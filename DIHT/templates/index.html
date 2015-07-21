@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
+
+{% block main_active %} class = "active" {% endblock %}
+
+{% block content %}
+		<div class = "container">
+			<div id="carousel" class="carousel slide">
+				<ol class = "carousel-indicators">
+					<li data-target="#carousel" class="active disable" data-slide-to="0"></li>
+					<li data-target="#carousel" class="disable" data-slide-to="1"></li>
+					<li data-target="#carousel" class="disable" data-slide-to="2"></li>
+				</ol>
+				<div class = "carousel-inner">
+					<div class="item active">
+						<img src="/static/img/1.jpg"></img>
+						<div class="carousel-caption">
+							<p>Тренажерный зал</p>
+						</div>
+					</div>
+					<div class="item">
+						<img src="/static/img/1.jpg"></img>
+						<div class="carousel-caption">
+							<p>Вход в общежитие</p>
+						</div>
+					</div>
+					<div class="item">
+						<img src="/static/img/1.jpg"></img>
+						<div class="carousel-caption">
+							<p>Хэллоуин</p>
+						</div>
+					</div>
+				</div>
+				<a href="#carousel" class="left carousel-control" data-slide="prev">
+					<i style="margin-top:120px" class="fa fa-chevron-left"></i>
+				</a>
+				<a href="#carousel" class="right carousel-control" data-slide="next">
+					<i style="margin-top:120px" class="fa fa-chevron-right"></i>
+				</a>
+				
+			</div>
+		</div>
+			
+			
+			<!-- VK Widget>
+  			<script type="text/javascript" src="//vk.com/js/api/openapi.js?79"></script>
+			<script type="text/javascript">
+				VK.Widgets.Group("vk_groups", {mode: 2, width: "375", height: "800"}, 45698612);
+			</script-->
+
+{% endblock %}

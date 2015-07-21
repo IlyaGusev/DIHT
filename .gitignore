@@ -1,0 +1,7 @@
+*.o
+*.so
+*.pyc
+*~
+.idea
+db.sqlite3
+test-reports/

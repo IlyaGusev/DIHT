@@ -1,0 +1,88 @@
+{% load static from staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %} {% endblock %}</title>
+    <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
+	<link rel="stylesheet" href="/static/css/base.css">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name='yandex-verification' content='456ed53f77d7ad00' />
+</head>
+<body style="padding-top:50px;">
+<script src="/static/jquery/js/jquery.js"></script>
+<script src="/static/bootstrap/js/bootstrap.js"></script>
+
+	<div class = "navbar navbar-default navbar-fixed-top container ">
+		<div class="navbar-header">
+			<a class="navbar-brand fivt-logo" href="/"><img width="90" alt="ФИВТ МФТИ" src="/static/img/logo_fivt.png"></a>
+		</div>
+		<div id="navbar">
+			<ul class = "nav navbar-nav">
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Общежитие<b class="caret"></b></a>
+					<ul class="dropdown-menu">
+						<li><a href="#">Стиралка</a></li>
+						<li><a href="#">Тренажерный зал</a></li>
+						<li><a href="#">Поселение</a></li>
+						<li><a href="#">Объявления</a></li>
+					</ul>
+				</li>
+				<li>
+					<a href="#">Актив</a>
+				</li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Медиа<b class="caret"></b></a>
+					<ul class="dropdown-menu">
+						<li><a href="#">Фото</a></li>
+						<li><a href="#">Видео</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<div class = "navbar-right">
+			<ul class = "nav navbar-nav">
+			{% if user.is_authenticated %}
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<i class="fa fa-user"></i> {{user.get_full_name}}   
+						{% if user.get_profile.money != 0 %}
+							({{user.get_profile.money}} <img style="margin-top:-3px;" src="/static/img/fivt_coin_tiny.png">)
+						{% endif %}
+						<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="#"><i class="fa fa-cogs"></i>Личный кабинет</a><li>
+						{% if user.is_staff %}
+						<!--li><a href="/accounts/control_page/"><i class="icon-wrench"></i>  Панель управления</a></li-->
+						{% endif %}
+						<li class="divider"></li>
+						<li><a href="#"><i class="fa fa-sign-out"></i>Выйти</a><li>
+					</ul>
+			{% else %}
+				<li><a href="/accounts/signup/"><i class="fa fa-edit"></i>  Регистрация</a></li>
+				<li><a href="/accounts/login/"><i class="fa fa-sign-in"></i>  Вход</a></li>
+			{% endif %}
+			</ul>
+		</div>
+	</div>
+	<div id="block-content container">
+		{% block content %}
+		{% endblock %}
+	</div>
+
+	<div class = "navbar navbar-inverse navbar-fixed-bottom" style="min-height:30px">
+		<div class = "container" style="text-align:center">
+			<a href="#">Разработчикам</a>
+			<a href="#">Сообщить об ошибке</a>
+		</div>
+		<div style="text-align: center;">FIVT site © 2013 </div>
+	<div>
+	
+	
+
+
+<!-- Yandex.Metrika counter -->
+<!--script type="text/javascript">(function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter20887150 = new Ya.Metrika({id:20887150, webvisor:true, clickmap:true, trackLinks:true, accurateTrackBounce:true}); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks");</script><noscript><div><img src="//mc.yandex.ru/watch/20887150" style="position:absolute; left:-9999px;" alt="" /></div></noscript-->
+<!-- /Yandex.Metrika counter -->
+</body>
+</html>
