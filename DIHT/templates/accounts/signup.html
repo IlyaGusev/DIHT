@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load add_class %}
+{% block signup_active %} class="active" {% endblock %}
+{% block content %}
+   <div class="col-md-offset-4 col-md-4">
+        <form class="form-horizontal" action="." method="post">
+            <div class="page-header"><h2 style="text-align: center;">Регистрация</h2></div>
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group row" id="group_{{field.name}}">
+                    <label class="control-label col-md-offset-1 col-md-3" for="{{field.id_for_label}}">{{ field.label }}</label>
+                    <div class="col-md-6">
+                        {{ field|add_class:"form-control" }}
+                        {{ field.errors }}
+                    </div>
+                </div>
+            {% endfor %}
+            {% if form.errors %}
+                {{ form.non_field_errors }}
+            {% endif %}
+             {% for field in profile_form %}
+                <div class="form-group row" id="group_{{field.name}}">
+                    <label class="control-label col-md-offset-1 col-md-3" for="{{field.id_for_label}}">{{ field.label }}</label>
+                    <div class="col-md-6">
+                        {{ field|add_class:"form-control" }}
+                        {{ field.errors }}
+                    </div>
+                </div>
+            {% endfor %}
+            {% if profile_form.errors %}
+                {{ profile_form.non_field_errors }}
+            {% endif %}
+            <div class="col-md-offset-4">
+                <button class="btn btn-md btn-primary" type="submit">Зарегистрироваться</button>
+            </div>
+        </form>
+    </div>
+    <div style="clear: both"></div>
+
+{% endblock content %}

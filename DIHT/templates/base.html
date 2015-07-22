@@ -15,9 +15,15 @@
 	<div class = "navbar navbar-default navbar-fixed-top container ">
 		<div class="navbar-header">
 			<a class="navbar-brand fivt-logo" href="/"><img width="90" alt="ФИВТ МФТИ" src="/static/img/logo_fivt.png"></a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+            </button>
 		</div>
-		<div id="navbar">
-			<ul class = "nav navbar-nav">
+		<div id="navbar" class="collapse navbar-collapse">
+			<ul class="nav navbar-nav">
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Общежитие<b class="caret"></b></a>
 					<ul class="dropdown-menu">
@@ -38,13 +44,11 @@
 					</ul>
 				</li>
 			</ul>
-		</div>
-		<div class = "navbar-right">
-			<ul class = "nav navbar-nav">
+            <ul class = "nav navbar-nav navbar-right">
 			{% if user.is_authenticated %}
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-						<i class="fa fa-user"></i> {{user.get_full_name}}   
+						<i class="fa fa-user"></i> {{user.get_full_name}}
 						{% if user.get_profile.money != 0 %}
 							({{user.get_profile.money}} <img style="margin-top:-3px;" src="/static/img/fivt_coin_tiny.png">)
 						{% endif %}
@@ -56,27 +60,28 @@
 						<!--li><a href="/accounts/control_page/"><i class="icon-wrench"></i>  Панель управления</a></li-->
 						{% endif %}
 						<li class="divider"></li>
-						<li><a href="#"><i class="fa fa-sign-out"></i>Выйти</a><li>
+						<li><a href="/accounts/logout/"><i class="fa fa-sign-out"></i>Выйти</a><li>
 					</ul>
 			{% else %}
-				<li><a href="/accounts/signup/"><i class="fa fa-edit"></i>  Регистрация</a></li>
+				<li {% block signup_active %} {% endblock %}><a href="/accounts/signup/"><i class="fa fa-edit"></i>  Регистрация</a></li>
 				<li><a href="/accounts/login/"><i class="fa fa-sign-in"></i>  Вход</a></li>
 			{% endif %}
 			</ul>
 		</div>
+
 	</div>
 	<div id="block-content container">
 		{% block content %}
 		{% endblock %}
 	</div>
 
-	<div class = "navbar navbar-inverse navbar-fixed-bottom" style="min-height:30px">
-		<div class = "container" style="text-align:center">
-			<a href="#">Разработчикам</a>
-			<a href="#">Сообщить об ошибке</a>
-		</div>
-		<div style="text-align: center;">FIVT site © 2013 </div>
-	<div>
+	<!--<div class = "navbar navbar-inverse navbar-fixed-bottom" style="min-height:30px">-->
+		<!--<div class = "container" style="text-align:center">-->
+			<!--<a href="#">Разработчикам</a>-->
+			<!--<a href="#">Сообщить об ошибке</a>-->
+		<!--</div>-->
+		<!--<div class = "container" style="text-align: center;">FIVT site © 2013 </div>-->
+	<!--<div>-->
 	
 	
 
