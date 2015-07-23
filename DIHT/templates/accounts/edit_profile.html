@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Изменение личной информации{% endblock %}
+
+{% block profile_active %} class="active" {% endblock %}
+
+{% block content %}
+<style type="text/css">
+    div.hero-unit p.title small {
+        color: rgb(153, 153, 153);
+        font-size: 25px;
+    }
+</style>
+<div class="hero-unit">
+        <p  class="title">Изменение личной информации <small>{{ user_.get_full_name }}</small></p>
+</div>
+
+<div style="margin-left:200px; width:auto; display:inline-block;">
+<form class="form-horizontal" method="post" action=".">
+    {% csrf_token %}
+    <!--{{ userForm.errors }}-->
+    <!--{{ userProfileForm.errors }}-->
+    <input type="hidden" name="username" value="{{ user_.username }}">
+    <div class="control-group {% if userForm.first_name.errors %}error{% endif %}">
+        <label class="control-label" for="id_first_name">Имя</label>
+        <div class="controls">
+            <input type="text" id="id_first_name" name = "first_name" placeholder="Имя" value="{{ user_.first_name }}" required>
+        </div>
+    </div>
+    <div class="control-group {% if userForm.last_name.errors %}error{% endif %}">
+        <label class="control-label" for="id_last_name">Фамилия</label>
+        <div class="controls">
+            <input type="text" id="id_last_name" name = "last_name" placeholder="Фамилия" value="{{ user_.last_name }}" required>
+        </div>
+    </div>
+    <div class="control-group {% if userForm.get_profile.middle_name.errors %}error{% endif %}">
+        <label class="control-label" for="id_middle_name">Отчество</label>
+        <div class="controls">
+            <input type="text" id="id_middle_name" name = "middle_name" placeholder="Отчество" value="{{ user_.get_profile.middle_name }}" required>
+        </div>
+    </div>
+    <div class="control-group {% if userProfileForm.mobile.errors %}error{% endif %}">
+        <label class="control-label inline" for="id_sex_0">Пол</label>
+        <div class="controls">
+            <label class="radio inline">
+                <input type="radio" name="sex" id="id_sex_0" value="0" {% if user_.get_profile.sex %} checked="True" {% endif %}/>
+                Мужской
+            </label>
+            <label class="radio inline">
+                <input type="radio" name="sex" id="id_sex_1" value="1" {% if not user_.get_profile.sex %} checked="True" {% endif %}/>
+                Женский
+            </label>
+            {% if formProfile.sex.errors %} {% for err in formProfile.sex.errors %}<span class="help-block">{{ err }}</span> {% endfor %} {% endif %}
+        </div>
+    </div>
+    <div class="control-group {% if userForm.get_profile.hostel.errors %}error{% endif %}">
+        <label class="control-label" for="id_hostel">Общежитие</label>
+        <div class="controls">
+            <input type="text" id="id_hostel" name = "hostel" placeholder="Общежитие" value="{{ user_.get_profile.hostel }}" required>
+        </div>
+    </div>
+    <div class="control-group {% if userProfileForm.room_number.errors %}error{% endif %}">
+        <label class="control-label" for="id_room_number">Номер комнаты</label>
+        <div class="controls">
+            <input type="text" id="id_room_number" name = "room_number" placeholder="Номер комнаты" value="{{ user_.get_profile.room_number }}" required>
+        </div>
+    </div>
+    <div id="group_status" class="control-group {% if formProfile.status.errors %}error{% endif %}">
+        <label class="control-label">Статус</label>
+        <div class="controls">
+            <select size="1" name="status">
+                <option selected value="Студент">Студент</option>
+                <option value="Аспирант">Аспирант</option>
+            </select>
+            {% if formProfile.status.errors %} {% for err in formProfile.status.errors %}<span class="help-block">{{ err }}</span> {% endfor %} {% endif %}
+        </div>
+    </div>
+    <div class="control-group {% if userProfileForm.group_number.errors %}error{% endif %}">
+        <label class="control-label" for="id_group_number">Номер группы</label>
+        <div class="controls">
+            <input type="text" id="id_group_number" name = "group_number" placeholder="Номер группы" value="{{ user_.get_profile.group_number }}" required>
+        </div>
+    </div>
+    <div class="control-group {% if userProfileForm.mobile.errors %}error{% endif %}">
+        <label class="control-label" for="id_mobile">Телефон</label>
+        <div class="controls">
+            <input type="text" id="id_mobile" name = "mobile" placeholder="+71234567890" value="{{ user_.get_profile.mobile }}" required>
+        </div>
+    </div>
+    <div class="control-group {% if userProfileForm.email.errors %}error{% endif %}">
+        <label class="control-label" for="id_email">E-mail</label>
+        <div class="controls">
+            <input type="email" id="id_email" name = "email" placeholder="example@domain.com" value="{{ user_.email }}" required>
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-primary"><i class="icon-ok"></i>    Сохранить</button>
+            <a href="/accounts/view_profile/{{ user_.id }}"class="btn">Отменить</a>
+        </div>
+    </div>
+</form>
+</div>
+
+{% endblock %}
+
+<!--TODO-all: view-->
