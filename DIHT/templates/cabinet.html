@@ -5,10 +5,43 @@
 {% block main_active %} class = "active" {% endblock %}
 
 {% block content %}
+	
 	<div class = "container">
+		<div class="page-header">
+			<h1>Личный кабинет</h1>
+		</div>
 		<div class="row">
-			<div class="col-md-offset-1 col-md-4"><div class = "well">part 1</div></div>
-			<div class="col-md-6"><div class = "well">part 2</div></div>
+			<div class="col-md-offset-1 col-md-4"><div class = "well" align="center"><img class = "round avatar" src="/static/img/standart_avatar.png"></img></div></div>
+			<div class="col-md-6"><div class = "well">
+				<h2>Имя Фамилия (Логин)</h2>
+				<h4>Уровень X</h4>
+				<h4>Роль</h4>
+				<h4>Курс</h4>
+			</div></div>
+		</div>
+		<div class="row">
+			<div class = "tabs">
+				<ul class = "nav nav-tabs">
+					<li class = "active"><a href="#tab-con" data-toggle="tab">Контакты</a></li>
+					<li><a href="#tab-tsk" data-toggle="tab">Задачи</a></li>
+					<li><a href="#tab-ach" data-toggle="tab">Достижения</a></li>
+					<li><a href="#tab-acc" data-toggle="tab">Аккаунт</a></li>
+					<li><a href="#tab-wsh" data-toggle="tab">Стиралка</a></li>
+				</ul>
+				<div class = "tab-content">
+					<div class = "tab-pane active" id = "tab-con">
+						<button class = "btn btn-primary">Изменить</button>
+					</div>
+					<div class = "tab-pane" id = "tab-tsk">
+					</div>
+					<div class = "tab-pane" id = "tab-ach">
+					</div>
+					<div class = "tab-pane" id = "tab-acc">
+					</div>
+					<div class = "tab-pane" id = "tab-wsh">
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 {% endblock %}
