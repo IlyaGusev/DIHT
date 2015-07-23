@@ -5,6 +5,7 @@
     <title>{% block title %} {% endblock %}</title>
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
 	<link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/fontawesome/css/font-awesome.min.css">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name='yandex-verification' content='456ed53f77d7ad00' />
 </head>
@@ -64,7 +65,7 @@
 					</ul>
 			{% else %}
 				<li {% block signup_active %} {% endblock %}><a href="/accounts/signup/"><i class="fa fa-edit"></i>  Регистрация</a></li>
-				<li><a href="/accounts/login/"><i class="fa fa-sign-in"></i>  Вход</a></li>
+				<li {% block login_active %} {% endblock %}><a href="/accounts/login/"><i class="fa fa-sign-in"></i>  Вход</a></li>
 			{% endif %}
 			</ul>
 		</div>

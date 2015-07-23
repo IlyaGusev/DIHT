@@ -1,4 +1,4 @@
-from django.forms import ValidationError, ModelForm
+from django.forms import ValidationError, ModelForm, Form, IntegerField
 from django.forms import CharField, PasswordInput, TextInput, TypedChoiceField, RadioSelect
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import mark_safe
@@ -20,7 +20,7 @@ class SignUpForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email')
+        fields = ('username', 'email', 'first_name', 'last_name', )
         labels = {
             'username': _('Логин'),
             'first_name': _('Имя'),
@@ -80,6 +80,7 @@ class UserProfileForm(ModelForm):
     sex = TypedChoiceField(label=_("Пол"),
                            coerce=lambda x: x == 'Женский',
                            choices=((False, 'Мужской'), (True, 'Женский')))
+
     class Meta:
         model = UserProfile
         fields = ('middle_name', 'sex', 'status', 'group_number', 'hostel', 'room_number', 'mobile', )
@@ -115,3 +116,17 @@ class UserProfileForm(ModelForm):
             raise ValidationError(
                 _('Неверный формат отчества: первыя буква должна быть заглавной, допустимы только русские символы.'))
         return self.cleaned_data['middle_name']
+
+
+class ResetPasswordForm(Form):
+    username = CharField(min_length=5, max_length=30, required=True)
+
+    def clean_username(self):
+        r = re.compile('^[a-zA-Z][a-zA-Z0-9_-]*$')
+        res = r.match(self.cleaned_data['username'])
+        if res is None:
+            raise ValidationError(u'Некорректный логин')
+        if User.objects.all().filter(username=self.cleaned_data['username']).count() != 1:
+            raise ValidationError(u'Некорректный логин')
+        return self.cleaned_data['username']
+

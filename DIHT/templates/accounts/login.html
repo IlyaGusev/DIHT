@@ -3,8 +3,6 @@
 {% block title %}Вход в систему{% endblock %}
 {% block login_active %} class="active" {% endblock %}
 {% block content %}
-
-
     <div class="col-md-offset-4 col-md-4">
         <div class="page-header"><h2 style="text-align: center;">Страница входа</h2></div>
         <form class="form-horizontal" method="post" action="./?next={{ redirect_url }}">
@@ -27,9 +25,9 @@
                 {% endif %}
                 <div class="col-md-offset-3 col-md-6">
                     <center>
-                    <button class="btn btn-primary btn-block" type="submit">Войти</button><br>
-                    <a href="/accounts/signup/">Зарегистрироваться!</a><br>
-                    <a href="/accounts/reset_password">Забыл пароль?</a>
+                        <button class="btn btn-primary btn-block" type="submit">Войти</button><br>
+                        <a href="/accounts/signup/">Зарегистрироваться!</a><br>
+                        <a href="/accounts/reset_password">Забыл пароль?</a>
                     </center>
                 </div>
             </div>

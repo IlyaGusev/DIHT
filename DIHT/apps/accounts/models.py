@@ -8,8 +8,7 @@ class UserProfile(models.Model):
         ('Аспирант', _("Аспирант"),),
     )
 
-    user = models.ForeignKey(User, unique=True)
-    is_activated = models.BooleanField()
+    user = models.OneToOneField(User)
     room_number = models.CharField(max_length=30, blank=True)
     group_number = models.CharField(max_length=30, blank=True)
     money = models.SmallIntegerField(blank=True)
@@ -28,5 +27,4 @@ class Permission(models.Model):
             ('in_charge_of_finance', 'Ответственный за финансы'),
             ('in_charge_of_users', 'Ответственный за работу с пользователями'),
             ('in_charge_of_washing', 'Ответственный за стиралку'),
-            ('admin', 'Администратор'),
         )

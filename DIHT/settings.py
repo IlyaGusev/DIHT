@@ -106,3 +106,37 @@ STATICFILES_DIRS = (
 LOGIN_URL = '/accounts//login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'example@gmail.com'
+EMAIL_HOST_PASSWORD = '123'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file_debug': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR+'/debug.log',
+        },
+        'file_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR+'/info.log',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['file_debug'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'DIHT.custom': {
+            'handlers': ['file_info'],
+            'level': 'INFO',
+        },
+    },
+}
