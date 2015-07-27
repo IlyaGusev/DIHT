@@ -83,7 +83,7 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('middle_name', 'sex', 'status', 'group_number', 'hostel', 'room_number', 'mobile', )
+        fields = ('middle_name', 'sex',  'group_number', 'hostel', 'room_number', 'mobile', )
 
         labels = {
             'room_number': _('Номер комнаты'),

@@ -1,4 +1,5 @@
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView
+from django.views.generic import DetailView
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
 from django.db import transaction
@@ -6,6 +7,7 @@ from django.contrib.auth import login, authenticate
 from django.core.mail import EmailMessage
 from accounts.forms import UserProfileForm, SignUpForm, ResetPasswordForm
 from accounts.models import UserProfile
+from django.http import JsonResponse
 
 import logging
 logger = logging.getLogger('DIHT.custom')
@@ -60,3 +62,29 @@ class ResetPasswordView(FormView):
             user.save()
             logger.info('Пользователь ' + user.get_full_name() + ' (' + user.username + ') изменил свой пароль через функцию восстановления пароля.')
         return super(ResetPasswordView, self).form_valid(form)
+
+
+class ProfileView(DetailView):
+    template_name = 'accounts/profile.html'
+    model = User
+    slug_field = 'id'
+    slug_url_kwarg = 'id'
+
+    def get_context_data(self, **kwargs):
+        context = super(ProfileView, self).get_context_data(**kwargs)
+        user = self.get_object()
+        context['profile'] = UserProfile.objects.get(user__id=user.id)
+        return context
+
+
+class UserProfileUpdateView(UpdateView):
+    model = UserProfile
+    form_class = UserProfileForm
+    template_name = "accounts/edit_profile.html"
+    slug_field = 'id'
+    slug_url_kwarg = 'id'
+    success_url = reverse_lazy('main:home')
+
+    def form_invalid(self, form):
+        super(UserProfileUpdateView, self).form_invalid(form)
+        return JsonResponse(form.errors, status=400)

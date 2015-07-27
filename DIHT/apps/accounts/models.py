@@ -8,6 +8,8 @@ class UserProfile(models.Model):
         ('Аспирант', _("Аспирант"),),
     )
 
+
+
     user = models.OneToOneField(User)
     room_number = models.CharField(max_length=30, blank=True)
     group_number = models.CharField(max_length=30, blank=True)
