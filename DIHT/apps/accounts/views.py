@@ -1,5 +1,5 @@
 from django.views.generic.edit import FormView, UpdateView
-from django.views.generic import DetailView
+from django.views.generic import DetailView, View
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
 from django.db import transaction
@@ -88,3 +88,14 @@ class UserProfileUpdateView(UpdateView):
     def form_invalid(self, form):
         super(UserProfileUpdateView, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)
+
+
+class CheckUsernameView(View):
+
+    def get(self, request, *args, **kwargs):
+        username = request.GET['username']
+        if User.objects.all().filter(username=username).count() > 0:
+            result = {'exist': "1"}
+        else:
+            result = {'exist': "0"}
+        return JsonResponse(result, status=200)

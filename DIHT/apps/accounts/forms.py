@@ -48,6 +48,9 @@ class SignUpForm(ModelForm):
         if res is None:
             raise ValidationError(
                 _('Некорректный логин'))
+        if User.objects.all().filter(username=self.cleaned_data['username']).count() > 0:
+            raise ValidationError(
+                _('Логин уже используется'))
         return self.cleaned_data['username']
 
     def clean_first_name(self):

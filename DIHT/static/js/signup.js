@@ -1,23 +1,16 @@
 var mistakes = 0
 
-function ajax_check() {
-    var errorText = '';
-    $.ajax({
-        type: 'GET',
-        dataType: 'json',
-        url: '/accounts/check_username/',
-        async: false,
-        data: {
-            username: $('#id_username').val()
-        }
-    }).done(function (json) {
-            if (json.exist == '1') {
-                errorText = 'Логин занят';
-            }
-        });
-    return errorText;
-}
+function check_username() {
+    var request = new XMLHttpRequest();
+    var error = ''
+    request.open('GET', '/accounts/check_username/?username='+$('#id_username').val(), false);  // `false` makes the request synchronous
+    request.send(null);
 
+    if (request.status === 200)
+        if (JSON.parse(request.responseText).exist == '1')
+            error = 'Логин занят';
+    return error
+}
 
 function check_field(event) {
     var error = '';
@@ -25,7 +18,7 @@ function check_field(event) {
         if (($('#id_username').val()).length < 5) error += 'Слишком короткий (больше 4)<br>';
         if (($('#id_username').val()).length > 30) error += 'Слишком длинный (меньше 30)<br>';
         if (!(/^\w*$/.test($('#id_username').val()))) error += 'Только латинские буквы, цифры и \'_\'<br>';
-        error += ajax_check();
+        error += check_username();
     }
     if (event.data == 'first_name'){
         if (!(/^^[А-ЯЁ][а-яё]+$/.test($('#id_first_name').val()))) error += 'Содержит только русские буквы и начинается с большой';
