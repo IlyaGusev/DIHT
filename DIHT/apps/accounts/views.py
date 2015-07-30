@@ -3,10 +3,9 @@ from django.views.generic import DetailView, View
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
 from django.db import transaction
-from django.contrib.auth import login, authenticate
 from django.core.mail import EmailMessage
-from accounts.forms import UserProfileForm, SignUpForm, ResetPasswordForm
-from accounts.models import UserProfile
+from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm
+from accounts.models import Profile
 from django.http import JsonResponse
 
 import logging
@@ -30,16 +29,14 @@ class SignUpView(FormView):
                                         password=form['password'],
                                         first_name=form['first_name'],
                                         last_name=form['last_name'])
-        # profile = UserProfile.objects.create(user=user,
-        #                                      room_number=pform['room_number'],
-        #                                      group_number=pform['group_number'],
-        #                                      money=0,
-        #                                      is_activated=False,
-        #                                      mobile=pform['mobile'],
-        #                                      middle_name=pform['middle_name'],
-        #                                      hostel=pform['hostel'],
-        #                                      status=pform['status'],
-        #                                      sex=pform['sex'])
+        profile = Profile.objects.create(user=user,
+                                         room_number=form['room_number'],
+                                         group_number=form['group_number'],
+                                         money=0,
+                                         mobile=form['mobile'],
+                                         middle_name=form['middle_name'],
+                                         hostel=form['hostel'],
+                                         sex=form['sex'])
         user.is_active = False
         user.save()
         logger.info('Пользователь '+str(form['first_name'])+' '+str(form['last_name'])+' ('+str(form['username'])+') только что зарегистрировался на сайте.')
@@ -73,20 +70,20 @@ class ProfileView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
         user = self.get_object()
-        context['profile'] = UserProfile.objects.get(user__id=user.id)
+        context['profile'] = Profile.objects.get(user__id=user.id)
         return context
 
 
-class UserProfileUpdateView(UpdateView):
-    model = UserProfile
-    form_class = UserProfileForm
+class ProfileUpdateView(UpdateView):
+    model = Profile
+    form_class = ProfileForm
     template_name = "accounts/edit_profile.html"
     slug_field = 'id'
     slug_url_kwarg = 'id'
     success_url = reverse_lazy('main:home')
 
     def form_invalid(self, form):
-        super(UserProfileUpdateView, self).form_invalid(form)
+        super(ProfileUpdateView, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)
 
 

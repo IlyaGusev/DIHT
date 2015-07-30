@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.html import mark_safe
 from django.contrib.auth.models import User
 import re
-from accounts.models import UserProfile
+from accounts.models import Profile
 
 class HorizRadioRenderer(RadioSelect.renderer):
     def render(self):
@@ -15,6 +15,14 @@ class SignUpForm(ModelForm):
     Регистрационная форма.
     """
 
+    middle_name = CharField(label=_('Отчество'), widget=TextInput(attrs={'placeholder': _('Отчество')}))
+    sex = TypedChoiceField(label=_("Пол"),
+                           coerce=lambda x: x == 'Женский',
+                           choices=((False, 'Мужской'), (True, 'Женский')))
+    hostel = CharField(label=_('Общежитие'), widget=TextInput(attrs={'placeholder': _('Общежитие')}), required=False)
+    room_number = CharField(label=_('Номер комнаты'), widget=TextInput(attrs={'placeholder': _('Номер комнаты')}), required=False)
+    group_number = CharField(label=_('Номер группы'), widget=TextInput(attrs={'placeholder': _('Номер группы')}), required=False)
+    mobile = CharField(label=_('Номер телефона'), widget=TextInput(attrs={'placeholder': _('+71234567890')}))
     password = CharField(label=_('Пароль'), widget=PasswordInput(attrs={'placeholder': _('Пароль')}))
     password_repeat = CharField(label=_('Пароль ещё раз'), widget=PasswordInput(attrs={'placeholder': _('Пароль ещё раз')}))
 
@@ -77,32 +85,43 @@ class SignUpForm(ModelForm):
                 _('Неверный формат email.'))
         return self.cleaned_data['email']
 
+    def clean_mobile(self):
+        r = re.compile('^\+7[0-9]{10,10}$')
+        res = r.match(self.cleaned_data['mobile'])
+        if res is None:
+            raise ValidationError(_('Некорректный номер телефона.'))
+        return self.cleaned_data['mobile']
+
+    def clean_middle_name(self):
+        r = re.compile(u'^[А-Яёа-я]+$', re.UNICODE)
+        res = r.match(self.cleaned_data['middle_name'])
+        if res is None:
+            raise ValidationError(
+                _('Неверный формат отчества: первыя буква должна быть заглавной, допустимы только русские символы.'))
+        return self.cleaned_data['middle_name']
 
 
-class UserProfileForm(ModelForm):
+
+class ProfileForm(ModelForm):
     sex = TypedChoiceField(label=_("Пол"),
                            coerce=lambda x: x == 'Женский',
                            choices=((False, 'Мужской'), (True, 'Женский')))
 
     class Meta:
-        model = UserProfile
-        fields = ('middle_name', 'sex',  'group_number', 'hostel', 'room_number', 'mobile', )
+        model = Profile
+        fields = ('sex',  'group_number', 'hostel', 'room_number', 'mobile', )
 
         labels = {
             'room_number': _('Номер комнаты'),
             'group_number': _('Номер группы'),
             'hostel': _('Общежитие'),
             'mobile': _('Номер телефона'),
-            'middle_name': _('Отчество'),
-            'status': _('Статус'),
-            'sex': _('Пол'),
         }
         widgets = {
             'room_number': TextInput(attrs={'placeholder': _('Номер комнаты')}),
             'group_number': TextInput(attrs={'placeholder': _('Номер группы')}),
             'hostel': TextInput(attrs={'placeholder': _('Общежитие')}),
             'mobile': TextInput(attrs={'placeholder': _('+71234567890')}),
-            'middle_name': TextInput(attrs={'placeholder': _('Отчество')}),
         }
 
     def clean_mobile(self):

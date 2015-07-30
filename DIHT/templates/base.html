@@ -1,10 +1,8 @@
 {% load static from staticfiles %}
-<!DOCTYPE html>
 <html>
 <head>
     <title>{% block title %} {% endblock %}</title>
     <link rel="stylesheet" href="/static/lib/bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="/static/lib/font-awesome/css/font-awesome.min.css">
 	<link rel="stylesheet" href="/static/css/style.css">
 
     <script src="/static/lib/jquery/js/jquery.js"></script>
@@ -32,7 +30,7 @@
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Общежитие<b class="caret"></b></a>
 					<ul class="dropdown-menu">
-						<li><a href="#">Стиралка</a></li>
+						<li><a href="{% url 'washing:index' %}">Стиралка</a></li>
 						<li><a href="#">Тренажерный зал</a></li>
 						<li><a href="#">Поселение</a></li>
 						<li><a href="#">Объявления</a></li>
@@ -75,7 +73,7 @@
 		</div>
 
 	</div>
-	<div id="block-content container">
+	<div id="block-content">
 		{% block content %}
 		{% endblock %}
 	</div>

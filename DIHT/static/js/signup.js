@@ -26,8 +26,14 @@ function check_field(event) {
     if (event.data == 'last_name'){
         if (!(/^[А-ЯЁ][а-яё]+$/.test($('#id_last_name').val()))) error += 'Содержит только русские буквы и начинается с большой';
     }
+    if (event.data == 'middle_name'){
+        if (!(/^[А-ЯЁ][а-яё]+$/.test($('#id_middle_name').val()))) error += 'Содержит только русские буквы и начинается с большой';
+    }
     if (event.data == 'email'){
         if (!(/^.+@.+\..+$/.test($('#id_email').val()))) error += 'Формат example@domain.com';
+    }
+    if (event.data == 'mobile'){
+        if (!(/^\+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/.test($('#id_mobile').val()))) error += 'Формат телефона +74951234567';
     }
     if (event.data == 'password'){
         if (($('#id_password').val()).length < 6) error += 'Слишком короткий больше 5<br>';
@@ -61,6 +67,7 @@ $(document).ready(function () {
         $('#id_password_repeat').val() === '' |
         $('#id_email').val() === '' |
         $('#id_first_name').val() === '' |
+        $('#id_middle_name').val() === '' |
         $('#id_last_name').val() === '') {
             $('#subbutton').attr('disabled', 'true');
             $('#subbutton').addClass('disabled');
@@ -78,7 +85,7 @@ $(document).ready(function () {
         }
     }, 10);
 
-    var fields = ['username', 'first_name', 'last_name', 'password', 'password_repeat', 'email'];
+    var fields = ['username', 'first_name', 'last_name', 'password', 'password_repeat', 'email', 'middle_name', 'mobile'];
     for (i in fields)
         $('#id_'+fields[i]).blur(fields[i], check_field);
 });

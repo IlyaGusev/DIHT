@@ -7,10 +7,10 @@ from accounts import models
 
 admin.site.unregister(User)
 
-class UserProfileInline(admin.StackedInline):
-    model = models.UserProfile
+class ProfileInline(admin.StackedInline):
+    model = models.Profile
 
-class UserProfileAdmin(UserAdmin):
-    inlines = [UserProfileInline]
+class ProfileAdmin(UserAdmin):
+    inlines = [ProfileInline]
 
-admin.site.register(User, UserProfileAdmin)
+admin.site.register(User, ProfileAdmin)

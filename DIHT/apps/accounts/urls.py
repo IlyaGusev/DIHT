@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
-from accounts.views import SignUpView, ResetPasswordView, ProfileView, UserProfileUpdateView, CheckUsernameView
+from accounts.views import SignUpView, ResetPasswordView, ProfileView, ProfileUpdateView, CheckUsernameView
 
 urlpatterns = [
     url(r'^signup/$', SignUpView.as_view(), name='signup'),
@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^reset_password_ok/$', TemplateView.as_view(template_name='accounts/reset_password_ok.html'), name='reset_password_ok'),
 
     url(r'^profile/(?P<id>[0-9]*)/$', ProfileView.as_view(), name='profile'),
-    url(r'^profile/edit/(?P<id>[0-9]*)/$', UserProfileUpdateView.as_view(), name='edit_profile'),
+    url(r'^profile/edit/(?P<id>[0-9]*)/$', ProfileUpdateView.as_view(), name='edit_profile'),
 
     url(r'^check_username/$', CheckUsernameView.as_view(), name='check_username'),
 ]
