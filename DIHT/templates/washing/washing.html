@@ -10,13 +10,18 @@
         }
         td.status1{/*free (green)*/
             background-color: #59B259;
-            cursor: pointer;
+            {% if user.is_authenticated %}
+                cursor: pointer;
+            {% endif %}
         }
         td.status2{/*bought (red)*/
             background-color:#D14741;
         }
         td.status3{/*your (blue)*/
             background-color:#44AAC8;
+            {% if user.is_authenticated %}
+                cursor: pointer;
+            {% endif %}
         }
     </style>
     <div class="page-header">
@@ -42,16 +47,27 @@
                     <th scope="row" width="150" class="text-center">{{ interval.0|time:"H:i" }}-{{ interval.1|time:"H:i" }}</th>
                     {% for machine, status in records.items %}
                     {% if status == 'OK' %}
-                    <td class="status1 btn-open-modal" href="{% url 'washing:create_record'%}"
-                        data-toggle="modal"
-                        data-target="#form-modal"
-                        id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }}"></td>
+                        {% if user.is_authenticated %}
+                        <td class="status1 btn-open-modal" href="{% url 'washing:create_record'%}"
+                            data-toggle="modal"
+                            data-target="#form-modal"
+                            id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }}"></td>
+                        {% else %}
+                        <td class="status1"></td>
+                        {% endif %}
                     {% elif status == 'BUSY' %}
-                    <td class="status2"></td>
+                    <td class="status2"> </td>
                     {% elif status == 'DISABLE' %}
                     <td class="status0"></td>
                     {% elif status == 'YOURS' %}
-                    <td class="status3"></td>
+                        {% if user.is_authenticated %}
+                        <td class="status3 btn-open-modal" href="{% url 'washing:cancel_record'%}"
+                            data-toggle="modal"
+                            data-target="#form-modal"
+                            id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }}"></td>
+                        {% else %}
+                        <td class="status3"></td>
+                        {% endif %}
                     {% endif %}
                     {% endfor %}
                 </tr>

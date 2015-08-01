@@ -7,11 +7,25 @@ from accounts.models import Profile, MoneyOperation
 
 admin.site.unregister(User)
 
+
+def cancel_money_operation(modeladmin, request, queryset):
+    for obj in queryset:
+        obj.cancel()
+
+cancel_money_operation.short_description = "Отмена операции с возвращением денег"
+
+
 class ProfileInline(admin.StackedInline):
     model = Profile
+
 
 class ProfileAdmin(UserAdmin):
     inlines = [ProfileInline]
 
+
+class MoneyOperationAdmin(admin.ModelAdmin):
+    model = MoneyOperation
+    actions = [cancel_money_operation]
+
 admin.site.register(User, ProfileAdmin)
-admin.site.register(MoneyOperation)
+admin.site.register(MoneyOperation, MoneyOperationAdmin)

@@ -63,7 +63,7 @@
                         <ul class="dropdown-menu">
                             <li><a href="{% url 'accounts:profile' id=user.id %}"><i class="fa fa-cogs"></i>Личный кабинет</a><li>
                             {% if user.is_staff %}
-                            <!--li><a href="/accounts/control_page/"><i class="icon-wrench"></i>  Панель управления</a></li-->
+                            <li><a href="/admin/"> Панель управления</a></li>
                             {% endif %}
                             <li class="divider"></li>
                             <li><a href="{% url 'accounts:logout' %}"><i class="fa fa-sign-out"></i>Выйти</a><li>

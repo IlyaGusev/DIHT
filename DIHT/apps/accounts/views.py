@@ -7,6 +7,8 @@ from django.core.mail import EmailMessage
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm
 from accounts.models import Profile
 from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
 import logging
 logger = logging.getLogger('DIHT.custom')
@@ -81,6 +83,11 @@ class ProfileUpdateView(UpdateView):
     slug_field = 'id'
     slug_url_kwarg = 'id'
     success_url = reverse_lazy('main:home')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ProfileUpdateView, self).dispatch(*args, **kwargs)
+
 
     def form_invalid(self, form):
         super(ProfileUpdateView, self).form_invalid(form)

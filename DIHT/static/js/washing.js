@@ -1,5 +1,5 @@
 $(function() {
-    $('#form-modal').on('submit', '.create-record-form', function () {
+    $('#form-modal').on('submit', '.create-record-form,.cancel-record-form', function () {
         var form = $(this);
         id = $(current_edit_span)[0].id.split(" ")
         $.ajax({
@@ -29,6 +29,7 @@ $(function() {
         $("#form-modal").find(".modal-content").load($(this).attr("href"), function() {
             machine_name = $("#machine_"+id[0]).text()
             $(this).find("#create-record-body").html("<h4>Оплатить "+machine_name+" на "+id[1]+" с "+id[2]+" до "+id[3]+"</h4>")
+            $(this).find("#cancel-record-body").html("<h4>Отказаться от записи на "+id[1]+" с "+id[2]+" до "+id[3]+"</h4>")
         });
         $("#form-modal").modal('show');
         ev.stopPropagation();

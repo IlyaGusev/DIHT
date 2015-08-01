@@ -1,10 +1,10 @@
 from django.views.generic import TemplateView, View
 from django.contrib.auth.models import Group
-from django.core.urlresolvers import reverse_lazy
-from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from washing.models import WashingMachine, WashingMachineRecord, RegularNonWorkingDay, NonWorkingDay, Parameters
 from accounts.models import MoneyOperation
-from django.db import transaction
 import collections
 import datetime as dt
 import pytz
@@ -76,19 +76,54 @@ class IndexView(TemplateView):
         return context
 
 
+def parse_record(request):
+    date = request.POST['date']
+    time_from = request.POST['time_from']
+    time_to = request.POST['time_to']
+    machine = WashingMachine.objects.get(id=request.POST['machine'])
+    user = request.user
+    datetime_from = dt.datetime.strptime(date+' '+time_from, '%d.%m.%Y %H:%M')
+    datetime_to = dt.datetime.strptime(date+' '+time_to, '%d.%m.%Y %H:%M')
+    return {'machine': machine, 'user': user, 'datetime_from': datetime_from, 'datetime_to': datetime_to}
+
+
 class CreateRecordView(TemplateView):
     template_name = "washing/create_record.html"
 
-    @transaction.atomic
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(CreateRecordView, self).dispatch(*args, **kwargs)
+
+    @method_decorator(transaction.atomic)
     def post(self, request, *args, **kwargs):
-        date = request.POST['date']
-        time_from = request.POST['time_from']
-        time_to = request.POST['time_to']
-        machine = WashingMachine.objects.get(id=request.POST['machine'])
-        user = self.request.user
-        datetime_from = dt.datetime.strptime(date+' '+time_from, '%d.%m.%Y %H:%M')
-        datetime_to = dt.datetime.strptime(date+' '+time_to, '%d.%m.%Y %H:%M')
-        WashingMachineRecord.objects.create(machine=machine, user=user, datetime_from=datetime_from, datetime_to=datetime_to)
-        price = machine.parameters.all().filter(date__lte=datetime_from.date()).order_by('-date')[0].price
-        MoneyOperation.objects.create(user=user, amount=-price, timestamp=dt.datetime.now(), description="Стиралка")
+        record = parse_record(request)
+        price = record['machine'].parameters.all().filter(date__lte=record['datetime_from'].date()).order_by('-date')[0].price
+        operation = MoneyOperation.objects.create(user=record['user'],
+                                                  amount=-price,
+                                                  timestamp=dt.datetime.now(),
+                                                  description="Стиралка")
+        WashingMachineRecord.objects.create(machine=record['machine'],
+                                            user=record['user'],
+                                            datetime_from=record['datetime_from'],
+                                            datetime_to=record['datetime_to'],
+                                            money_operation=operation)
         return super(CreateRecordView, self).get(request, *args, **kwargs)
+
+
+class CancelRecordView(TemplateView):
+    template_name = "washing/cancel_record.html"
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(CancelRecordView, self).dispatch(*args, **kwargs)
+
+    @method_decorator(transaction.atomic)
+    def post(self, request, *args, **kwargs):
+        record = parse_record(request)
+        record_obj = WashingMachineRecord.objects.get(machine=record['machine'],
+                                                      user=record['user'],
+                                                      datetime_from=record['datetime_from'],
+                                                      datetime_to=record['datetime_to'])
+        # record_obj.money_operation.cancel()
+        record_obj.delete()
+        return super(CancelRecordView, self).get(request, *args, **kwargs)

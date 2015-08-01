@@ -3,51 +3,74 @@ from django.db.models import \
     PositiveSmallIntegerField, ForeignKey, DateTimeField, \
     DateField, BooleanField, OneToOneField,\
     Model, CharField, ManyToManyField
+from accounts.models import MoneyOperation
 
 
 class Parameters(Model):
-    date = DateField()
-    delta_hour = PositiveSmallIntegerField()
-    delta_minute = PositiveSmallIntegerField()
-    start_hour = PositiveSmallIntegerField()
-    start_minute = PositiveSmallIntegerField()
-    price = PositiveSmallIntegerField()
+    date = DateField("Дата начала действия")
+    delta_hour = PositiveSmallIntegerField("Промежуток времени(часы)")
+    delta_minute = PositiveSmallIntegerField("Промежуток времени(минуты)")
+    start_hour = PositiveSmallIntegerField("Время начала отсчёта промежутков(часы)")
+    start_minute = PositiveSmallIntegerField("Время начала отсчёта промежутков(минуты)")
+    price = PositiveSmallIntegerField("Цена за промежуток")
+
+    class Meta:
+        verbose_name = "Параметры"
+        verbose_name_plural = "Наборы параметров"
 
     def __str__(self):
-        return 'Price: '+str(self.price)+\
-               '; Delta: '+str(self.delta_hour) + '-' + str(self.delta_minute) + \
-               '; Start: '+str(self.start_hour) + '-' + str(self.start_minute)
+        return 'Цена: '+str(self.price)+\
+               '; Промежуток: '+str(self.delta_hour) + '-' + str(self.delta_minute) + \
+               '; Начало: '+str(self.start_hour) + '-' + str(self.start_minute)
 
 
 class WashingMachine(Model):
-    is_active = BooleanField(default=True)
-    name = CharField(max_length=50)
-    parameters = ManyToManyField(Parameters, related_name='machines')
+    is_active = BooleanField("Активна", default=True)
+    name = CharField("Название", max_length=50)
+    parameters = ManyToManyField(Parameters, related_name='machines', verbose_name="Параметры")
+
+    class Meta:
+        verbose_name = "Стиральная машинка"
+        verbose_name_plural = "Стиральные машинки"
 
     def __str__(self):
         return self.name
 
 
 class WashingMachineRecord(Model):
-    machine = ForeignKey(WashingMachine, related_name='records')
-    user = ForeignKey(User)
-    datetime_from = DateTimeField()
-    datetime_to = DateTimeField()
+    machine = ForeignKey(WashingMachine, related_name='records', verbose_name="Машинка")
+    user = ForeignKey(User, verbose_name="Пользователь, занявший машинку")
+    datetime_from = DateTimeField("Время начала")
+    datetime_to = DateTimeField("Время окончания")
+    money_operation = OneToOneField(MoneyOperation, related_name='washing_record', verbose_name="Денежная операция")
+
+    class Meta:
+        verbose_name = "Запись стиралки"
+        verbose_name_plural = "Записи стиралки"
 
     def __str__(self):
         return str(self.machine)+'; '+str(self.user.last_name) + '; ' + str(self.datetime_from)
 
 
 class RegularNonWorkingDay(Model):
-    day_of_week = PositiveSmallIntegerField()
-    machine = ForeignKey(WashingMachine, related_name='regular_non_working_days')
+    day_of_week = PositiveSmallIntegerField("Номер дня недели, начиная с 0")
+    machine = ForeignKey(WashingMachine, related_name='regular_non_working_days', verbose_name="Отключаемая машинка")
+
+    class Meta:
+        verbose_name = "Регулярный нерабочий день"
+        verbose_name_plural = "регулярные нерабочие дни"
 
     def __str__(self):
         return str(self.machine)+'; '+str(self.day_of_week)
 
+
 class NonWorkingDay(Model):
-    date = DateField()
-    machine = ForeignKey(WashingMachine, related_name='non_working_days')
+    date = DateField("Дата")
+    machine = ForeignKey(WashingMachine, related_name='non_working_days', verbose_name="Отключаемая машинка")
+
+    class Meta:
+        verbose_name = "Нерабочий день"
+        verbose_name_plural = "Нерабочие дни"
 
     def __str__(self):
         return str(self.machine)+'; '+str(self.date)
