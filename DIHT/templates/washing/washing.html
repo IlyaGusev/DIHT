@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% block title %} Стиралка {% endblock %}
+{% block washing_active %} class = "active" {% endblock %}
+{% block custom_scripts %}<script src="{% static 'js/washing.js' %}"></script>{% endblock %}
+{% block content %}
+    <style>
+        .status0{/*blocked (grey)*/
+            background-color:#B4B4B4;
+        }
+        td.status1{/*free (green)*/
+            background-color: #59B259;
+            cursor: pointer;
+        }
+        td.status2{/*bought (red)*/
+            background-color:#D14741;
+        }
+        td.status3{/*your (blue)*/
+            background-color:#44AAC8;
+        }
+    </style>
+    <div class="page-header">
+        <h1>Стиралка</h1>
+    </div>
+    <div class="row">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th width="150" class="text-center">Время</th>
+                    {% for machine in machines %}
+                    <th class="text-center" id="machine_{{ machine.id }}">{{machine.name}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for day, intervals in schedule.items %}
+                <tr>
+                    <th scope="row" colspan="{{ machines|length|add:'1' }}" class="text-center" >{{day| date:"d.m.Y (l)"}}</th>
+                </tr>
+                {% for interval, records in intervals.items %}
+                <tr>
+                    <th scope="row" width="150" class="text-center">{{ interval.0|time:"H:i" }}-{{ interval.1|time:"H:i" }}</th>
+                    {% for machine, status in records.items %}
+                    {% if status == 'OK' %}
+                    <td class="status1 btn-open-modal" href="{% url 'washing:create_record'%}"
+                        data-toggle="modal"
+                        data-target="#form-modal"
+                        id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }}"></td>
+                    {% elif status == 'BUSY' %}
+                    <td class="status2"></td>
+                    {% elif status == 'DISABLE' %}
+                    <td class="status0"></td>
+                    {% elif status == 'YOURS' %}
+                    <td class="status3"></td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <center><a href="#" data-toggle="modal" data-target="#responsible-modal">Ответственные за стиралку</a></center><br>
+    <div class="modal" id="responsible-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h3>Ответственные за стиралку</h3></div>
+                <div id="form-modal-body" class="modal-body">
+                    {% for user in charge_washing %}
+                        {{ user.get_full_name }}, комната {{ user.profile.room_number }}<br>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% include "modal.html" %}
+{% endblock %}

@@ -2,11 +2,13 @@
 <html>
 <head>
     <title>{% block title %} {% endblock %}</title>
-    <link rel="stylesheet" href="/static/lib/bootstrap/css/bootstrap.css">
-	<link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.css' %}">
+	<link rel="stylesheet" href="{% static 'css/style.css' %}">
 
-    <script src="/static/lib/jquery/js/jquery.js"></script>
-    <script src="/static/lib/bootstrap/js/bootstrap.js"></script>
+    <script src="{% static 'lib/jquery/js/jquery.js' %}"></script>
+    <script src="{% static 'lib/bootstrap/js/bootstrap.js' %}"></script>
+    <script src="{% static 'js/common.js' %}"></script>
+    <script src="{% static 'js/ajax.csrf.js' %}"></script>
     {% block custom_scripts %} {% endblock %}
 
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -15,65 +17,67 @@
 <body style="padding-top:50px;">
 
 
-	<div class = "navbar navbar-default navbar-fixed-top container ">
-		<div class="navbar-header">
-			<a class="navbar-brand fivt-logo" href="/"><img width="90" alt="ФИВТ МФТИ" src="/static/img/logo_fivt.png"></a>
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-            </button>
-		</div>
-		<div id="navbar" class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Общежитие<b class="caret"></b></a>
-					<ul class="dropdown-menu">
-						<li><a href="{% url 'washing:index' %}">Стиралка</a></li>
-						<li><a href="#">Тренажерный зал</a></li>
-						<li><a href="#">Поселение</a></li>
-						<li><a href="#">Объявления</a></li>
-					</ul>
-				</li>
-				<li>
-					<a href="#">Актив</a>
-				</li>
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Медиа<b class="caret"></b></a>
-					<ul class="dropdown-menu">
-						<li><a href="#">Фото</a></li>
-						<li><a href="#">Видео</a></li>
-					</ul>
-				</li>
-			</ul>
-            <ul class = "nav navbar-nav navbar-right">
-			{% if user.is_authenticated %}
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-						<i class="fa fa-user"></i> {{user.get_full_name}}
-						{% if user.get_profile.money != 0 %}
-							({{user.get_profile.money}} <img style="margin-top:-3px;" src="/static/img/fivt_coin_tiny.png">)
-						{% endif %}
-						<b class="caret"></b>
-					</a>
-					<ul class="dropdown-menu">
-						<li><a href="{% url 'accounts:profile' id=user.id %}"><i class="fa fa-cogs"></i>Личный кабинет</a><li>
-						{% if user.is_staff %}
-						<!--li><a href="/accounts/control_page/"><i class="icon-wrench"></i>  Панель управления</a></li-->
-						{% endif %}
-						<li class="divider"></li>
-						<li><a href="{% url 'accounts:logout' %}"><i class="fa fa-sign-out"></i>Выйти</a><li>
-					</ul>
-			{% else %}
-				<li {% block signup_active %} {% endblock %}><a href="{% url 'accounts:signup' %}"><i class="fa fa-edit"></i>  Регистрация</a></li>
-				<li {% block login_active %} {% endblock %}><a href="{% url 'accounts:login' %}"><i class="fa fa-sign-in"></i>  Вход</a></li>
-			{% endif %}
-			</ul>
-		</div>
+	<div class = "navbar navbar-default navbar-fixed-top">
+        <div class="container">
+		    <div class="navbar-header">
+                <a class="navbar-brand fivt-logo" href="/"><img width="90" alt="ФИВТ МФТИ" src="/static/img/logo_fivt.png"></a>
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Общежитие<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'washing:index' %}">Стиралка</a></li>
+                            <li><a href="#">Тренажерный зал</a></li>
+                            <li><a href="#">Поселение</a></li>
+                            <li><a href="#">Объявления</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">Актив</a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Медиа<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Фото</a></li>
+                            <li><a href="#">Видео</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class = "nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-user"></i> {{user.get_full_name}}
+                            {% if user.profile.money != 0 %}
+                                ({{user.profile.money}} <img style="margin-top:-3px;" src="/static/img/fivt_coin_tiny.png">)
+                            {% endif %}
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'accounts:profile' id=user.id %}"><i class="fa fa-cogs"></i>Личный кабинет</a><li>
+                            {% if user.is_staff %}
+                            <!--li><a href="/accounts/control_page/"><i class="icon-wrench"></i>  Панель управления</a></li-->
+                            {% endif %}
+                            <li class="divider"></li>
+                            <li><a href="{% url 'accounts:logout' %}"><i class="fa fa-sign-out"></i>Выйти</a><li>
+                        </ul>
+                {% else %}
+                    <li {% block signup_active %} {% endblock %}><a href="{% url 'accounts:signup' %}"><i class="fa fa-edit"></i>  Регистрация</a></li>
+                    <li {% block login_active %} {% endblock %}><a href="{% url 'accounts:login' %}"><i class="fa fa-sign-in"></i>  Вход</a></li>
+                {% endif %}
+                </ul>
+            </div>
+        </div>
 
 	</div>
-	<div id="block-content">
+	<div class="container">
 		{% block content %}
 		{% endblock %}
 	</div>

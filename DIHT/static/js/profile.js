@@ -13,6 +13,7 @@ $(function() {
             url: form.attr('action'),
             data: form.serialize(),
             success: function(data) {
+                $("#form-modal").modal('hide');
                 window.location.reload();
             },
             error: function(request, status, error) {

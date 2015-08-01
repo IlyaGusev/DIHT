@@ -3,7 +3,7 @@
 {% block title %}Вход в систему{% endblock %}
 {% block login_active %} class="active" {% endblock %}
 {% block content %}
-    <div class="col-md-offset-4 col-md-4">
+    <div class="col-md-offset-3 col-md-6">
         <div class="page-header"><h2 style="text-align: center;">Страница входа</h2></div>
         <form class="form-horizontal" method="post" action="./?next={{ redirect_url }}">
             {% csrf_token %}
