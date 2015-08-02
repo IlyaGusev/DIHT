@@ -39,7 +39,7 @@ class WashingMachine(Model):
 
 class WashingMachineRecord(Model):
     machine = ForeignKey(WashingMachine, related_name='records', verbose_name="Машинка")
-    user = ForeignKey(User, verbose_name="Пользователь, занявший машинку")
+    user = ForeignKey(User, verbose_name="Пользователь, занявший машинку", related_name="records")
     datetime_from = DateTimeField("Время начала")
     datetime_to = DateTimeField("Время окончания")
     money_operation = OneToOneField(MoneyOperation, related_name='washing_record', verbose_name="Денежная операция")
@@ -77,7 +77,12 @@ class NonWorkingDay(Model):
 
 
 class BlackListRecord(Model):
-    user = OneToOneField(User)
-    always = BooleanField()
-    date_to = DateField(null=True)
+    user = OneToOneField(User, verbose_name="Юзер", related_name="black_list_record")
+    is_blocked = BooleanField("Заблокирован в стиралке")
 
+    class Meta:
+        verbose_name = "Запись в чёрном списке"
+        verbose_name_plural = "Записи в чёрном списке"
+
+    def __str__(self):
+        return str(self.user.username)

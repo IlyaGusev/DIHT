@@ -10,7 +10,7 @@
         }
         td.status1{/*free (green)*/
             background-color: #59B259;
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and not user.black_list_record.is_blocked %}
                 cursor: pointer;
             {% endif %}
         }
@@ -33,38 +33,53 @@
                 <tr>
                     <th width="150" class="text-center">Время</th>
                     {% for machine in machines %}
-                    <th class="text-center" id="machine_{{ machine.id }}">{{machine.name}}</th>
+                        <th class="text-center" id="machine_{{ machine.id }}" price=" {{ machine.parameters.all }}">{{machine.name}}</th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
                 {% for day, intervals in schedule.items %}
                 <tr>
-                    <th scope="row" colspan="{{ machines|length|add:'1' }}" class="text-center" >{{day| date:"d.m.Y (l)"}}</th>
+                    {% if user in charge_washing %}
+                    <th scope="row"
+                        style="cursor: pointer;"
+                        colspan="{{ machines|length|add:'1' }}"
+                        class="text-center btn-open-modal"
+                        href="{% url 'washing:block_day' %}"
+                        id="{{day| date:'d.m.Y'}}">
+                        {{day| date:"d.m.Y (l)"}}
+                    </th>
+                    {% else %}
+                    <th scope="row"
+                        colspan="{{ machines|length|add:'1' }}"
+                        class="text-center">
+                        {{day| date:"d.m.Y (l)"}}
+                    </th>
+                    {% endif %}
                 </tr>
                 {% for interval, records in intervals.items %}
                 <tr>
                     <th scope="row" width="150" class="text-center">{{ interval.0|time:"H:i" }}-{{ interval.1|time:"H:i" }}</th>
                     {% for machine, status in records.items %}
-                    {% if status == 'OK' %}
-                        {% if user.is_authenticated %}
+                    {% if status.0 == 'OK' %}
+                        {% if user.is_authenticated and not user.black_list_record.is_blocked%}
                         <td class="status1 btn-open-modal" href="{% url 'washing:create_record'%}"
                             data-toggle="modal"
                             data-target="#form-modal"
-                            id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }}"></td>
+                            id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
                         {% else %}
                         <td class="status1"></td>
                         {% endif %}
-                    {% elif status == 'BUSY' %}
+                    {% elif status.0 == 'BUSY' %}
                     <td class="status2"> </td>
-                    {% elif status == 'DISABLE' %}
+                    {% elif status.0 == 'DISABLE' %}
                     <td class="status0"></td>
-                    {% elif status == 'YOURS' %}
-                        {% if user.is_authenticated %}
+                    {% elif status.0 == 'YOURS' %}
+                        {% if user.is_authenticated and day != current %}
                         <td class="status3 btn-open-modal" href="{% url 'washing:cancel_record'%}"
                             data-toggle="modal"
                             data-target="#form-modal"
-                            id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }}"></td>
+                            id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
                         {% else %}
                         <td class="status3"></td>
                         {% endif %}
@@ -92,6 +107,35 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="jumbotron">
+        <h3>Правила пользования</h3>
+
+        <ol>
+            <li>Студентам, пользующимся стиралкой (стиральной машиной), запрещается:
+            <ul>
+                <li>передавать ключ от стиралки другим лицам, без согласования с ответственным</li>
+                <li>использовать стиральную машинку, на которую не были записаны</li>
+                <li>оставлять неубранным&nbsp;рассыпанный&nbsp;стиральный порошок</li>
+                <li>оставлять пустые коробки&nbsp;из-под порошка, пакеты&nbsp;и т.д.</li>
+                <li>использовать при стирке вещества, не предназначенные для автоматических стиральных машин</li>
+            </ul>
+            </li>
+            <li>Студенты, пользующиеся стиралкой, обязаны соблюдать правила эксплуатации машинками:
+            <ul>
+                <li>Не загружать в машинку более 6 кг. белья</li>
+                <li>Использовать стиральную машинку только с тем номером, на которую были записаны</li>
+                <li>Не открывать дверцы до разблокировки</li>
+                <li>Избегать попадания мелких деталей (монеты, ключи и т.д.) в барабан машинки</li>
+                <li>Стирать бюстгалтеры и вещи с мелкими твердыми предметами в специальных мешках для стирки</li>
+                <li>Не оставлять белье в машинке после стирки</li>
+                <li>Не смешивать белые и цветные вещи</li>
+                <li>Оставлять после стирки дверцу машинки открытой</li>
+                <li>Забрать высохшие вещи из стиралки в течение суток после окончания своей записи (в<span style="line-height:1.6em">зять ключ в таком случае нужно у того ответственного или заведующего, который выдал ключ по записи)</span></li>
+                <li>Оперативно информировать ответственного или заведующего о выявленных неисправностях машинки</li>
+            </ul>
+            </li>
+        </ol>
     </div>
 {% include "modal.html" %}
 {% endblock %}

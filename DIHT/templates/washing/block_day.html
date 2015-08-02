@@ -1,0 +1,24 @@
+{% load add_class %}
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3>Блокировка</h3>
+</div>
+
+<div class="modal-body" id="block-day-body">
+     <select size="1" name="machine_id" id="machine_id" class="form-control">
+        <option selected value="all">Все стиралки</option>
+        {% for machine in machines %}
+            {% if machine.is_active %}
+                <option value="{{ machine.id }}">{{ machine.name }}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+    <form id="block-day-form" action="{% url 'washing:block_day' %}" method="POST">
+    </form>
+    <form id="unblock-day-form" action="{% url 'washing:unblock_day' %}" method="POST">
+    </form>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-danger" onclick="$('#block-day-form').submit()">Заблокировать</button>
+    <button class="btn btn-success" onclick="$('#unblock-day-form').submit();">Разблокировать</button>
+</div>

@@ -1,8 +1,10 @@
 from django.views.generic import TemplateView, View
 from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.db import transaction
+from django.utils import timezone
+from django.http import JsonResponse
 from washing.models import WashingMachine, WashingMachineRecord, RegularNonWorkingDay, NonWorkingDay, Parameters
 from accounts.models import MoneyOperation
 import collections
@@ -26,12 +28,13 @@ class IndexView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         context['charge_washing'] = Group.objects.get(name=u'Ответственные за стиралку').user_set.all()
-        machines = WashingMachine.objects.all()
-        current = dt.datetime.now(tz=pytz.timezone('Europe/Moscow'))
+        machines = WashingMachine.objects.filter(is_active=True)
+        current = timezone.now()
 
         schedule = collections.OrderedDict()
 
         day = current.date()
+        context['current'] = day
         for i in range(7):
             schedule[day] = collections.OrderedDict()
             for machine in machines:
@@ -66,7 +69,7 @@ class IndexView(TemplateView):
                                     dt.time(end_hour, end_minute, 0))
                         if schedule[day].get(interval) is None:
                             schedule[day][interval] = collections.OrderedDict()
-                        schedule[day][interval][machine] = status
+                        schedule[day][interval][machine] = (status, params.price)
                         start += delta
 
             day += dt.timedelta(days=1)
@@ -91,6 +94,7 @@ class CreateRecordView(TemplateView):
     template_name = "washing/create_record.html"
 
     @method_decorator(login_required)
+    @method_decorator(user_passes_test(lambda u: not u.black_list_record.is_blocked))
     def dispatch(self, *args, **kwargs):
         return super(CreateRecordView, self).dispatch(*args, **kwargs)
 
@@ -98,15 +102,18 @@ class CreateRecordView(TemplateView):
     def post(self, request, *args, **kwargs):
         record = parse_record(request)
         price = record['machine'].parameters.all().filter(date__lte=record['datetime_from'].date()).order_by('-date')[0].price
-        operation = MoneyOperation.objects.create(user=record['user'],
-                                                  amount=-price,
-                                                  timestamp=dt.datetime.now(),
-                                                  description="Стиралка")
-        WashingMachineRecord.objects.create(machine=record['machine'],
-                                            user=record['user'],
-                                            datetime_from=record['datetime_from'],
-                                            datetime_to=record['datetime_to'],
-                                            money_operation=operation)
+        if record['user'].profile.money >= price:
+            operation = MoneyOperation.objects.create(user=record['user'],
+                                                      amount=-price,
+                                                      timestamp=timezone.now(),
+                                                      description="Стиралка")
+            WashingMachineRecord.objects.create(machine=record['machine'],
+                                                user=record['user'],
+                                                datetime_from=record['datetime_from'],
+                                                datetime_to=record['datetime_to'],
+                                                money_operation=operation)
+        else:
+            return JsonResponse({"no_money": "Нет денег для оплаты"}, status=400)
         return super(CreateRecordView, self).get(request, *args, **kwargs)
 
 
@@ -124,6 +131,60 @@ class CancelRecordView(TemplateView):
                                                       user=record['user'],
                                                       datetime_from=record['datetime_from'],
                                                       datetime_to=record['datetime_to'])
-        # record_obj.money_operation.cancel()
+        record_obj.money_operation.cancel()
         record_obj.delete()
         return super(CancelRecordView, self).get(request, *args, **kwargs)
+
+
+class BlockDayView(TemplateView):
+    template_name = "washing/block_day.html"
+
+    @method_decorator(login_required)
+    @method_decorator(permission_required('washing.add_nonworkingday', raise_exception=True))
+    def dispatch(self, *args, **kwargs):
+        return super(BlockDayView, self).dispatch(*args, **kwargs)
+
+    @method_decorator(transaction.atomic)
+    def post(self, request, *args, **kwargs):
+        machine_id = request.POST['machine']
+        if machine_id == 'all':
+            machines = WashingMachine.objects.filter(is_active=True)
+        else:
+            machines = WashingMachine.objects.filter(id=machine_id)
+        date = request.POST['date']
+        for machine in machines:
+            NonWorkingDay.objects.create(date=dt.datetime.strptime(date, '%d.%m.%Y').date(), machine=machine)
+        return super(BlockDayView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(BlockDayView, self).get_context_data(**kwargs)
+        machines = WashingMachine.objects.filter(is_active=True)
+        context['machines'] = machines
+        return context
+
+
+class UnblockDayView(TemplateView):
+    template_name = "washing/block_day.html"
+
+    @method_decorator(login_required)
+    @method_decorator(permission_required('washing.delete_nonworkingday', raise_exception=True))
+    def dispatch(self, *args, **kwargs):
+        return super(UnblockDayView, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(UnblockDayView, self).get_context_data(**kwargs)
+        machines = WashingMachine.objects.filter(is_active=True)
+        context['machines'] = machines
+        return context
+
+    @method_decorator(transaction.atomic)
+    def post(self, request, *args, **kwargs):
+        machine_id = request.POST['machine']
+        if machine_id == 'all':
+            machines = WashingMachine.objects.filter(is_active=True)
+        else:
+            machines = WashingMachine.objects.filter(id=machine_id)
+        date = request.POST['date']
+        for machine in machines:
+            NonWorkingDay.objects.filter(date=dt.datetime.strptime(date, '%d.%m.%Y').date(), machine=machine).delete()
+        return super(UnblockDayView, self).get(request, *args, **kwargs)

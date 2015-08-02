@@ -9,6 +9,7 @@ from accounts.models import Profile
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 import logging
 logger = logging.getLogger('DIHT.custom')
@@ -72,6 +73,7 @@ class ProfileView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
         user = self.get_object()
+        context['records'] = user.records.filter(datetime_to__gte=timezone.now()).order_by('-datetime_to').reverse()
         context['profile'] = Profile.objects.get(user__id=user.id)
         return context
 

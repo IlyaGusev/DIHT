@@ -24,18 +24,17 @@
     <div class="row">
         <div class = "tabs">
             <ul class = "nav nav-tabs">
-                <li class = "active"><a href="#tab-con" data-toggle="tab">Аккаунт</a></li>
+                <li class = "active"><a href="#tab-acc" data-toggle="tab">Аккаунт</a></li>
                 <li><a href="#tab-tsk" data-toggle="tab">Задачи</a></li>
                 <li><a href="#tab-ach" data-toggle="tab">Достижения</a></li>
                 <li><a href="#tab-wsh" data-toggle="tab">Стиралка</a></li>
             </ul>
             <div class = "tab-content">
-                <div class = "tab-pane active" id = "tab-con">
+                <div class = "tab-pane active" id = "tab-acc">
                     <p><b>Группа:</b> {{ profile.group_number }}</p>
                     <p><b>Общежитие:</b> {{ profile.hostel }}</p>
                     <p><b>Комната:</b> {{ profile.room_number }}</p>
                     <p><b>Телефон:</b> {{ profile.mobile }} </p>
-                    <span >
                     <button class = "btn btn-primary"
                             href="{% url 'accounts:edit_profile' id=profile.id %}"
                             data-toggle="modal"
@@ -45,9 +44,11 @@
                 </div>
                 <div class = "tab-pane" id = "tab-ach">
                 </div>
-                <div class = "tab-pane" id = "tab-acc">
-                </div>
                 <div class = "tab-pane" id = "tab-wsh">
+                    <p><b>Записи:</b></p>
+                    {% for record in records %}
+                        <p>{{ record.machine.name }}, {{ record.datetime_from.date }}, с {{ record.datetime_from.time }} до {{ record.datetime_to.time }} </p>
+                    {% endfor %}
                 </div>
             </div>
         </div>

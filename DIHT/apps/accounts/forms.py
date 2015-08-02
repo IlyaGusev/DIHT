@@ -103,13 +103,9 @@ class SignUpForm(ModelForm):
 
 
 class ProfileForm(ModelForm):
-    sex = TypedChoiceField(label=_("Пол"),
-                           coerce=lambda x: x == 'Женский',
-                           choices=((False, 'Мужской'), (True, 'Женский')))
-
     class Meta:
         model = Profile
-        fields = ('sex',  'group_number', 'hostel', 'room_number', 'mobile', )
+        fields = ('group_number', 'hostel', 'room_number', 'mobile', )
 
         labels = {
             'room_number': _('Номер комнаты'),
