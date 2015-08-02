@@ -36,6 +36,14 @@ body {
 	-webkit-padding-start: 15px;
 }
 
+#washing-rules ul {
+	-webkit-padding-start: 15px;
+}
+
+#washing-rules ol {
+	-webkit-padding-start: 15px;
+}
+
 img.round {
 	width: 192px;
 	height: 192px;

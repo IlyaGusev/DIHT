@@ -24,9 +24,10 @@
             {% endif %}
         }
     </style>
-    <div class="page-header">
+    <div class="col-md-10 col-md-offset-1 page-header">
         <h1>Стиралка</h1>
     </div>
+	<div class="col-md-10 col-md-offset-1"> 
     <div class="row">
         <table class="table table-bordered">
             <thead>
@@ -108,8 +109,8 @@
             </div>
         </div>
     </div>
-    <div class="jumbotron">
-        <h3>Правила пользования</h3>
+    <div class="jumbotron" id="washing-rules">
+        <center><h3>Правила пользования стиралкой</h3></center>
 
         <ol>
             <li>Студентам, пользующимся стиралкой (стиральной машиной), запрещается:
@@ -137,5 +138,6 @@
             </li>
         </ol>
     </div>
+	</div>
 {% include "modal.html" %}
 {% endblock %}
