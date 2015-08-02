@@ -28,6 +28,10 @@ body {
 	color: rgb(50, 50, 50);
 }
 
+#cell-for-vk-widget {
+	padding: 0px;
+}
+
 #gym-rules ul {
 	-webkit-padding-start: 15px;
 }
