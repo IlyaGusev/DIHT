@@ -10,8 +10,30 @@ ul.navbar-form  li  a{
 	padding:5px 15px;
 }
 
-navbar {
-	margin-bottom: 30px
+.navbar a {
+	font-size: 16px;
+}
+
+body {
+	font-family:"RobotoRegular";
+}
+
+.jumbotron {
+	font-family:"RobotoMedium";
+	color: rgb(80, 80, 80);
+}
+
+.jumbotron  h3 {
+	font-family:"RobotoMedium";
+	color: rgb(50, 50, 50);
+}
+
+#gym-rules ul {
+	-webkit-padding-start: 15px;
+}
+
+#gym-rules ol {
+	-webkit-padding-start: 15px;
 }
 
 img.round {
