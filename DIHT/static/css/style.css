@@ -60,6 +60,10 @@ body {
 	margin: 0px;
 }
 
+.task-name {
+	margin: 0px;
+}
+
 .just-a-line {
 	margin: 4px 0px;
 	border-color: #BBBBBB;
@@ -76,6 +80,11 @@ body {
 .section-name {
 	color: #111111;
 	font-family: "RobotoMedium"
+}
+
+.namezone {
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
 img.round {

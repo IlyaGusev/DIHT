@@ -15,3 +15,8 @@ class EventView(DetailView):
     slug_field = 'id'
     slug_url_kwarg = 'id'
     template_name = 'activism/event.html'
+
+
+class TaskView(DetailView):
+	model = Task
+	template_name = 'activism/task.html'
