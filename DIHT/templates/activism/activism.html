@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
+{% block main_active %} class = "active" {% endblock %}
+{% block custom_scripts %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Актив</h1>
+</div>
+<div class = "row">
+    <p>Мероприятия:</p>
+    {% for event in events %}
+        <a href="{% url 'activism:event' id=event.id %}"> {{ event.name }}</a>
+    {% endfor %}
+</div>
+{% endblock %}

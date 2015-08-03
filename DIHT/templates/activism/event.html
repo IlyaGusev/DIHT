@@ -1,0 +1,85 @@
+﻿{% extends "base.html" %}
+{% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
+{% block main_active %} class = "active" {% endblock %}
+{% block custom_scripts %}{% endblock %}
+{% block content %}
+        <div class="row well">
+			<h3 class="event-name">{{ event.name }}</h3>
+		</div>
+		<div class = "row">
+			<div class = "col-md-8">
+				<button class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Изменить</button>
+				<div class="section">
+					<h5 class="section-name">Информация</h5>
+					<hr class="just-a-line">
+					<div class = "row">
+						<div class = "col-md-6">
+							<span class="param">Создатель:</span>
+                            <a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
+                            <br>
+							<span class="param">Ответственный:
+                                {% for assignee in event.assignees.all %}
+                                <a href="{% url 'accounts:profile' id=assignee.id %}" class = "pull-right">{{ assignee.get_full_name }}</a>
+                                {% endfor %}
+
+						</div>
+						<div class = "col-md-6">
+							<span class="param">Cтатус:</span>
+                            {% if event.status == 'closed' %}
+                            <span class="label label-success pull-right">
+                            {% elif event.status == 'open' %}
+                            <span class="label label-danger pull-right">
+                            {% endif %}
+                            {{ event.get_status_display }}
+                            </span>
+                            <br>
+							<span class="param">Дата проведения:</span> <i class = "pull-right">{{ event.date_held }}</i><br>
+							<span class="param">Дата создания:</span> <i class = "pull-right">{{ event.date_created }}</i><br>
+						</div>
+					</div>
+				</div>
+				<div class="section">
+					<h5 class="section-name">Описание</h5>
+					<hr class="just-a-line">
+					<span class = "description">{{ event.description }}</span>
+				</div>
+				<div class = "section">
+					<h5 class="section-name">Задачи</h5>
+					<table class = "table">
+                        {% for task in event.tasks.all %}
+						<tr>
+							<td><a href="#">#{{ task.id }}</a></td>
+							<td>{{ task.name }}</td>
+							<td> {% for assignee in task.assignees.all %}
+                                <a href="{% url 'accounts:profile' id=assignee.id %}">{{ assignee.get_full_name }}</a>
+                                {% endfor %}
+                            </td>
+                            <td>
+                            {% if task.status == 'closed' %}
+							    <span class="label label-success pull-right">
+                            {% elif task.status == 'resolved' %}
+                                <span class="label label-primary pull-right">
+                            {% elif task.status == 'in_progress' %}
+                                <span class="label label-warning pull-right">
+                            {% elif task.status == 'open' %}
+                                <span class="label label-default pull-right">
+                            {% elif task.status == 'in_labor' %}
+                                <span class="label label-danger pull-right">
+                            {% elif task.status == 'volunteers' %}
+                                <span class="label label-info pull-right">
+                            {% endif %}
+                                    {{ task.get_status_display }}
+                                </span>
+                            </td>
+						</tr>
+                        {% endfor %}
+					</table>
+					
+				</div>
+			</div>
+			<div class = "col-md-4">
+			</div>
+		</div>
+
+
+{% endblock %}

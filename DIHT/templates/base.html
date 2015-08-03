@@ -11,6 +11,8 @@
     <script src="{% static 'lib/bootstrap/js/bootstrap.js' %}"></script>
     <script src="{% static 'js/common.js' %}"></script>
     <script src="{% static 'js/ajax.csrf.js' %}"></script>
+
+    <link rel="stylesheet" href="/static/lib/font-awesome/css/font-awesome.min.css">
     {% block custom_scripts %} {% endblock %}
 
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -42,7 +44,7 @@
                         </ul>
                     </li>
                     <li>
-                        <a href="#">Актив</a>
+                        <a href="{% url 'activism:index' %}">Актив</a>
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Медиа <b class="caret"></b></a>
