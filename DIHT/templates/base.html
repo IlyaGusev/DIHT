@@ -68,7 +68,7 @@
                             <li><a href="/admin/"><i class="fa fa-wrench"></i> Панель управления</a></li>
                             {% endif %}
                             <li class="divider"></li>
-                            <li><a href="{% url 'accounts:logout' %}"><i class="fa fa-sign-out"></i>Выйти</a><li>
+                            <li><a href="{% url 'accounts:logout' %}"><i class="fa fa-sign-out"></i> Выйти</a><li>
                         </ul>
                 {% else %}
                     <li {% block signup_active %} {% endblock %}><a href="{% url 'accounts:signup' %}"><i class="fa fa-edit"></i>  Регистрация</a></li>

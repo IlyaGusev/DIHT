@@ -3,7 +3,5 @@
 *.pyc
 *~
 .idea
-debug.log
-info.log
 db.sqlite3
 test-reports/
