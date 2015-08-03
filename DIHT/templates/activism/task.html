@@ -4,7 +4,7 @@
 {% block custom_scripts %}{% endblock %}
 {% block content %}
         <div class="row well namezone">
-			<h3 class="task-name">task.name</h3>
+			<h3 class="task-name"> {{ task.name }}</h3>
 		</div>
 		<button class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Изменить</button>
 		<div class = "row">
@@ -14,14 +14,16 @@
 					<hr class="just-a-line">
 					<div class = "row">
 						<div class = "col-md-6">
+                            <span class="param">Мероприятие:</span>
+                                <a href="{% url 'activism:event' id=task.event.id %}" class = "pull-right">{{ task.event.name }}</a>
+							<br>
 							<span class="param">Создатель:</span>
                             <a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ task.creator.get_full_name }}</a>
                             <br>
-							<span class="param">Исполнитель:</span>
+							<span class="param">Исполнители:</span>
                                 {% for assignee in task.assignees.all %}
-                                <a href="{% url 'accounts:profile' id=assignee.id %}" class = "pull-right">{{ assignee.get_full_name }}</a>
+                                <a href="{% url 'accounts:profile' id=assignee.id %}" class = "pull-right">{{ assignee.get_full_name }}</a><br>
                                 {% endfor %}
-							<br>
 							<span class="param">Сроки:</span> 
 								<span class = "pull-right">10.11.2015</span>
 						</div>
@@ -43,11 +45,19 @@
                                     {{ task.get_status_display }}
                                 </span>
 							<br>
-							<span class="param">Приоритет:</span>
+							<span class="param">Особенности:</span>
+                            {% if task.is_urgent %}
                             <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
 								СРОЧНОЕ
                             </span>
                             <br>
+                            {% endif %}
+                            {% if task.is_hard %}
+                            <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
+								ТРУДНОЕ
+                            </span>
+                            <br>
+                            {% endif %}
 						</div>
 					</div>
 				</div>
@@ -61,15 +71,16 @@
 				<div class="section">
 					<h5 class="section-name">Волонтерские часы</h5>
 					<hr class="just-a-line">
-					<span class="param">Расчетные:</span> <span class = "pull-right">3 часа</span> <br>
-					<span class="param">Реальные:</span> <span class = "pull-right">-</span>
+					<span class="param">Расчетные:</span> <span class = "pull-right">{% if task.hours_predict %}{{ task.hours_predict }} час.{% endif %}</span> <br>
+					<span class="param">Реальные:</span> <span class = "pull-right">{% if task.hours_real %}{{ task.hours_real }} час.{% endif %}</span>
 				</div>
 				<div class="section">
 					<h5 class="section-name">Даты</h5>
 					<hr class="just-a-line">
-					<span class="param">Создано:</span> <span class = "pull-right">03.08.2015</span> <br>
-					<span class="param">Последнее изменение:</span> <span class = "pull-right">01.09.2015</span> <br>
-					<span class="param">Закрыто:</span> <span class = "pull-right">-</span>
+					<span class="param">Создано:</span> <span class = "pull-right">{{ task.datetime_created }}</span> <br>
+                    <span class="param">Ограничение:</span> <span class = "pull-right">{{ task.datetime_limit }}</span> <br>
+					<span class="param">Последнее изменение:</span> <span class = "pull-right">{{ task.datetime_last_modified }}</span> <br>
+					<span class="param">Закрыто:</span> <span class = "pull-right">{{ task.datetime_closed }}</span>
 				</div>
 			</div>
 		</div>

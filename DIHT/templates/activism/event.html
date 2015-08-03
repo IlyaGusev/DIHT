@@ -17,9 +17,10 @@
 							<span class="param">Создатель:</span>
                             <a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
                             <br>
-							<span class="param">Ответственный:
+							<span class="param">Ответственные:</span>
                                 {% for assignee in event.assignees.all %}
-                                <a href="{% url 'accounts:profile' id=assignee.id %}" class = "pull-right">{{ assignee.get_full_name }}</a>
+                                <a href="{% url 'accounts:profile' id=assignee.id %}" class="pull-right">{{ assignee.get_full_name }}</a>
+                                <br>
                                 {% endfor %}
 
 						</div>
@@ -48,10 +49,10 @@
 					<table class = "table">
                         {% for task in event.tasks.all %}
 						<tr>
-							<td><a href="#">#{{ task.id }}</a></td>
+							<td><a href="{% url 'activism:task' id=task.id %}">#{{ task.id }}</a></td>
 							<td>{{ task.name }}</td>
 							<td> {% for assignee in task.assignees.all %}
-                                <a href="{% url 'accounts:profile' id=assignee.id %}">{{ assignee.get_full_name }}</a>
+                                <a href="{% url 'accounts:profile' id=assignee.id %}">{{ assignee.get_full_name }}</a><br>
                                 {% endfor %}
                             </td>
                             <td>
