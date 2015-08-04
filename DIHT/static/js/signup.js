@@ -17,7 +17,7 @@ function check_field(event) {
     if (event.data == 'username'){
         if (($('#id_username').val()).length < 5) error += 'Слишком короткий (больше 4)<br>';
         if (($('#id_username').val()).length > 30) error += 'Слишком длинный (меньше 30)<br>';
-        if (!(/^\w*$/.test($('#id_username').val()))) error += 'Только латинские буквы, цифры и \'_\'<br>';
+        if (!(/^[a-zA-Z][a-zA-Z0-9_-]*$/.test($('#id_username').val()))) error += 'Только латинские буквы, цифры и \'_\', первый символ - буква<br>';
         error += check_username();
     }
     if (event.data == 'first_name'){
@@ -36,8 +36,8 @@ function check_field(event) {
         if (!(/^\+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/.test($('#id_mobile').val()))) error += 'Формат телефона +74951234567';
     }
     if (event.data == 'password'){
-        if (($('#id_password').val()).length < 6) error += 'Слишком короткий больше 5<br>';
-        if (($('#id_password').val()).length > 30) error += 'Слишком длинный меньше 30<br>';
+        if (($('#id_password').val()).length < 6) error += 'Слишком короткий - нужно больше 5 символов<br>';
+        if (($('#id_password').val()).length > 30) error += 'Слишком длинный - нужно меньше 30 символов<br>';
         event.data = 'password_repeat'
         check_field(event)
         event.data = 'password'

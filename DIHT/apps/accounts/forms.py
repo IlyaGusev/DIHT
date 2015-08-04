@@ -47,22 +47,22 @@ class SignUpForm(ModelForm):
         pass2 = self.data['password_repeat']
         if pass1 != pass2:
             raise ValidationError(
-                _("Пароли не совпадают"))
+                _("Пароли не совпадают."))
         return pass2
 
     def clean_username(self):
         r = re.compile('^[a-zA-Z][a-zA-Z0-9_-]*$')
         res = r.match(self.cleaned_data['username'])
-        if res is None:
+        if res is None or len(self.cleaned_data['username']) <= 4:
             raise ValidationError(
-                _('Некорректный логин'))
+                _('Некорректный логин.'))
         if User.objects.all().filter(username=self.cleaned_data['username']).count() > 0:
             raise ValidationError(
-                _('Логин уже используется'))
+                _('Логин уже используется.'))
         return self.cleaned_data['username']
 
     def clean_first_name(self):
-        r = re.compile(u'^[А-Яа-яё]*$', re.UNICODE)
+        r = re.compile(u'^[А-ЯЁ][а-яё]*$', re.UNICODE)
         res = r.match(self.cleaned_data['first_name'])
         if res is None:
             raise ValidationError(
@@ -70,20 +70,12 @@ class SignUpForm(ModelForm):
         return self.cleaned_data['first_name']
 
     def clean_last_name(self):
-        r = re.compile(u'^[А-Яа-яё]+$', re.UNICODE)
+        r = re.compile(u'^[А-ЯЁ][а-яё]+$', re.UNICODE)
         res = r.match(self.cleaned_data['last_name'])
         if res is None:
             raise ValidationError(
-                _('Неверный формат имени: первыя буква должна быть заглавной, допустимы только русские символы.'))
+                _('Неверный формат фамилии: первыя буква должна быть заглавной, допустимы только русские символы.'))
         return self.cleaned_data['last_name']
-
-    def clean_email(self):
-        r = re.compile(u'^.+@.+\..+$', re.UNICODE)
-        res = r.match(self.cleaned_data['email'])
-        if res is None:
-            raise ValidationError(
-                _('Неверный формат email.'))
-        return self.cleaned_data['email']
 
     def clean_mobile(self):
         r = re.compile('^\+7[0-9]{10,10}$')
@@ -93,12 +85,19 @@ class SignUpForm(ModelForm):
         return self.cleaned_data['mobile']
 
     def clean_middle_name(self):
-        r = re.compile(u'^[А-Яёа-я]+$', re.UNICODE)
+        r = re.compile(u'^[А-ЯЁ][ёа-я]+$', re.UNICODE)
         res = r.match(self.cleaned_data['middle_name'])
         if res is None:
             raise ValidationError(
                 _('Неверный формат отчества: первыя буква должна быть заглавной, допустимы только русские символы.'))
         return self.cleaned_data['middle_name']
+
+    def clean_password(self):
+        l = len(self.cleaned_data['password'])
+        if l <= 5 or l >= 30:
+            raise ValidationError(
+                _('Неверная длина пароля.'))
+        return self.cleaned_data['password']
 
 
 
