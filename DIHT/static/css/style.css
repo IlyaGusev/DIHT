@@ -48,6 +48,10 @@ body {
 	-webkit-padding-start: 15px;
 }
 
+.dash-panel {
+	cursor: pointer;
+}
+
 .not-assigned {
 	color: red;
 }

@@ -1,0 +1,45 @@
+﻿{% extends "base.html" %}
+{% block title %} Сайт общежития №2 (ФИВТ) - Биржа {% endblock %}
+{% block main_active %} class = "active" {% endblock %}
+{% block custom_scripts %}{% endblock %}
+{% block content %}
+<div class="dashboard_name">
+	<center>
+		<h1>Биржа</h1>
+	</center>
+</div>
+<div class = "row">
+	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+		<div class="panel panel-danger">
+			<div class="panel-heading dash-panel" role="tab" id="heading1" data-toggle="collapse" data-parent="#accordion" href="#body1" aria-expanded="false" aria-controls="body1">
+				<h4>Task 1</h4>
+			</div>
+			<div id="body1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading1">
+				<div class="panel-body">
+					Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, 
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading dash-panel" role="tab" id="heading2" data-toggle="collapse" data-parent="#accordion" href="#body2" aria-expanded="false" aria-controls="body2">
+				Task 1
+			</div>
+			<div id="body2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading2">
+				<div class="panel-body">
+					Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, 
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading dash-panel" role="tab" id="heading3" data-toggle="collapse" data-parent="#accordion" href="#body3" aria-expanded="false" aria-controls="body3">
+				Task 1
+			</div>
+			<div id="body3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
+				<div class="panel-body">
+					Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, 
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
