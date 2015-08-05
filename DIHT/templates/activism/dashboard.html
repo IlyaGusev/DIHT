@@ -3,50 +3,47 @@
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}{% endblock %}
 {% block content %}
-<div class="dashboard_name">
-	<center>
-		<h1>Биржа</h1>
-	</center>
+<div class="page-header">
+    <h1>Биржа</h1>
 </div>
 <div class = "row">
 	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+        {% for task in tasks %}
+        {% if task.is_urgent%}
 		<div class="panel panel-danger">
-			<div class="panel-heading dash-panel" role="tab" id="heading1" data-toggle="collapse" data-parent="#accordion" href="#body1" aria-expanded="false" aria-controls="body1">
-				<h4>Task 1</h4>
+        {% else %}
+        <div class="panel panel-default">
+        {% endif %}
+			<div class="panel-heading dash-panel" role="tab" id="heading{{task.id}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.id}}" aria-expanded="false" aria-controls="body{{task.id}}">
+				<h4>{{ task.name }}</h4>
 			</div>
-			<div id="body1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading1">
+			<div id="body{{task.id}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{task.id}}">
 				<div class="panel-body">
-					[<a href="#">Посвят</a>] <br>
-					Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute <br>
-					<a href="#">#посвят</a> <a href="#">#пс</a> <a href="#">#купить</a> <br>
-					<span class = "param">Волонтерские Часы:</span> <span class="value-accent">2</span><br>
-					<span class = "param">Сделать до:</span> <span class="date-accent">12.10.2015</span>
-					<button class="btn btn-primary pull-right">{Хочу выполнить!}</button>
+                    {% if task.event %}
+					[<a href="{% url 'activism:event' id=task.event.id %}">{{ task.event.name }}</a>] <br>
+                    {% endif %}
+					{{ task.description }} <br>
+                    {% for tag in task.tags.all %}
+					<a href="#">#{{tag}}</a>
+                    {% endfor %}
+                    <br>
+					<span class = "param">Волонтерские Часы:</span> <span class="value-accent">{{ task.hours_predict }}</span><br>
+					<span class = "param">Сделать до:</span> <span class="date-accent">{{ task.datetime_limit }}</span>
+                    {% if request.user in task.candidates.all %}
+                    <a class="btn btn-primary pull-right disabled" href="{% url 'activism:task' id=task.id %}">Заявка подана</a>
+                    {% elif request.user in task.assignees.all %}
+                    <a class="btn btn-primary pull-right disabled" href="{% url 'activism:task' id=task.id %}">Заявка одобрена</a>
+                    {% else %}
+                    <a class="btn btn-primary pull-right" href="{% url 'activism:do_task' id=task.id %}">Хочу выполнить!</a>
+                    {% endif %}
 					<br>
-					<span class = "param">Активисты:</span> <span class="value-accent">2</span> <span class = "param">(остался <span class="value-accent">1</span>)</span>
+					<span class = "param">Активисты:</span>
+                    <span class="value-accent">{{task.number_of_assignees}}</span>
+                    <span class = "param">(набрано <span class="value-accent">{{task.assignees.all.count}}</span>)</span>
 				</div>
 			</div>
 		</div>
-		<div class="panel panel-default">
-			<div class="panel-heading dash-panel" role="tab" id="heading2" data-toggle="collapse" data-parent="#accordion" href="#body2" aria-expanded="false" aria-controls="body2">
-				<h4>Task 2</h4>
-			</div>
-			<div id="body2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading2">
-				<div class="panel-body">
-					Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, 
-				</div>
-			</div>
-		</div>
-		<div class="panel panel-default">
-			<div class="panel-heading dash-panel" role="tab" id="heading3" data-toggle="collapse" data-parent="#accordion" href="#body3" aria-expanded="false" aria-controls="body3">
-				<h4>Task 3</h4>
-			</div>
-			<div id="body3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
-				<div class="panel-body">
-					Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, 
-				</div>
-			</div>
-		</div>
+        {% endfor %}
 	</div>
 </div>
 {% endblock %}

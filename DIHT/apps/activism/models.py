@@ -4,6 +4,8 @@ from django.db.models import \
     PositiveSmallIntegerField, ForeignKey, DateTimeField, \
     DateField, BooleanField, OneToOneField,\
     Model, CharField, ManyToManyField, TextField
+from taggit.managers import TaggableManager
+from taggit.models import TaggedItemBase
 
 
 class Event(Model):
@@ -27,6 +29,10 @@ class Event(Model):
         return str(self.name)+" by "+str(self.creator)
 
 
+class TaggedTask(TaggedItemBase):
+    content_object = ForeignKey('Task')
+
+
 class Task(Model):
     STATUS_CHOICES = (
         ('closed', 'Закрыто'),
@@ -39,15 +45,18 @@ class Task(Model):
 
     name = CharField("Название", max_length=50)
     creator = ForeignKey(User, verbose_name="Создатель", related_name="tasks_created")
-    datetime_created = DateTimeField("Время создания", default=timezone.now)
     event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True, null=True)
     description = TextField("Описание", blank=True)
+    tags = TaggableManager(through=TaggedTask)
     hours_predict = PositiveSmallIntegerField("Расчётное количество часов", blank=True, null=True)
     hours_real = PositiveSmallIntegerField("Реальное количество часов", blank=True, null=True)
-    assignees = ManyToManyField(User, "Ответственные", related_name="tasks", blank=True)
-    datetime_limit = DateTimeField("До какого времени надо сделать", blank=True)
-    datetime_closed = DateTimeField("Время закрытия", blank=True)
-    datetime_last_modified = DateTimeField("Время последнего изменения", blank=True)
+    number_of_assignees = PositiveSmallIntegerField("Количество людей")
+    candidates = ManyToManyField(User, "Кандидаты", related_name="tasks_approve", blank=True)
+    assignees = ManyToManyField(User, "Назначенные", related_name="tasks", blank=True)
+    datetime_created = DateTimeField("Время создания", default=timezone.now)
+    datetime_limit = DateTimeField("До какого времени надо сделать")
+    datetime_closed = DateTimeField("Время закрытия", blank=True, null=True)
+    datetime_last_modified = DateTimeField("Время последнего изменения", default=timezone.now)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=15)
     is_urgent = BooleanField(default=False)
     is_hard = BooleanField(default=False)

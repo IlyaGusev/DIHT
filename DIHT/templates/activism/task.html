@@ -14,9 +14,11 @@
 					<hr class="just-a-line">
 					<div class = "row">
 						<div class = "col-md-6">
+                            {% if task.event %}
                             <span class="param">Мероприятие:</span>
                                 <a href="{% url 'activism:event' id=task.event.id %}" class = "pull-right">{{ task.event.name }}</a>
 							<br>
+                            {% endif %}
 							<span class="param">Создатель:</span>
                             <a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ task.creator.get_full_name }}</a>
                             <br>
@@ -24,8 +26,7 @@
                                 {% for assignee in task.assignees.all %}
                                 <a href="{% url 'accounts:profile' id=assignee.id %}" class = "pull-right">{{ assignee.get_full_name }}</a><br>
                                 {% endfor %}
-							<span class="param">Сроки:</span> 
-								<span class = "pull-right">10.11.2015</span>
+                            <br>
 						</div>
 						<div class = "col-md-6">
 							<span class="param">Статус:</span>
@@ -58,6 +59,8 @@
                             </span>
                             <br>
                             {% endif %}
+                            <span class="param">Сроки:</span>
+								<span class = "pull-right">{{ task.datetime_limit }}</span>
 						</div>
 					</div>
 				</div>
@@ -72,15 +75,18 @@
 					<h5 class="section-name">Волонтерские часы</h5>
 					<hr class="just-a-line">
 					<span class="param">Расчетные:</span> <span class = "pull-right">{% if task.hours_predict %}{{ task.hours_predict }} час.{% endif %}</span> <br>
+                    {% if task.hours_real  %}
 					<span class="param">Реальные:</span> <span class = "pull-right">{% if task.hours_real %}{{ task.hours_real }} час.{% endif %}</span>
+                    {% endif %}
 				</div>
 				<div class="section">
 					<h5 class="section-name">Даты</h5>
 					<hr class="just-a-line">
 					<span class="param">Создано:</span> <span class = "pull-right">{{ task.datetime_created }}</span> <br>
-                    <span class="param">Ограничение:</span> <span class = "pull-right">{{ task.datetime_limit }}</span> <br>
 					<span class="param">Последнее изменение:</span> <span class = "pull-right">{{ task.datetime_last_modified }}</span> <br>
+                    {% if task.datetime_closed %}
 					<span class="param">Закрыто:</span> <span class = "pull-right">{{ task.datetime_closed }}</span>
+                    {% endif %}
 				</div>
 			</div>
 		</div>
