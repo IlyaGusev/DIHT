@@ -119,3 +119,24 @@ class RegisterTestCase(TestCase):
             user['mobile'] = mobile
             response = self.client.post('/accounts/signup/', user)
             self.assertFormError(response, 'form', 'mobile', ['Некорректный номер телефона.'])
+
+
+class LoginTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        User.objects.create(username='111', password='111', email='111@l.ru')
+
+    def test_login_ok(self):
+        response = self.client.post('/accounts/login/', {'username': '111', 'password': '111'})
+        self.assertTemplateUsed(response, 'accounts/login.html')
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_errors(self):
+        response = self.client.post('/accounts/login/', {'username': '111', 'password': '222'})
+        self.assertFormError(response, 'form', None,
+                             ['Пожалуйста, введите правильные имя пользователя и пароль. '
+                              'Оба поля могут быть чувствительны к регистру.'])
+        response = self.client.post('/accounts/login/', {'username': '222', 'password': '222'})
+        self.assertFormError(response, 'form', None,
+                             ['Пожалуйста, введите правильные имя пользователя и пароль. '
+                              'Оба поля могут быть чувствительны к регистру.'])
