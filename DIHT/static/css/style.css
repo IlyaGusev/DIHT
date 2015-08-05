@@ -48,6 +48,22 @@ body {
 	-webkit-padding-start: 15px;
 }
 
+.value-accent {
+	font-family: RobotoBold;
+	font-size: 16;
+	color: #444444;
+}
+
+.date-accent {
+	font-family: RobotoBold;
+	font-size: 14;
+	color: #444444;
+}
+
+.dash-panel {
+	cursor: pointer;
+}
+
 .not-assigned {
 	color: red;
 }

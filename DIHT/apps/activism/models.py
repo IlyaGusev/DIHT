@@ -40,7 +40,7 @@ class Task(Model):
     name = CharField("Название", max_length=50)
     creator = ForeignKey(User, verbose_name="Создатель", related_name="tasks_created")
     datetime_created = DateTimeField("Время создания", default=timezone.now)
-    event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True)
+    event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True, null=True)
     description = TextField("Описание", blank=True)
     hours_predict = PositiveSmallIntegerField("Расчётное количество часов", blank=True, null=True)
     hours_real = PositiveSmallIntegerField("Реальное количество часов", blank=True, null=True)
