@@ -1,3 +1,6 @@
 Django == 1.8
 django-taggit == 0.16.2
-pytz
+pytz == 2015.2
+oauthlib == 1.0.1
+requests == 2.7.0
+python-social-auth == 0.2.12

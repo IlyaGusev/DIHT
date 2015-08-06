@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'accounts',
     'washing',
     'activism',
+    'social.apps.django_app.default',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -54,6 +55,24 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
 )
+
+
+AUTHENTICATION_BACKENDS = (
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.vk.VKOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_URL_NAMESPACE = 'accounts:social'
+SOCIAL_AUTH_FACEBOOK_KEY = ''
+SOCIAL_AUTH_FACEBOOK_SECRET = ''
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {'locale': 'ru_RU'}
+SOCIAL_AUTH_VK_OAUTH2_KEY = ''
+SOCIAL_AUTH_VK_OAUTH2_SECRET = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 
 ROOT_URLCONF = 'DIHT.urls'
 
@@ -68,6 +87,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
             ],
         },
     },

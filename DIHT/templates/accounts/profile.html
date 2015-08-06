@@ -35,6 +35,10 @@
                     <p><b>Общежитие:</b> {{ profile.hostel }}</p>
                     <p><b>Комната:</b> {{ profile.room_number }}</p>
                     <p><b>Телефон:</b> {{ profile.mobile }} </p>
+                    <p><b>Добавить соц. сеть:</b>
+                        <a href="{% url 'accounts:social:begin' 'facebook' %}"><img src="/static/img/facebook.png" style="height:40px;width:40px"></a>
+                        <a href="{% url 'accounts:social:begin' 'vk-oauth2' %}"><img src="/static/img/vk.png" style="height:40px;width:40px"></a>
+                    </p>
                     <button class = "btn btn-primary"
                             href="{% url 'accounts:edit_profile' id=profile.id %}"
                             data-toggle="modal"
