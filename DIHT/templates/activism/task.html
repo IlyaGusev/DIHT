@@ -1,12 +1,15 @@
 ﻿{% extends "base.html" %}
+{% load static from staticfiles %}
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
-{% block custom_scripts %}{% endblock %}
+{% block custom_scripts %}<script src="{% static 'js/task.js' %}"></script>{% endblock %}
 {% block content %}
         <div class="row well namezone">
 			<h3 class="task-name"> {{ task.name }}</h3>
 		</div>
-		<button class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Изменить</button>
+		{% if user == task.creator %}
+		
+		{% endif %}
 		<div class = "row">
 			<div class = "col-md-8">
 				<div class="section">
@@ -16,17 +19,61 @@
 						<div class = "col-md-6">
                             {% if task.event %}
                             <span class="param">Мероприятие:</span>
-                                <a href="{% url 'activism:event' id=task.event.id %}" class = "pull-right">{{ task.event.name }}</a>
+								{% if user == task.creator %}
+									<span class="visible pull-right" id="event-noedit">
+									<a href="{% url 'activism:event' id=task.event.id %}" id = "event-name">{{ task.event.name }}</a>
+									<a href="#" class="light"><i class="fa fa-pencil" id="event-pencil"></i></a>
+									</span>
+									<select class="pull-right selector hidden" id="event-selector">
+										<option class="selector-item">ПОСВЯТ</option>
+										<option class="selector-item">ХУЯТ</option>
+										<option class="selector-item">ПЕРМАНГАНАТ</option>
+									</select>
+								{% else %}
+									<a href="{% url 'activism:event' id=task.event.id %}" class = "pull-right">{{ task.event.name }}</a>
+								{% endif %}
 							<br>
                             {% endif %}
 							<span class="param">Создатель:</span>
-                            <a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ task.creator.get_full_name }}</a>
+                            {% if user == task.creator %}
+							<span class="pull-right">{{ task.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
+							{% else %}
+							<a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ task.creator.get_full_name }}</a>
+							{% endif %}
                             <br>
 							<span class="param">Исполнители:</span>
                                 {% for assignee in task.assignees.all %}
-                                <a href="{% url 'accounts:profile' id=assignee.id %}" class = "pull-right">{{ assignee.get_full_name }}</a><br>
+									<span class="pull-right">
+									<a href="{% url 'accounts:profile' id=assignee.id %}" class = "">{{ assignee.get_full_name }}</a>
+									{% if user == task.creator %}
+									<a href="#" class="red"> <i class="fa fa-times fa-lg"></i> </a>
+									{% endif %}
+									</span>
+									
+									<br>
                                 {% endfor %}
+								{% if user == task.creator %}
+									<span class="pull-right">
+									<a href="#" class="green">Назначить   <i class="fa fa-plus fa-lg "></i></a>
+									</span>
+									<br>
+									<br>
+								{% endif %}
+							{% if user == task.creator %}
+								{% if task.candidates.size == 0 %} <!-- I have no idea how to check -->
+								<span class="grey">Нет кандидатов</span>
+								{% else %}
+								<span class="param">Кандидаты:</span>
+                                {% for assignee in task.candidates.all %}
+									<span class="pull-right">
+									<a href="{% url 'accounts:profile' id=assignee.id %}" class = "">{{ assignee.get_full_name }}</a>
+									<a href="#" class="blue"> <i class="fa fa-thumbs-up fa-lg"></i> </a>
+									</span>
+									<br>
+                                {% endfor %}
+								{% endif %}
                             <br>
+							{% endif %}
 						</div>
 						<div class = "col-md-6">
 							<span class="param">Статус:</span>
@@ -60,24 +107,58 @@
                             <br>
                             {% endif %}
                             <span class="param">Сроки:</span>
+								{% if user == task.creator %}
+								
+								<span class = "pull-right">
+									<span id="datelimit" class="visible">
+										{{ task.datetime_limit }}
+										<a href="#" class="light"><i class="fa fa-pencil" id="datelimit-pencil"></i></a>
+									</span>
+									<span id="dateedit" class="delete hidden">
+										<input id = "datepicker" type="date"> <!-- Надо придумать, как проставить default value -->
+										</input>
+										<input id = "timepicker" type="time">
+										</input>
+									</span>
+								</span>
+								
+								
+								{% else %}
 								<span class = "pull-right">{{ task.datetime_limit }}</span>
+								{% endif %}
 						</div>
 					</div>
 				</div>
 				<div class="section">
-					<h5 class="section-name">Описание</h5>
+					<h5 class="section-name">Описание <a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a> </h5> 
 					<hr class="just-a-line">
-					<span class = "description">{{ task.description }}</span>
+					{% if user == task.creator %}
+					<span class = "visible" id="desc">{{ task.description }}</span>
+					<textarea class="form-control hidden" id="desc-area" rows="4">{{ task.description }}</textarea>
+					{% else %}
+					<span id = "desc">{{ task.description }}</span>
+					{% endif %}
+					
 				</div>
 			</div>
 			<div class = "col-md-4">
 				<div class="section">
 					<h5 class="section-name">Волонтерские часы</h5>
 					<hr class="just-a-line">
-					<span class="param">Расчетные:</span> <span class = "pull-right">{% if task.hours_predict %}{{ task.hours_predict }} час.{% endif %}</span> <br>
-                    {% if task.hours_real  %}
-					<span class="param">Реальные:</span> <span class = "pull-right">{% if task.hours_real %}{{ task.hours_real }} час.{% endif %}</span>
-                    {% endif %}
+					{% if user == task.creator %}
+						<span class="param">Расчетные:</span> <span class = "pull-right">
+							<span id="est-hours" class="visible"> {% if task.hours_predict %}{{ task.hours_predict }} час.{% endif %}
+							<a href="#" class="light"><i class="fa fa-pencil" id="est-hours-pencil"></i></a></span>
+							<span id="est-hours-edit" class="hidden">
+							<input id="est-hours-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict }}{% endif %}"></input> час.
+							</span>
+						</span>
+					{% else %}
+						<span class="param">Расчетные:</span> <span class = "pull-right">{% if task.hours_predict %}{{ task.hours_predict }} час.{% endif %}</span> <br>
+						{% if task.hours_real  %}
+						<span class="param">Реальные:</span> <span class = "pull-right">{% if task.hours_real %}{{ task.hours_real }} час.{% endif %}</span>
+						{% endif %}
+					{% endif %}
 				</div>
 				<div class="section">
 					<h5 class="section-name">Даты</h5>
