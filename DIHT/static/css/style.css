@@ -104,6 +104,14 @@ body {
 	color: #444444;
 }
 
+.usual-letters {
+	font-size: 14px;
+}
+
+.robotobold {
+	font-family: RobotoBold;
+}
+
 .dash-panel {
 	cursor: pointer;
 	padding-top: 5px;

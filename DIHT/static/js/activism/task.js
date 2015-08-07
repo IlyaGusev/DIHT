@@ -1,21 +1,3 @@
-function itemHasFocus(id)
-{
-    var output = false;
-    console.log(id);
-    //loop for all fields in the form
-    $.each($('#'+id+' :input'), function(i,v)
-    {
-       console.log($(this).is(":focus")); //check item has focus
-       if ($(this).is(":focus"))
-       {
-         output = true;
-         return false; //return false skips out of the loop
-       }
-    });
-    return output;
-}
-
-
 $(function() {
 	/* Изменение события */
 	$('#event-pencil').click(function() {

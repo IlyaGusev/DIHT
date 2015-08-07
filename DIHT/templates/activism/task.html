@@ -2,7 +2,7 @@
 {% load static from staticfiles %}
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
-{% block custom_scripts %}<script src="{% static 'js/task.js' %}"></script>{% endblock %}
+{% block custom_scripts %}<script src="{% static 'js/activism/task.js' %}"></script>{% endblock %}
 {% block content %}
         <div class="row well namezone">
 			<h3 class="task-name"> {{ task.name }}</h3>
@@ -49,7 +49,6 @@
 									<a href="#" class="red"> <i class="fa fa-times fa-lg"></i> </a>
 									{% endif %}
 									</span>
-									
 									<br>
                                 {% endfor %}
 								{% if user == task.creator %}
@@ -60,7 +59,7 @@
 									<br>
 								{% endif %}
 							{% if user == task.creator %}
-								{% if task.candidates.size == 0 %} <!-- I have no idea how to check -->
+								{% if task.candidates.all.count == 0 %}
 								<span class="grey">Нет кандидатов</span>
 								{% else %}
 								<span class="param">Кандидаты:</span>
@@ -130,7 +129,7 @@
 					</div>
 				</div>
 				<div class="section">
-					<h5 class="section-name">Описание <a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a> </h5> 
+					<h5 class="section-name">Описание <a href="#" class="light">{% if user == task.creator %}<i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %}</h5> 
 					<hr class="just-a-line">
 					{% if user == task.creator %}
 					<span class = "visible" id="desc">{{ task.description }}</span>

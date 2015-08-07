@@ -11,8 +11,8 @@
         {% for task in tasks %}
         {% if task.is_urgent%}
 		<div class="panel panel-danger">
-        {% else %}
-        <div class="panel panel-default">
+        {% elif task.is_hard%}
+        <div class="panel panel-warning">
         {% endif %}
 			<div class="panel-heading dash-panel" role="tab" id="heading{{task.id}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.id}}" aria-expanded="false" aria-controls="body{{task.id}}">
 				<h4>{{ task.name }}</h4>
@@ -20,7 +20,7 @@
 			<div id="body{{task.id}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{task.id}}">
 				<div class="panel-body">
                     {% if task.event %}
-					[<a href="{% url 'activism:event' id=task.event.id %}">{{ task.event.name }}</a>] <br>
+					<a href="{% url 'activism:event' id=task.event.id %}">{{ task.event.name }}</a>/<a href="{% url 'activism:event' id=task.id %}">{{ task.name }}</a> <br>
                     {% endif %}
 					{{ task.description }} <br>
                     {% for tag in task.tags.all %}

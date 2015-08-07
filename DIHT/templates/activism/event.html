@@ -1,7 +1,8 @@
 ﻿{% extends "base.html" %}
+{% load static from staticfiles %}
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
-{% block custom_scripts %}{% endblock %}
+{% block custom_scripts %}<script src="{% static 'js/activism/event.js' %}"></script>{% endblock %}
 {% block content %}
         <div class="row well namezone">
 			<h3 class="event-name">{{ event.name }}</h3>
@@ -15,14 +16,30 @@
 					<div class = "row">
 						<div class = "col-md-6">
 							<span class="param">Создатель:</span>
-                            <a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
+							{% if user == event.creator %}
+							<span class="pull-right">{{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
+							{% else %}
+							<a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
+							{% endif %}
                             <br>
 							<span class="param">Ответственные:</span>
                                 {% for assignee in event.assignees.all %}
-                                <a href="{% url 'accounts:profile' id=assignee.id %}" class="pull-right">{{ assignee.get_full_name }}</a>
-                                <br>
+								
+								<span class="pull-right">
+									<a href="{% url 'accounts:profile' id=assignee.id %}" class = "">{{ assignee.get_full_name }}</a>
+									{% if user == event.creator %}
+									<a href="#" class="red"> <i class="fa fa-times fa-lg"></i> </a>
+									{% endif %}
+									</span>
+									<br>
                                 {% endfor %}
-
+								{% if user == event.creator %}
+									<span class="pull-right">
+									<a href="#" class="green">Назначить   <i class="fa fa-plus fa-lg "></i></a>
+									</span>
+									<br>
+									<br>
+								{% endif %}
 						</div>
 						<div class = "col-md-6">
 							<span class="param">Cтатус:</span>
@@ -40,13 +57,25 @@
 					</div>
 				</div>
 				<div class="section">
-					<h5 class="section-name">Описание</h5>
+					<h5 class="section-name">Описание <a href="#" class="light">{% if user == event.creator %}<i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5> 
 					<hr class="just-a-line">
-					<span class = "description">{{ event.description }}</span>
+					{% if user == event.creator %}
+					<span class = "visible" id="desc">{{ event.description }}</span>
+					<textarea class="form-control hidden" id="desc-area" rows="4">{{ event.description }}</textarea>
+					{% else %}
+					<span id = "desc">{{ event.description }}</span>
+					{% endif %}
+					
 				</div>
 				<div class = "section">
 					<h5 class="section-name">Задачи</h5>
-					<table class = "table">
+					<table class = "table usual-letters">
+						<tr>
+							<th>Номер</th>
+							<th>Задача</th>
+							<th>Исполнитель(-и)</th>
+							<th>Статус</th>
+						</tr>
                         {% for task in event.tasks.all %}
 						<tr>
 							<td><a href="{% url 'activism:task' id=task.id %}">#{{ task.id }}</a></td>
@@ -56,24 +85,31 @@
                                 {% endfor %}
                             </td>
                             <td>
+							<span class="">
                             {% if task.status == 'closed' %}
-							    <span class="label label-success pull-right">
+							    <span class="label label-success">
                             {% elif task.status == 'resolved' %}
-                                <span class="label label-primary pull-right">
+                                <span class="label label-primary">
                             {% elif task.status == 'in_progress' %}
-                                <span class="label label-warning pull-right">
+                                <span class="label label-warning">
                             {% elif task.status == 'open' %}
-                                <span class="label label-default pull-right">
+                                <span class="label label-default">
                             {% elif task.status == 'in_labor' %}
-                                <span class="label label-danger pull-right">
+                                <span class="label label-danger">
                             {% elif task.status == 'volunteers' %}
-                                <span class="label label-info pull-right">
+                                <span class="label label-info ">
                             {% endif %}
                                     {{ task.get_status_display }}
                                 </span>
+							</span>
                             </td>
 						</tr>
                         {% endfor %}
+						<tr>
+							<td colspan="4"><center><a href="#" class="btn btn-default green robotobold">
+								<i class="fa fa-plus fa-lg" style="margin-right:20px"></i> Создать задачу <i class="fa fa-plus fa-lg" style="margin-left:20px"></i>
+							</a></center></td>
+						</tr>
 					</table>
 					
 				</div>
