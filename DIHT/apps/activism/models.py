@@ -6,6 +6,7 @@ from django.db.models import \
     Model, CharField, ManyToManyField, TextField
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase
+from django.core.urlresolvers import reverse
 
 
 class Event(Model):
@@ -24,6 +25,9 @@ class Event(Model):
     class Meta:
         verbose_name = "Мероприятие"
         verbose_name_plural = "Мероприятия"
+
+    def get_absolute_url(self):
+        return reverse('activism:event', kwargs={'id': self.pk})
 
     def __str__(self):
         return str(self.name)+" by "+str(self.creator)
@@ -64,6 +68,9 @@ class Task(Model):
     class Meta:
         verbose_name = "Задача"
         verbose_name_plural = "Задачи"
+
+    def get_absolute_url(self):
+        return reverse('activism:task', kwargs={'id': self.pk})
 
     def save(self, *args, **kwargs):
         self.datetime_last_modified = timezone.now()

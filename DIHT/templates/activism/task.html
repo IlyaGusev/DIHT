@@ -20,14 +20,14 @@
                             {% if task.event %}
                             <span class="param">Мероприятие:</span>
 								{% if user == task.creator %}
-									<span class="visible pull-right" id="event-noedit">
+									<span class="pull-right" id="event-noedit">
 									<a href="{% url 'activism:event' id=task.event.id %}" id = "event-name">{{ task.event.name }}</a>
 									<a href="#" class="light"><i class="fa fa-pencil" id="event-pencil"></i></a>
 									</span>
 									<select class="pull-right selector hidden" id="event-selector">
-										<option class="selector-item">ПОСВЯТ</option>
-										<option class="selector-item">ХУЯТ</option>
-										<option class="selector-item">ПЕРМАНГАНАТ</option>
+                                        {% for event in events %}
+										<option class="selector-item">{{ event.name }}</option>
+                                        {% endfor %}
 									</select>
 								{% else %}
 									<a href="{% url 'activism:event' id=task.event.id %}" class = "pull-right">{{ task.event.name }}</a>
@@ -44,29 +44,36 @@
 							<span class="param">Исполнители:</span>
                                 {% for assignee in task.assignees.all %}
 									<span class="pull-right">
-									<a href="{% url 'accounts:profile' id=assignee.id %}" class = "">{{ assignee.get_full_name }}</a>
+									<a href="{% url 'accounts:profile' id=assignee.id %}" class="assignee" id="{{assignee.id}}">{{ assignee.get_full_name }}</a>
 									{% if user == task.creator %}
-									<a href="#" class="red"> <i class="fa fa-times fa-lg"></i> </a>
+									<a href="#" class="red resign"> <i class="fa fa-times fa-lg"></i> </a>
 									{% endif %}
 									</span>
 									<br>
                                 {% endfor %}
 								{% if user == task.creator %}
 									<span class="pull-right">
-									<a href="#" class="green">Назначить   <i class="fa fa-plus fa-lg "></i></a>
+									<a href="#" class="green" id="assign">Назначить   <i class="fa fa-plus fa-lg "></i></a>
 									</span>
-									<br>
-									<br>
+
+                                    <select class="pull-right selector hidden" id="assignee-selector">
+                                        {% for user in users %}
+                                        {% if user.username != 'admin' %}
+										<option class="selector-item" value="{{ user.id }}">{{ user.get_full_name }}</option>
+                                        {% endif %}
+                                        {% endfor %}
+									</select>
+                                    <br>
 								{% endif %}
 							{% if user == task.creator %}
 								{% if task.candidates.all.count == 0 %}
 								<span class="grey">Нет кандидатов</span>
 								{% else %}
 								<span class="param">Кандидаты:</span>
-                                {% for assignee in task.candidates.all %}
+                                {% for candidate in task.candidates.all %}
 									<span class="pull-right">
-									<a href="{% url 'accounts:profile' id=assignee.id %}" class = "">{{ assignee.get_full_name }}</a>
-									<a href="#" class="blue"> <i class="fa fa-thumbs-up fa-lg"></i> </a>
+									<a href="{% url 'accounts:profile' id=assignee.id %}" class="candidate" id="{{candidate.id}}">{{ candidate.get_full_name }}</a>
+									<a href="#" class="blue approve"> <i class="fa fa-thumbs-up fa-lg"></i> </a>
 									</span>
 									<br>
                                 {% endfor %}
@@ -109,15 +116,14 @@
 								{% if user == task.creator %}
 								
 								<span class = "pull-right">
-									<span id="datelimit" class="visible">
-										{{ task.datetime_limit }}
-										<a href="#" class="light"><i class="fa fa-pencil" id="datelimit-pencil"></i></a>
-									</span>
-									<span id="dateedit" class="delete hidden">
-										<input id = "datepicker" type="date"> <!-- Надо придумать, как проставить default value -->
-										</input>
-										<input id = "timepicker" type="time">
-										</input>
+									<span id="datelimit">
+                                        {{ task.datetime_limit }}
+                                        <a href="#" class="light"><i class="fa fa-pencil" id="datelimit-pencil"></i>
+                                        </a>
+                                    </span>
+                                    <span class="hidden" id="datelimit_formatted">{{ task.datetime_limit|date:'Y-m-d\TH:i' }}</span>
+									<span id="dateedit" class="hidden">
+										<input id="datepicker" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
 									</span>
 								</span>
 								
@@ -132,7 +138,7 @@
 					<h5 class="section-name">Описание <a href="#" class="light">{% if user == task.creator %}<i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %}</h5> 
 					<hr class="just-a-line">
 					{% if user == task.creator %}
-					<span class = "visible" id="desc">{{ task.description }}</span>
+					<span id="desc">{{ task.description }}</span>
 					<textarea class="form-control hidden" id="desc-area" rows="4">{{ task.description }}</textarea>
 					{% else %}
 					<span id = "desc">{{ task.description }}</span>
@@ -146,7 +152,7 @@
 					<hr class="just-a-line">
 					{% if user == task.creator %}
 						<span class="param">Расчетные:</span> <span class = "pull-right">
-							<span id="est-hours" class="visible"> {% if task.hours_predict %}{{ task.hours_predict }} час.{% endif %}
+							<span id="est-hours"> {% if task.hours_predict %}{{ task.hours_predict }} час.{% endif %}
 							<a href="#" class="light"><i class="fa fa-pencil" id="est-hours-pencil"></i></a></span>
 							<span id="est-hours-edit" class="hidden">
 							<input id="est-hours-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict }}{% endif %}"></input> час.

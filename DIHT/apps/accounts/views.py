@@ -90,7 +90,6 @@ class ProfileUpdateView(UpdateView):
     def dispatch(self, *args, **kwargs):
         return super(ProfileUpdateView, self).dispatch(*args, **kwargs)
 
-
     def form_invalid(self, form):
         super(ProfileUpdateView, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)

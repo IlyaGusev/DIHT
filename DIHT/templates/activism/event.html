@@ -7,7 +7,6 @@
         <div class="row well namezone">
 			<h3 class="event-name">{{ event.name }}</h3>
 		</div>
-		<button class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Изменить</button>
 		<div class = "row">
 			<div class = "col-md-8">
 				<div class="section">
@@ -26,19 +25,26 @@
                                 {% for assignee in event.assignees.all %}
 								
 								<span class="pull-right">
-									<a href="{% url 'accounts:profile' id=assignee.id %}" class = "">{{ assignee.get_full_name }}</a>
+									<a href="{% url 'accounts:profile' id=assignee.id %}" class="assignee" id="{{assignee.id}}">{{ assignee.get_full_name }}</a>
 									{% if user == event.creator %}
-									<a href="#" class="red"> <i class="fa fa-times fa-lg"></i> </a>
+									<a href="#" class="red resign"> <i class="fa fa-times fa-lg"></i> </a>
 									{% endif %}
 									</span>
 									<br>
                                 {% endfor %}
 								{% if user == event.creator %}
 									<span class="pull-right">
-									<a href="#" class="green">Назначить   <i class="fa fa-plus fa-lg "></i></a>
+									<a href="#" class="green" id="assign">Назначить   <i class="fa fa-plus fa-lg "></i></a>
 									</span>
-									<br>
-									<br>
+
+                                    <select class="pull-right selector hidden" id="assignee-selector">
+                                        {% for user in users %}
+                                        {% if user.username != 'admin' %}
+										<option class="selector-item" value="{{ user.id }}">{{ user.get_full_name }}</option>
+                                        {% endif %}
+                                        {% endfor %}
+									</select>
+                                    <br>
 								{% endif %}
 						</div>
 						<div class = "col-md-6">

@@ -1,93 +1,130 @@
 $(function() {
-	/* Изменение события */
+    function transfer_class(attr, elem2, elem1){
+        $(elem1).addClass(attr);
+		$(elem2).removeClass(attr);
+    };
+
+    function dict_to_string(dat){
+        st = '';
+        for (var key in dat)
+            if (!Array.isArray(dat[key]))
+                st+='&'+key+'='+dat[key];
+            else
+                for (var elem in dat[key])
+                    st+='&'+key+'='+dat[key][elem];
+        st = st.substr(1);
+        return st;
+    };
+
+    function get_ids(selector){
+        var a = [];
+        $(selector).each(function() {
+            a.push($(this)[0].id);
+        });
+        return a;
+    }
+
+    function post_ajax(dict){
+        var dat = {};
+        dat['hours_predict'] = $('#est-hours').text().split(' ')[1];
+        dat['description'] = $('#desc').text();
+        dat['datetime_limit'] = $('#datelimit_formatted').text();
+        dat['assignees'] = get_ids('.assignee');
+        dat['candidates'] = get_ids('.candidate');
+
+        for (key in dict)
+            dat[key] = dict[key];
+        dat['datetime_limit'] = dat['datetime_limit'].replace('T', ' ');
+
+        data = dict_to_string(dat);
+        $.ajax({
+            type: 'POST',
+            url: window.location.href,
+            data: data,
+            success: function(data) {
+                window.location.reload();
+            },
+            error: function(request, status, error) {
+                console.log(error)
+            }
+        });
+    };
+
+    // Events
 	$('#event-pencil').click(function() {
-		$('#event-noedit').removeClass('visible');
-		$('#event-noedit').addClass('hidden');
-		$('#event-selector').removeClass('hidden');
-		$('#event-selector').addClass('visible');
+	    transfer_class('hidden', '#event-selector', '#event-noedit');
 		$('#event-selector').focus();
 		
 	})
 	
 	$('#event-selector').blur(function() {
-		//AJAX отправка на сервак
-		$('#event-noedit').removeClass('hidden');
-		$('#event-noedit').addClass('visible');
-		$('#event-selector').removeClass('visible');
-		$('#event-selector').addClass('hidden');
+		transfer_class('hidden', '#event-noedit', '#event-selector');
 	})
-	
-	/* Изменение описания */
-	
+
+	// Description
 	$('#desc-pencil').click(function() {
-		$('#desc').removeClass('visible');
-		$('#desc').addClass('hidden');
-		$('#desc-area').removeClass('hidden');
-		$('#desc-area').addClass('visible');
+	    transfer_class('hidden', '#desc-area', '#desc');
 		$('#desc-area').focus();
 	})
-	
+
 	$('#desc-area').blur(function() {
-		//AJAX отправка на сервак
-		$('#desc').removeClass('hidden');
-		$('#desc').addClass('visible');
-		$('#desc-area').removeClass('visible');
-		$('#desc-area').addClass('hidden');
+	    post_ajax({'description': $('#desc-area').val()})
+		transfer_class('hidden', '#desc', '#desc-area');
 	})
-	
-	/* Изменение расчетных ВЧ */
-	
+
+	// Hours
 	$('#est-hours-pencil').click(function() {
-		
-		$('#est-hours').removeClass('visible');
-		$('#est-hours').addClass('hidden');
-		$('#est-hours-edit').removeClass('hidden');
-		$('#est-hours-edit').addClass('visible');
+		transfer_class('hidden', '#est-hours-edit', '#est-hours');
 		$('#est-hours-field').focus();
 	})
 	
 	$('#est-hours-field').blur(function() {
-		//AJAX отправка на сервак
-		$('#est-hours').removeClass('hidden');
-		$('#est-hours').addClass('visible');
-		$('#est-hours-edit').removeClass('visible');
-		$('#est-hours-edit').addClass('hidden');
+	    post_ajax({'hours_predict': $('#est-hours-field').val()})
+		transfer_class('hidden', '#est-hours', '#est-hours-edit');
 	})
-	
-	/* Изменение сроков */
-	
+
+
+	// Datetime_limit
 	$('#datelimit-pencil').click(function() {
-		
-		$('#datelimit').removeClass('visible');
-		$('#datelimit').addClass('hidden');
-		$('#dateedit').removeClass('hidden');
-		$('#dateedit').addClass('visible');
+		transfer_class('hidden', '#dateedit', '#datelimit');
 		$('#datepicker').focus();
-		
-		console.log(($("#datepicker").is(":focus")));
-		console.log(($("#timepicker").is(":focus")));
-		console.log(itemHasFocus("datepicker"));
-		console.log(itemHasFocus("timepicker"));
-		
 	})
 	
 	$('#datepicker').blur(function() {
-		//AJAX отправка на сервак
-		setTimeout(function() {if (! ($("#timepicker").is(":focus"))) {
-			$('#datelimit').removeClass('hidden');
-			$('#datelimit').addClass('visible');
-			$('#dateedit').removeClass('visible');
-			$('#dateedit').addClass('hidden');
-		}}, 0);
+        post_ajax({'datetime_limit': ($("#datepicker").val()+' '+$("#timepicker").val()).split(' ')[0]})
+        transfer_class('hidden', '#datelimit', '#dateedit');
 	})
-	$('#timepicker').blur(function() {
-		//AJAX отправка на сервак
-		setTimeout(function() {if (! ($("#datepicker").is(":focus"))) {
-			$('#datelimit').removeClass('hidden');
-			$('#datelimit').addClass('visible');
-			$('#dateedit').removeClass('visible');
-			$('#dateedit').addClass('hidden');
-		}}, 0);
+
+	// Assign
+	$('#assign').click(function() {
+		transfer_class('hidden', '#assignee-selector', '#assign');
+		$('#assignee-selector').focus();
 	})
-	
+
+	$('#assignee-selector').blur(function() {
+	    var assignees = get_ids('.assignee');
+        assignees.push($("#assignee-selector option:selected" ).val())
+        post_ajax({'assignees': assignees});
+        transfer_class('hidden', '#assign', '#assignee-selector');
+	})
+
+
+    // Resign
+	$('.resign').click(function() {
+		resign_id = $(this).prev()[0].id;
+		var assignees = get_ids('.assignee');
+        assignees.splice($.inArray(resign_id, assignees), 1);
+        post_ajax({'assignees': assignees});
+	})
+
+	// Approve
+	$('.approve').click(function() {
+		approve_id = $(this).prev()[0].id;
+		var candidates = get_ids('.candidate');
+		candidates.splice($.inArray(approve_id, candidates), 1);
+		var assignees = get_ids('.assignee');
+		assignees.push(approve_id);
+        post_ajax({'candidates': candidates, 'assignees': assignees});
+	})
+
 });

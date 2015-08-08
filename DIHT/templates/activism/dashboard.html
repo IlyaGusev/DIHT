@@ -20,8 +20,9 @@
 			<div id="body{{task.id}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{task.id}}">
 				<div class="panel-body">
                     {% if task.event %}
-					<a href="{% url 'activism:event' id=task.event.id %}">{{ task.event.name }}</a>/<a href="{% url 'activism:event' id=task.id %}">{{ task.name }}</a> <br>
+					<a href="{% url 'activism:event' id=task.event.id %}">{{ task.event.name }}</a>/
                     {% endif %}
+                    <a href="{% url 'activism:task' id=task.id %}">{{ task.name }}</a> <br>
 					{{ task.description }} <br>
                     {% for tag in task.tags.all %}
 					<a href="#">#{{tag}}</a>
