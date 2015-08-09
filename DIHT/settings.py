@@ -38,11 +38,12 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'taggit',
+    'braces',
+    'social.apps.django_app.default',
     'main',
     'accounts',
     'washing',
     'activism',
-    'social.apps.django_app.default',
 )
 
 MIDDLEWARE_CLASSES = (

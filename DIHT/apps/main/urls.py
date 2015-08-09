@@ -6,5 +6,4 @@ urlpatterns = [
     url(r'^gym/$', TemplateView.as_view(template_name="gym.html"), name='gym'),
     url(r'^accommodation/$', TemplateView.as_view(template_name="accommodation.html"), name='accommodation'),
     url(r'^announcements/$', TemplateView.as_view(template_name="announcements.html"), name='announcements'),
-    url(r'^test/$', TemplateView.as_view(template_name="activism/dashboard.html"), name='dash'),
 ]

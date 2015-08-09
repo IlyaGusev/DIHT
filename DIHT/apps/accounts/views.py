@@ -7,8 +7,7 @@ from django.core.mail import EmailMessage
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm
 from accounts.models import Profile
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
+from braces.views import LoginRequiredMixin, UserPassesTestMixin
 from django.utils import timezone
 
 import logging
@@ -64,9 +63,20 @@ class ResetPasswordView(FormView):
         return super(ResetPasswordView, self).form_valid(form)
 
 
-class ProfileView(DetailView):
+class CheckUsernameView(View):
+    def get(self, request, *args, **kwargs):
+        username = request.GET['username']
+        if User.objects.all().filter(username=username).count() > 0:
+            result = {'exist': "1"}
+        else:
+            result = {'exist': "0"}
+        return JsonResponse(result, status=200)
+
+
+class ProfileView(LoginRequiredMixin, DetailView):
     template_name = 'accounts/profile.html'
     model = User
+    context_object_name = 'profile_user'
     slug_field = 'id'
     slug_url_kwarg = 'id'
 
@@ -78,29 +88,18 @@ class ProfileView(DetailView):
         return context
 
 
-class ProfileUpdateView(UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Profile
     form_class = ProfileForm
     template_name = "accounts/edit_profile.html"
     slug_field = 'id'
     slug_url_kwarg = 'id'
     success_url = reverse_lazy('main:home')
+    raise_exception = True
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(ProfileUpdateView, self).dispatch(*args, **kwargs)
+    def test_func(self, user):
+        return self.get_object().user.id == user.id
 
     def form_invalid(self, form):
         super(ProfileUpdateView, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)
-
-
-class CheckUsernameView(View):
-
-    def get(self, request, *args, **kwargs):
-        username = request.GET['username']
-        if User.objects.all().filter(username=username).count() > 0:
-            result = {'exist': "1"}
-        else:
-            result = {'exist': "0"}
-        return JsonResponse(result, status=200)

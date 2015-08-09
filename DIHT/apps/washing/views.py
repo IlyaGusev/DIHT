@@ -1,15 +1,14 @@
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.db import transaction
 from django.utils import timezone
 from django.http import JsonResponse
 from washing.models import WashingMachine, WashingMachineRecord, RegularNonWorkingDay, NonWorkingDay, Parameters
 from accounts.models import MoneyOperation
+from braces.views import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
 import collections
 import datetime as dt
-import pytz
 import logging
 logger = logging.getLogger('DIHT.custom')
 
@@ -84,31 +83,29 @@ def parse_record(request):
     time_from = request.POST['time_from']
     time_to = request.POST['time_to']
     machine = WashingMachine.objects.get(id=request.POST['machine'])
-    user = request.user
     datetime_from = dt.datetime.strptime(date+' '+time_from, '%d.%m.%Y %H:%M')
     datetime_to = dt.datetime.strptime(date+' '+time_to, '%d.%m.%Y %H:%M')
-    return {'machine': machine, 'user': user, 'datetime_from': datetime_from, 'datetime_to': datetime_to}
+    return {'machine': machine, 'datetime_from': datetime_from, 'datetime_to': datetime_to}
 
 
-class CreateRecordView(TemplateView):
+class CreateRecordView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "washing/create_record.html"
+    raise_exception = True
 
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: not u.black_list_record.is_blocked))
-    def dispatch(self, *args, **kwargs):
-        return super(CreateRecordView, self).dispatch(*args, **kwargs)
+    def test_func(self, user):
+        return not user.black_list_record.is_blocked
 
     @method_decorator(transaction.atomic)
     def post(self, request, *args, **kwargs):
         record = parse_record(request)
         price = record['machine'].parameters.all().filter(date__lte=record['datetime_from'].date()).order_by('-date')[0].price
-        if record['user'].profile.money >= price:
-            operation = MoneyOperation.objects.create(user=record['user'],
+        if request.user.profile.money >= price:
+            operation = MoneyOperation.objects.create(user=request.user,
                                                       amount=-price,
                                                       timestamp=timezone.now(),
                                                       description="Стиралка")
             WashingMachineRecord.objects.create(machine=record['machine'],
-                                                user=record['user'],
+                                                user=request.user,
                                                 datetime_from=record['datetime_from'],
                                                 datetime_to=record['datetime_to'],
                                                 money_operation=operation)
@@ -117,18 +114,15 @@ class CreateRecordView(TemplateView):
         return super(CreateRecordView, self).get(request, *args, **kwargs)
 
 
-class CancelRecordView(TemplateView):
+class CancelRecordView(LoginRequiredMixin, TemplateView):
     template_name = "washing/cancel_record.html"
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(CancelRecordView, self).dispatch(*args, **kwargs)
+    raise_exception = True
 
     @method_decorator(transaction.atomic)
     def post(self, request, *args, **kwargs):
         record = parse_record(request)
         record_obj = WashingMachineRecord.objects.get(machine=record['machine'],
-                                                      user=record['user'],
+                                                      user=request.user,
                                                       datetime_from=record['datetime_from'],
                                                       datetime_to=record['datetime_to'])
         record_obj.money_operation.cancel()
@@ -136,13 +130,16 @@ class CancelRecordView(TemplateView):
         return super(CancelRecordView, self).get(request, *args, **kwargs)
 
 
-class BlockDayView(TemplateView):
+class BlockDayView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     template_name = "washing/block_day.html"
+    permission_required = "washing.add_nonworkingday"
+    raise_exception = True
 
-    @method_decorator(login_required)
-    @method_decorator(permission_required('washing.add_nonworkingday', raise_exception=True))
-    def dispatch(self, *args, **kwargs):
-        return super(BlockDayView, self).dispatch(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super(BlockDayView, self).get_context_data(**kwargs)
+        machines = WashingMachine.objects.filter(is_active=True)
+        context['machines'] = machines
+        return context
 
     @method_decorator(transaction.atomic)
     def post(self, request, *args, **kwargs):
@@ -156,20 +153,11 @@ class BlockDayView(TemplateView):
             NonWorkingDay.objects.create(date=dt.datetime.strptime(date, '%d.%m.%Y').date(), machine=machine)
         return super(BlockDayView, self).get(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super(BlockDayView, self).get_context_data(**kwargs)
-        machines = WashingMachine.objects.filter(is_active=True)
-        context['machines'] = machines
-        return context
 
-
-class UnblockDayView(TemplateView):
+class UnblockDayView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     template_name = "washing/block_day.html"
-
-    @method_decorator(login_required)
-    @method_decorator(permission_required('washing.delete_nonworkingday', raise_exception=True))
-    def dispatch(self, *args, **kwargs):
-        return super(UnblockDayView, self).dispatch(*args, **kwargs)
+    permission_required = 'washing.delete_nonworkingday'
+    raise_exception = True
 
     def get_context_data(self, **kwargs):
         context = super(UnblockDayView, self).get_context_data(**kwargs)
