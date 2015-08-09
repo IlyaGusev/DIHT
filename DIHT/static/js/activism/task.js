@@ -31,6 +31,8 @@ $(function() {
         dat['datetime_limit'] = $('#datelimit_formatted').text();
         dat['assignees'] = get_ids('.assignee');
         dat['candidates'] = get_ids('.candidate');
+        dat['number_of_assignees'] = $('#num-field').val();
+        dat['event'] = $('.event-name')[0].id;
 
         for (key in dict)
             dat[key] = dict[key];
@@ -58,6 +60,7 @@ $(function() {
 	})
 	
 	$('#event-selector').blur(function() {
+	    post_ajax({'event': $('#event-selector option:selected').val()})
 		transfer_class('hidden', '#event-noedit', '#event-selector');
 	})
 
@@ -94,6 +97,19 @@ $(function() {
         post_ajax({'datetime_limit': ($("#datepicker").val()+' '+$("#timepicker").val()).split(' ')[0]})
         transfer_class('hidden', '#datelimit', '#dateedit');
 	})
+
+
+	// Number of assignees
+	$('#num-pencil').click(function() {
+		transfer_class('hidden', '#num-edit', '#num');
+		$('#num-field').focus();
+	})
+
+	$('#num-field').blur(function() {
+        post_ajax({'number_of_assignees': $('#num-field').val()});
+        transfer_class('hidden', '#num', '#num-edit');
+	})
+
 
 	// Assign
 	$('#assign').click(function() {

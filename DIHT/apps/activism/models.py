@@ -44,7 +44,6 @@ class Task(Model):
         ('in_progress', 'Выполняется'),
         ('open', 'Не назначено'),
         ('in_labor', 'На бирже'),
-        ('volunteers', 'Есть кандидаты'),
     )
 
     name = CharField("Название", max_length=50)
@@ -54,7 +53,7 @@ class Task(Model):
     tags = TaggableManager(through=TaggedTask)
     hours_predict = PositiveSmallIntegerField("Расчётное количество часов", blank=True, null=True)
     hours_real = PositiveSmallIntegerField("Реальное количество часов", blank=True, null=True)
-    number_of_assignees = PositiveSmallIntegerField("Количество людей")
+    number_of_assignees = PositiveSmallIntegerField("Количество людей", blank=False, null=False)
     candidates = ManyToManyField(User, "Кандидаты", related_name="tasks_approve", blank=True)
     assignees = ManyToManyField(User, "Назначенные", related_name="tasks", blank=True)
     datetime_created = DateTimeField("Время создания", default=timezone.now)

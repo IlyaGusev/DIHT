@@ -45,6 +45,24 @@
                             data-target="#form-modal">Изменить</button>
                 </div>
                 <div class = "tab-pane" id = "tab-tsk">
+                    <p><b>Созданные задачи:</b></p>
+                    <ul>
+                    {% for task in user.tasks_created.all %}
+                        <li><a href="{% url 'activism:task' id=task.id %}"> {{ task.name }} </a></li>
+                    {% endfor %}
+                    </ul>
+                    <p><b>Задачи, на которые подана заявка:</b></p>
+                    <ul>
+                    {% for task in user.tasks_approve.all %}
+                        <li><a href="{% url 'activism:task' id=task.id %}"> {{ task.name }} </a></li>
+                    {% endfor %}
+                    </ul>
+                    <p><b>Текущие задачи:</b></p>
+                    <ul>
+                    {% for task in user.tasks.all %}
+                        <li><a href="{% url 'activism:task' id=task.id %}"> {{ task.name }} </a></li>
+                    {% endfor %}
+                    </ul>
                 </div>
                 <div class = "tab-pane" id = "tab-ach">
                 </div>
