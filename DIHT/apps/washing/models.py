@@ -27,7 +27,7 @@ class Parameters(Model):
 class WashingMachine(Model):
     is_active = BooleanField("Активна", default=True)
     name = CharField("Название", max_length=50)
-    parameters = ManyToManyField(Parameters, related_name='machines', verbose_name="Параметры")
+    parameters = ManyToManyField(Parameters, related_name='machines', verbose_name="Параметры", blank=False)
 
     class Meta:
         verbose_name = "Стиральная машинка"

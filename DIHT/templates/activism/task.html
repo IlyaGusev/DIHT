@@ -1,5 +1,6 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
+{% load add_class %}
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}<script src="{% static 'js/activism/task.js' %}"></script>{% endblock %}
@@ -80,15 +81,11 @@
                 {% endif %}
                 {% if user == task.creator %}
                     <span class="pull-right">
-                        <a href="#" class="green" id="assign">Назначить   <i class="fa fa-plus fa-lg "></i></a>
+                        <a href="#" class="green" id="assign">Назначить <i class="fa fa-plus fa-lg "></i></a>
                     </span>
-                    <select class="pull-right selector hidden" id="assignee-selector">
-                    {% for user in users %}
-                        {% if user.username != 'admin' %}
-                        <option class="selector-item" value="{{ user.id }}">{{ user.get_full_name }}</option>
-                        {% endif %}
-                    {% endfor %}
-                    </select>
+                    <span class="pull-right">
+                        {{ form.assignees_autocomplete|add_class:"hidden" }}
+                    </span>
                     <br>
                 {% endif %}
                 </div>

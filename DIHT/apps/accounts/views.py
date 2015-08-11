@@ -6,6 +6,7 @@ from django.db import transaction
 from django.core.mail import EmailMessage
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm
 from accounts.models import Profile
+from washing.models import BlackListRecord
 from django.http import JsonResponse
 from braces.views import LoginRequiredMixin, UserPassesTestMixin
 from django.utils import timezone
@@ -39,6 +40,9 @@ class SignUpView(FormView):
                                          middle_name=form['middle_name'],
                                          hostel=form['hostel'],
                                          sex=form['sex'])
+
+        bl = BlackListRecord.objects.create(user=user,
+                                            is_blocked=False)
         user.is_active = False
         user.save()
         logger.info('Пользователь '+str(form['first_name'])+' '+str(form['last_name'])+' ('+str(form['username'])+') только что зарегистрировался на сайте.')

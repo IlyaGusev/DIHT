@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^washing/', include('washing.urls', namespace='washing')),
     url(r'^activism/', include('activism.urls', namespace='activism')),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^autocomplete/', include('autocomplete_light.urls')),
 ]

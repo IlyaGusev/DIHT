@@ -1,14 +1,8 @@
-from django.forms import ValidationError, ModelForm, Form, IntegerField
-from django.forms import CharField, PasswordInput, TextInput, TypedChoiceField, RadioSelect
-from django.utils.translation import ugettext_lazy as _
-from django.utils.html import mark_safe
-from django.contrib.auth.models import User
 import re
+from django.forms import ValidationError, ModelForm, Form, CharField, PasswordInput, TextInput, TypedChoiceField
+from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
 from accounts.models import Profile
-
-class HorizRadioRenderer(RadioSelect.renderer):
-    def render(self):
-            return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
 
 class SignUpForm(ModelForm):
     """

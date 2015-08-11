@@ -1,3 +1,6 @@
+import collections
+import datetime as dt
+import logging
 from django.views.generic import TemplateView
 from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
@@ -7,9 +10,7 @@ from django.http import JsonResponse
 from washing.models import WashingMachine, WashingMachineRecord, RegularNonWorkingDay, NonWorkingDay, Parameters
 from accounts.models import MoneyOperation
 from braces.views import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
-import collections
-import datetime as dt
-import logging
+
 logger = logging.getLogger('DIHT.custom')
 
 week = ['Понедельник',

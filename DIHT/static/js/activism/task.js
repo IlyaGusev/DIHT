@@ -36,9 +36,11 @@ $(function() {
 
         for (key in dict)
             dat[key] = dict[key];
+
         dat['datetime_limit'] = dat['datetime_limit'].replace('T', ' ');
 
         data = dict_to_string(dat);
+        console.log(data)
         $.ajax({
             type: 'POST',
             url: window.location.href,
@@ -113,15 +115,15 @@ $(function() {
 
 	// Assign
 	$('#assign').click(function() {
-		transfer_class('hidden', '#assignee-selector', '#assign');
-		$('#assignee-selector').focus();
+		transfer_class('hidden', '#id_assignees_autocomplete-autocomplete', '#assign');
+		$('#id_assignees_autocomplete-autocomplete').focus();
 	})
 
-	$('#assignee-selector').blur(function() {
+	$('#id_assignees_autocomplete-autocomplete').blur(function() {
 	    var assignees = get_ids('.assignee');
-        assignees.push($("#assignee-selector option:selected" ).val())
+        assignees.push($("#id_assignees_autocomplete option:selected" ).val())
         post_ajax({'assignees': assignees});
-        transfer_class('hidden', '#assign', '#assignee-selector');
+        transfer_class('hidden', '#assign', '#id_assignees_autocomplete-autocomplete');
 	})
 
 

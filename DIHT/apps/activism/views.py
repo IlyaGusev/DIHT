@@ -1,13 +1,16 @@
+import logging
 from django.views.generic import ListView, View
-from braces.views import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
+from braces.views import LoginRequiredMixin
 from django.views.generic.edit import UpdateView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from activism.models import Event, Task
 from django.http import JsonResponse
-import logging
+from activism.models import Event, Task
+from activism.forms import TaskForm
+
+
 logger = logging.getLogger('DIHT.custom')
 
 
@@ -44,9 +47,7 @@ class TaskView(LoginRequiredMixin, UpdateView):
     slug_field = 'id'
     slug_url_kwarg = 'id'
     template_name = 'activism/task.html'
-    fields = ('hours_predict', 'description', 'datetime_limit',
-              'assignees', 'candidates', 'number_of_assignees',
-              'event')
+    form_class = TaskForm
 
     def get_context_data(self, **kwargs):
         context = super(TaskView, self).get_context_data(**kwargs)

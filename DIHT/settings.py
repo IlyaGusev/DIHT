@@ -15,6 +15,7 @@ import os, sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.join(BASE_DIR, 'DIHT')
+sys.path.insert(0, PROJECT_DIR)
 sys.path.insert(0, os.path.join(PROJECT_DIR, 'apps'))
 
 # Quick-start development settings - unsuitable for production
@@ -44,6 +45,7 @@ INSTALLED_APPS = (
     'accounts',
     'washing',
     'activism',
+    'autocomplete_light',
 )
 
 MIDDLEWARE_CLASSES = (

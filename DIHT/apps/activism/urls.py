@@ -1,5 +1,4 @@
 from django.conf.urls import url
-from django.views.generic import TemplateView
 from activism.views import EventView, TaskView, IndexView, DoTaskView
 
 urlpatterns = [

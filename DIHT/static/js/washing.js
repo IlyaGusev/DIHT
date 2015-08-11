@@ -8,7 +8,8 @@ $(function() {
         }
     }
 
-    $('#form-modal').on('submit', '#create-record-form,#cancel-record-form', function () {
+    $('#form-modal').on('submit', '#create-record-form,#cancel-record-form', function (ev) {
+        ev.preventDefault();
         var form = $(this);
         id = $(current_edit_span)[0].id.split(" ")
         $.ajax({
@@ -30,7 +31,8 @@ $(function() {
         });
         return false;
     });
-    $('#form-modal').on('submit', '#block-day-form,#unblock-day-form', function () {
+    $('#form-modal').on('submit', '#block-day-form,#unblock-day-form', function (ev) {
+        ev.preventDefault();
         var form = $(this);
         id = $(current_edit_span)[0].id
         var val = $("#machine_id option:selected" ).val()
@@ -63,6 +65,6 @@ $(function() {
             $(this).find("#cancel-record-body").html("<h4>Отказаться от записи на "+id[1]+" с "+id[2]+" до "+id[3]+"</h4>")
         });
         $("#form-modal").modal('show');
-        ev.stopPropagation();
+        return false;
     });
 });

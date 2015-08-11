@@ -176,3 +176,7 @@ html {
 .modal-open[style] {
    padding-right: 0px !important;
 }
+
+.deck{
+    display:none !important;
+}

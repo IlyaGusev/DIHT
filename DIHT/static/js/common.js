@@ -5,7 +5,7 @@ $(function() {
         current_edit_span = $(this)[0];
         $("#form-modal").find(".modal-content").load($(this).attr("href"));
         $("#form-modal").modal('show');
-        ev.stopPropagation();
+        return false;
     });
 });
 
