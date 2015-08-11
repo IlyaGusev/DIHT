@@ -32,17 +32,16 @@ class SignUpView(FormView):
                                         password=form['password'],
                                         first_name=form['first_name'],
                                         last_name=form['last_name'])
-        profile = Profile.objects.create(user=user,
-                                         room_number=form['room_number'],
-                                         group_number=form['group_number'],
-                                         money=0,
-                                         mobile=form['mobile'],
-                                         middle_name=form['middle_name'],
-                                         hostel=form['hostel'],
-                                         sex=form['sex'])
+        Profile.objects.create(user=user,
+                               room_number=form['room_number'],
+                               group_number=form['group_number'],
+                               money=0,
+                               mobile=form['mobile'],
+                               middle_name=form['middle_name'],
+                               hostel=form['hostel'],
+                               sex=form['sex'])
 
-        bl = BlackListRecord.objects.create(user=user,
-                                            is_blocked=False)
+        BlackListRecord.objects.create(user=user, is_blocked=False)
         user.is_active = False
         user.save()
         logger.info('Пользователь '+str(form['first_name'])+' '+str(form['last_name'])+' ('+str(form['username'])+') только что зарегистрировался на сайте.')
@@ -52,9 +51,6 @@ class ResetPasswordView(FormView):
     template_name = 'accounts/reset_password.html'
     form_class = ResetPasswordForm
     success_url = reverse_lazy('accounts:reset_password_ok')
-
-    def get(self, request, *args, **kwargs):
-        return self.render_to_response(self.get_context_data(form=ResetPasswordForm()))
 
     def form_valid(self, form):
         user = User.objects.all().filter(username=form.cleaned_data['username'])[0]

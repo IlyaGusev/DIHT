@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils import timezone
 
+
 class Profile(Model):
     user = OneToOneField(User)
     sex = BooleanField("Пол", default=False)

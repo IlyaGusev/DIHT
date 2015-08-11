@@ -5,11 +5,6 @@ from accounts.models import Profile, MoneyOperation
 from washing.models import BlackListRecord
 
 admin.site.unregister(User)
-def cancel_money_operation(modeladmin, request, queryset):
-    for obj in queryset:
-        obj.cancel()
-
-cancel_money_operation.short_description = "Отмена операции с возвращением денег"
 
 
 class ProfileInline(admin.StackedInline):
@@ -22,6 +17,14 @@ class BlackListInline(admin.StackedInline):
 
 class ProfileAdmin(UserAdmin):
     inlines = [ProfileInline, BlackListInline]
+
+
+
+def cancel_money_operation(modeladmin, request, queryset):
+    for obj in queryset:
+        obj.cancel()
+
+cancel_money_operation.short_description = "Отмена операции с возвращением денег"
 
 
 class MoneyOperationAdmin(admin.ModelAdmin):

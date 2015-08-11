@@ -16,5 +16,6 @@ urlpatterns = [
     url(r'^profile/edit/(?P<id>[0-9]*)/$', ProfileUpdateView.as_view(), name='edit_profile'),
 
     url(r'^check_username/$', CheckUsernameView.as_view(), name='check_username'),
+
     url('', include('social.apps.django_app.urls', namespace='social')),
 ]

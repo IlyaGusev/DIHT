@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from accounts.models import Profile
 
+
 class SignUpForm(ModelForm):
     """
     Регистрационная форма.
@@ -94,7 +95,6 @@ class SignUpForm(ModelForm):
         return self.cleaned_data['password']
 
 
-
 class ProfileForm(ModelForm):
     class Meta:
         model = Profile
@@ -130,7 +130,7 @@ class ProfileForm(ModelForm):
 
 
 class ResetPasswordForm(Form):
-    username = CharField(min_length=5, max_length=30, required=True)
+    username = CharField(max_length=255, required=True, label='Логин', widget=TextInput(attrs={'placeholder': _('Логин')}))
 
     def clean_username(self):
         r = re.compile('^[a-zA-Z][a-zA-Z0-9_-]*$')
