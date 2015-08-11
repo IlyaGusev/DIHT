@@ -3,10 +3,13 @@
 {% load add_class %}
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
-{% block custom_scripts %}<script src="{% static 'js/activism/task.js' %}"></script>{% endblock %}
+{% block custom_scripts %}
+    <script src="{% static 'js/activism/task.js' %}"></script>
+	<link rel="stylesheet" href="{% static 'css/activism.css' %}">
+{% endblock %}
 {% block content %}
 <div class="row well namezone">
-    <h3 class="task-name"> {{ task.name }}</h3>
+    <h3 class="task-name nametext"> {{ task.name }}</h3>
 </div>
 <div class = "row">
     <div class = "col-md-8">
@@ -49,7 +52,7 @@
                 {% endif %}
                     <br>
 
-                    <span class="param">Количетсво людей:</span>
+                    <span class="param">Количество людей:</span>
                     <span class = "pull-right">
                         <span id="num">
                             {{ task.number_of_assignees }} чел.
@@ -73,7 +76,7 @@
                         <span class="pull-right">
                             <a href="{% url 'accounts:profile' id=assignee.id %}" class="assignee" id="{{assignee.id}}">{{ assignee.get_full_name }}</a>
                         {% if user == task.creator %}
-                            <a href="#" class="red resign"> <i class="fa fa-times fa-lg"></i> </a>
+                            <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"> <i class="fa fa-times fa-lg"></i> </a>
                         {% endif %}
                         </span>
                         <br>
@@ -145,7 +148,7 @@
                         {% for candidate in task.candidates.all %}
                         <span class="pull-right">
                             <a href="{% url 'accounts:profile' id=assignee.id %}" class="candidate" id="{{candidate.id}}">{{ candidate.get_full_name }}</a>
-                            <a href="#" class="blue approve"> <i class="fa fa-thumbs-up fa-lg"></i> </a>
+                            <a href="#" class="blue approve" data-toggle="tooltip" data-placement="left" title="Назначить на задачу"> <i class="fa fa-thumbs-up fa-lg"></i> </a>
                         </span>
                         <br>
                         {% endfor %}

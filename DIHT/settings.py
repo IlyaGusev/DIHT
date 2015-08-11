@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'taggit',
     'braces',
+    'autocomplete_light',
     'social.apps.django_app.default',
     'main',
     'accounts',

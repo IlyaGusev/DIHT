@@ -1,0 +1,44 @@
+a.fivt-logo {
+	padding: 10px 15px;
+}
+
+ul.navbar-form  li {
+	float:left;
+}
+
+ul.navbar-form  li  a{
+	padding:5px 15px;
+}
+
+a {
+	text-decoration: none !important;
+}
+
+.navbar a {
+	font-size: 16px;
+}
+
+div.tab-pane {
+	padding: 10px
+}
+
+html {
+  overflow-y: scroll;
+}
+
+.modal-open[style] {
+   padding-right: 0px !important;
+}
+
+.namezone {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.nametext {
+	margin: 0px;
+}
+
+#cell-for-vk-widget {
+	padding: 0px;
+}

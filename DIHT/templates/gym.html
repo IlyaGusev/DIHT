@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% load static from staticfiles %}
 {% block title %} Сайт общежития №2 (ФИВТ) - Тренажерный зал {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
-{% block custom_scripts %}{% endblock %}
+{% block custom_scripts %}
+	<link rel="stylesheet" href="{% static 'css/washing-gym.css' %}">
+{% endblock %}
 {% block content %}
 	<div class="page-header col-md-10 col-md-offset-1">
         <h1>Тренажерный зал</h1>

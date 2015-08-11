@@ -1,0 +1,100 @@
+/* Colors */
+
+.red {
+	color: #bb0000;
+}
+
+a.red:hover {
+	color: #dd0000;
+}
+
+.green {
+	color: #00aa00;
+}
+
+a.green:hover {
+	color: #00cc00;
+}
+
+.blue {
+	color: #0000ff;
+}
+
+a.blue:hover {
+	color: #3333ff;
+}
+
+.grey {
+	color: #777777;
+}
+
+.light {
+	color: #cccccc;
+}
+
+a.light:hover {
+	color: #aaaaaa;
+}
+
+/* Font Using */
+
+body {
+	font-family:"RobotoRegular";
+}
+
+.robotobold {
+	font-family: RobotoBold;
+}
+
+.robotomedium {
+	font-family: RobotoMedium;
+}
+
+.robotolight {
+	font-family: RobotoLight;
+} 
+
+/* Effects */
+
+.value-accent {
+	font-family: RobotoBold;
+	font-size: 16;
+	color: #444444;
+}
+
+.date-accent {
+	font-family: RobotoBold;
+	font-size: 14;
+	color: #444444;
+}
+
+.usual-letters {
+	font-size: 14px;
+}
+.just-a-line {
+	margin: 4px 0px;
+	border-color: #BBBBBB;
+}
+
+.param {
+	color: #777777;
+}
+
+.section {
+	margin-top: 15px;
+}
+
+.section-name {
+	color: #111111;
+	font-family: "RobotoMedium"
+}
+
+/* Images */
+
+img.round {
+	width: 128px;
+	height: 128px;
+	border-radius: 64px;
+	-webkit-border-radius: 64px;
+	-moz-border-radius: 64px;
+}
