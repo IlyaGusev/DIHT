@@ -2,7 +2,10 @@
 {% load static from staticfiles %}
 {% block title %} Стиралка {% endblock %}
 {% block washing_active %} class = "active" {% endblock %}
-{% block custom_scripts %}<script src="{% static 'js/washing.js' %}"></script>{% endblock %}
+{% block custom_scripts %}
+	<script src="{% static 'js/washing.js' %}"></script>
+	<link rel="stylesheet" href="{% static 'css/washing-gym.css' %}">
+{% endblock %}
 {% block content %}
     <style>
         .status0{/*blocked (grey)*/

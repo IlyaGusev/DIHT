@@ -1,0 +1,29 @@
+.jumbotron {
+	font-family:"RobotoMedium";
+	color: rgb(80, 80, 80);
+}
+
+.jumbotron  h3 {
+	font-family:"RobotoMedium";
+	color: rgb(50, 50, 50);
+}
+
+#gym-rules ul {
+	-webkit-padding-start: 15px;
+}
+
+#gym-rules ol {
+	-webkit-padding-start: 15px;
+}
+
+#washing-rules ul {
+	-webkit-padding-start: 15px;
+}
+
+#washing-rules ol {
+	-webkit-padding-start: 15px;
+}
+
+
+
+
