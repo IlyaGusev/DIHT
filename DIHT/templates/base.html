@@ -65,7 +65,7 @@
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="{% url 'accounts:profile' id=user.id %}"><i class="fa fa-cogs"></i> Личный кабинет</a><li>
+                            <li><a href="{% url 'accounts:profile' pk=user.pk %}"><i class="fa fa-cogs"></i> Личный кабинет</a><li>
                             {% if user.is_staff %}
                             <li><a href="/admin/"><i class="fa fa-wrench"></i> Панель управления</a></li>
                             {% endif %}

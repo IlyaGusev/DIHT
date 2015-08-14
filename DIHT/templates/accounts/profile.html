@@ -39,10 +39,10 @@
 			{% endif %}
 		</ul>
 		<div class = "tab-content col-md-offset-3 col-md-6">
-			<div class = "tab-pane active" id = "tab-acc">
+			<div class = "tab-pane active" id="tab-acc">
 				{% if profile.user == request.user %}
 				<button style = "margin-bottom:10px;" class = "btn btn-sm btn-default"
-						href="{% url 'accounts:edit_profile' id=profile.id %}"
+						href="{% url 'accounts:edit_profile' pk=profile.pk %}"
 						data-toggle="modal"
 						data-target="#form-modal"><i class="fa fa-pencil"></i> Изменить</button>
 				<br>
@@ -72,31 +72,31 @@
 				{% endif %}
 			</div>
 			{% if profile.user == request.user %}
-			<div class = "tab-pane" id = "tab-tsk">
+			<div class="tab-pane" id="tab-tsk">
 				<p><b>Созданные задачи:</b></p>
 				<ul>
 				{% for task in profile_user.tasks_created.all %}
-					<li><a href="{% url 'activism:task' id=task.id %}"> {{ task.name }} </a></li>
+					<li><a href="{% url 'activism:task' pk=task.pk %}"> {{ task.name }} </a></li>
 				{% endfor %}
 				</ul>
 				<p><b>Задачи, на которые подана заявка:</b></p>
 				<ul>
 				{% for task in profile_user.tasks_approve.all %}
-					<li><a href="{% url 'activism:task' id=task.id %}"> {{ task.name }} </a></li>
+					<li><a href="{% url 'activism:task' pk=task.pk %}"> {{ task.name }} </a></li>
 				{% endfor %}
 				</ul>
 				<p><b>Текущие задачи:</b></p>
 				<ul>
 				{% for task in profile_user.tasks.all %}
-					<li><a href="{% url 'activism:task' id=task.id %}"> {{ task.name }} </a></li>
+					<li><a href="{% url 'activism:task' pk=task.pk %}"> {{ task.name }} </a></li>
 				{% endfor %}
 				</ul>
 			</div>
 			{% endif %}
-			<div class = "tab-pane" id = "tab-ach">
+			<div class = "tab-pane" id="tab-ach">
 			</div>
 			{% if profile.user == request.user %}
-			<div class = "tab-pane" id = "tab-wsh">
+			<div class = "tab-pane" id="tab-wsh">
 				<p><b>Записи:</b></p>
 				{% for record in records %}
 					<p>{{ record.machine.name }}, {{ record.datetime_from.date }}, с {{ record.datetime_from.time }} до {{ record.datetime_to.time }} </p>

@@ -19,14 +19,14 @@
 							{% if user == event.creator %}
 							<span class="pull-right">{{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
 							{% else %}
-							<a href="{% url 'accounts:profile' id=event.creator.id %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
+							<a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
 							{% endif %}
                             <br>
 							<span class="param">Ответственные:</span>
                                 {% for assignee in event.assignees.all %}
 								
 								<span class="pull-right">
-									<a href="{% url 'accounts:profile' id=assignee.id %}" class="assignee" id="{{assignee.id}}">{{ assignee.get_full_name }}</a>
+									<a href="{% url 'accounts:profile' pk=assignee.pk %}" class="assignee" id="{{assignee.pk}}">{{ assignee.get_full_name }}</a>
 									{% if user == event.creator %}
 									<a href="#" class="red resign"> <i class="fa fa-times fa-lg"></i> </a>
 									{% endif %}
@@ -41,7 +41,7 @@
                                     <select class="pull-right selector hidden" id="assignee-selector">
                                         {% for user in users %}
                                         {% if user.username != 'admin' %}
-										<option class="selector-item" value="{{ user.id }}">{{ user.get_full_name }}</option>
+										<option class="selector-item" value="{{ user.pk }}">{{ user.get_full_name }}</option>
                                         {% endif %}
                                         {% endfor %}
 									</select>
@@ -70,7 +70,7 @@
 					<span class = "visible" id="desc">{{ event.description }}</span>
 					<textarea class="form-control hidden" id="desc-area" rows="4">{{ event.description }}</textarea>
 					{% else %}
-					<span id = "desc">{{ event.description }}</span>
+					<span id="desc">{{ event.description }}</span>
 					{% endif %}
 					
 				</div>
@@ -85,10 +85,10 @@
 						</tr>
                         {% for task in event.tasks.all %}
 						<tr>
-							<td><a href="{% url 'activism:task' id=task.id %}">#{{ task.id }}</a></td>
+							<td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
 							<td>{{ task.name }}</td>
 							<td> {% for assignee in task.assignees.all %}
-                                <a href="{% url 'accounts:profile' id=assignee.id %}">{{ assignee.get_full_name }}</a><br>
+                                <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a><br>
                                 {% endfor %}
                             </td>
                             <td>

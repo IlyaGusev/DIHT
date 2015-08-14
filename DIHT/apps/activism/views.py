@@ -1,14 +1,14 @@
 import logging
-from django.views.generic import ListView, View
+from django.views.generic import ListView, View, CreateView
 from braces.views import LoginRequiredMixin
 from django.views.generic.edit import UpdateView
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from activism.models import Event, Task
-from activism.forms import TaskForm
+from activism.forms import TaskForm, TaskCreateForm
 
 
 logger = logging.getLogger('DIHT.custom')
@@ -27,8 +27,6 @@ class IndexView(LoginRequiredMixin, ListView):
 
 class EventView(LoginRequiredMixin, UpdateView):
     model = Event
-    slug_field = 'id'
-    slug_url_kwarg = 'id'
     template_name = 'activism/event.html'
     fields = ('description', 'assignees')
 
@@ -42,10 +40,14 @@ class EventView(LoginRequiredMixin, UpdateView):
         return JsonResponse(form.errors, status=400)
 
 
+class TaskCreateView(CreateView):
+    model = Task
+    template_name = 'activism/task_create.html'
+    form_class = TaskCreateForm
+
+
 class TaskView(LoginRequiredMixin, UpdateView):
     model = Task
-    slug_field = 'id'
-    slug_url_kwarg = 'id'
     template_name = 'activism/task.html'
     form_class = TaskForm
 
@@ -70,8 +72,6 @@ class TaskView(LoginRequiredMixin, UpdateView):
 
 class DoTaskView(SingleObjectMixin, LoginRequiredMixin, View):
     model = Task
-    slug_field = 'id'
-    slug_url_kwarg = 'id'
     raise_exception = True
 
     def get(self, request, *args, **kwargs):

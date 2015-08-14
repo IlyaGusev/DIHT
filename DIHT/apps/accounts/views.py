@@ -77,8 +77,6 @@ class ProfileView(LoginRequiredMixin, DetailView):
     template_name = 'accounts/profile.html'
     model = User
     context_object_name = 'profile_user'
-    slug_field = 'id'
-    slug_url_kwarg = 'id'
 
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
@@ -92,8 +90,6 @@ class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Profile
     form_class = ProfileForm
     template_name = "accounts/edit_profile.html"
-    slug_field = 'id'
-    slug_url_kwarg = 'id'
     success_url = reverse_lazy('main:home')
     raise_exception = True
 

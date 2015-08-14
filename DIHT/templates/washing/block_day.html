@@ -9,7 +9,7 @@
         <option selected value="all">Все стиралки</option>
         {% for machine in machines %}
             {% if machine.is_active %}
-                <option value="{{ machine.id }}">{{ machine.name }}</option>
+                <option value="{{ machine.pk }}">{{ machine.name }}</option>
             {% endif %}
         {% endfor %}
     </select>

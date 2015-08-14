@@ -12,8 +12,8 @@ urlpatterns = [
     url(r'^reset_password/$', ResetPasswordView.as_view(), name='reset_password'),
     url(r'^reset_password_ok/$', TemplateView.as_view(template_name='accounts/reset_password_ok.html'), name='reset_password_ok'),
 
-    url(r'^profile/(?P<id>[0-9]*)/$', ProfileView.as_view(), name='profile'),
-    url(r'^profile/edit/(?P<id>[0-9]*)/$', ProfileUpdateView.as_view(), name='edit_profile'),
+    url(r'^profile/(?P<pk>[0-9]*)/$', ProfileView.as_view(), name='profile'),
+    url(r'^profile/edit/(?P<pk>[0-9]*)/$', ProfileUpdateView.as_view(), name='edit_profile'),
 
     url(r'^check_username/$', CheckUsernameView.as_view(), name='check_username'),
 

@@ -22,7 +22,7 @@
                     {% if user == task.creator %}
                         <span class="pull-right" id="event-noedit">
                         {% if task.event %}
-                            <a href="{% url 'activism:event' id=task.event.id %}" class="event-name" id="{{task.event.id}}">{{ task.event.name }}</a>
+                            <a href="{% url 'activism:event' pk=task.event.pk %}" class="event-name" id="{{task.event.pk}}">{{ task.event.name }}</a>
                         {% else %}
                             <span class="event-name" id="">Нет</span>
                         {% endif %}
@@ -31,13 +31,13 @@
                         <select class="pull-right selector hidden" id="event-selector">
                             <option class="selector-item" value="">Нет</option>
                             {% for event in events %}
-                            <option class="selector-item" value="{{ event.id }}">{{ event.name }}</option>
+                            <option class="selector-item" value="{{ event.pk }}">{{ event.name }}</option>
                             {% endfor %}
                         </select>
                     {% else %}
                         <span class="pull-right" id="event-noedit">
                         {% if task.event %}
-                            <a href="{% url 'activism:event' id=task.event.id %}" class="event-name" id="{{task.event.id}}">{{ task.event.name }}</a>
+                            <a href="{% url 'activism:event' pk=task.event.pk %}" class="event-name" id="{{task.event.pk}}">{{ task.event.name }}</a>
                         {% else %}
                             <span class="event-name" id="">Нет</span>
                         {% endif %}
@@ -48,7 +48,7 @@
                 {% if user == task.creator %}
                     <span class="pull-right">{{ task.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
                 {% else %}
-                    <a href="{% url 'accounts:profile' id=task.creator.id %}" class="pull-right">{{ task.creator.get_full_name }}</a>
+                    <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class="pull-right">{{ task.creator.get_full_name }}</a>
                 {% endif %}
                     <br>
 
@@ -74,7 +74,7 @@
                     <span class="param">Исполнители:</span>
                     {% for assignee in task.assignees.all %}
                         <span class="pull-right">
-                            <a href="{% url 'accounts:profile' id=assignee.id %}" class="assignee" id="{{assignee.id}}">{{ assignee.get_full_name }}</a>
+                            <a href="{% url 'accounts:profile' pk=assignee.pk %}" class="assignee" id="{{assignee.pk}}">{{ assignee.get_full_name }}</a>
                         {% if user == task.creator %}
                             <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"> <i class="fa fa-times fa-lg"></i> </a>
                         {% endif %}
@@ -147,7 +147,7 @@
                         <span class="param">Кандидаты:</span>
                         {% for candidate in task.candidates.all %}
                         <span class="pull-right">
-                            <a href="{% url 'accounts:profile' id=assignee.id %}" class="candidate" id="{{candidate.id}}">{{ candidate.get_full_name }}</a>
+                            <a href="{% url 'accounts:profile' pk=assignee.pk %}" class="candidate" id="{{candidate.}}">{{ candidate.get_full_name }}</a>
                             <a href="#" class="blue approve" data-toggle="tooltip" data-placement="left" title="Назначить на задачу"> <i class="fa fa-thumbs-up fa-lg"></i> </a>
                         </span>
                         <br>
@@ -199,4 +199,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

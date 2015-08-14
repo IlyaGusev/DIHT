@@ -27,7 +27,7 @@ class Event(Model):
         verbose_name_plural = "Мероприятия"
 
     def get_absolute_url(self):
-        return reverse('activism:event', kwargs={'id': self.pk})
+        return reverse('activism:event', kwargs={'pk': self.pk})
 
     def __str__(self):
         return str(self.name)+" by "+str(self.creator)
@@ -61,15 +61,15 @@ class Task(Model):
     datetime_closed = DateTimeField("Время закрытия", blank=True, null=True)
     datetime_last_modified = DateTimeField("Время последнего изменения", default=timezone.now)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=15)
-    is_urgent = BooleanField(default=False)
-    is_hard = BooleanField(default=False)
+    is_urgent = BooleanField("Срочное", default=False)
+    is_hard = BooleanField("Тяжёлое", default=False)
 
     class Meta:
         verbose_name = "Задача"
         verbose_name_plural = "Задачи"
 
     def get_absolute_url(self):
-        return reverse('activism:task', kwargs={'id': self.pk})
+        return reverse('activism:task', kwargs={'pk': self.pk})
 
     def save(self, *args, **kwargs):
         self.datetime_last_modified = timezone.now()

@@ -37,7 +37,7 @@
                 <tr>
                     <th width="150" class="text-center">Время</th>
                     {% for machine in machines %}
-                        <th class="text-center" id="machine_{{ machine.id }}" price=" {{ machine.parameters.all }}">{{machine.name}}</th>
+                        <th class="text-center" id="machine_{{ machine.pk }}" price=" {{ machine.parameters.all }}">{{machine.name}}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -70,7 +70,7 @@
                         <td class="status1 btn-open-modal" href="{% url 'washing:create_record'%}"
                             data-toggle="modal"
                             data-target="#form-modal"
-                            id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
+                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
                         {% else %}
                         <td class="status1"></td>
                         {% endif %}
@@ -83,7 +83,7 @@
                         <td class="status3 btn-open-modal" href="{% url 'washing:cancel_record'%}"
                             data-toggle="modal"
                             data-target="#form-modal"
-                            id="{{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
+                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
                         {% else %}
                         <td class="status3"></td>
                         {% endif %}
