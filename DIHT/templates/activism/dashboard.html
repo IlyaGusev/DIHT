@@ -1,5 +1,6 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
+{% load has_group %}
 {% block title %} Сайт общежития №2 (ФИВТ) - Биржа {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
@@ -9,6 +10,7 @@
 <div class="page-header">
     <h1>Биржа</h1>
 </div>
+{% if request.user|has_group:"Активисты" %} <p>User belongs to my group {% else %} <p>User doesn't belong to mygroup</p> {% endif %}
 <div class = "row">
 	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
         {% for task in tasks %}

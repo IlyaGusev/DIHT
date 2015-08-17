@@ -12,7 +12,6 @@ class Command(BaseCommand):
         washing_perms = Permission.objects.filter(content_type__in=washing_cts).all()
 
         groups = [('Активисты', []),
-                  ('Пользователи', []),
                   ('Руководящая группа', []),
                   ('Кураторы', []),
                   ('Ответственные за волонтёров', []),

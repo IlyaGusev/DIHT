@@ -1,6 +1,6 @@
 from django.views.generic.edit import FormView, UpdateView
 from django.views.generic import DetailView, View
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse_lazy
 from django.db import transaction
 from django.core.mail import EmailMessage

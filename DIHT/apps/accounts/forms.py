@@ -23,7 +23,7 @@ class SignUpForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', )
+        fields = ('username', 'email', 'last_name', 'first_name', )
         labels = {
             'username': _('Логин'),
             'first_name': _('Имя'),
