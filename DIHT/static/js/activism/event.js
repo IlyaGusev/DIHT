@@ -27,6 +27,7 @@ $(function() {
     function post_ajax(dict){
         var dat = {};
         dat['description'] = $('#desc').text();
+        dat['date_held'] = $('#date_held_formatted').text();
         dat['assignees'] = get_ids('.assignee');
 
         for (key in dict)
@@ -59,15 +60,27 @@ $(function() {
 
 	// Assign
 	$('#assign').click(function() {
-		transfer_class('hidden', '#assignee-selector', '#assign');
-		$('#assignee-selector').focus();
+		transfer_class('hidden', '#id_assignees_autocomplete-autocomplete', '#assign');
+		$('#id_assignees_autocomplete-autocomplete').focus();
 	})
 
-	$('#assignee-selector').blur(function() {
+	$('#id_assignees_autocomplete-autocomplete').blur(function() {
 	    var assignees = get_ids('.assignee');
-        assignees.push($("#assignee-selector option:selected" ).val())
+        assignees.push($("#id_assignees_autocomplete option:selected" ).val())
         post_ajax({'assignees': assignees});
-        transfer_class('hidden', '#assign', '#assignee-selector');
+        transfer_class('hidden', '#assign', '#id_assignees_autocomplete-autocomplete');
+	})
+
+
+	// Date_held
+	$('#date_held-pencil').click(function() {
+		transfer_class('hidden', '#dateedit', '#date_held');
+		$('#datepicker').focus();
+	})
+
+	$('#datepicker').blur(function() {
+        post_ajax({'date_held': ($("#datepicker").val()).split(' ')[0]})
+        transfer_class('hidden', '#date_held', '#dateedit');
 	})
 
 

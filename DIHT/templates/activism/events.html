@@ -32,9 +32,9 @@
     {% if request.user|has_group:"Руководящая группа" %}
     
     <center><a class="btn btn-default robotobold"
-               {% comment %} href="{% url 'activism:create_task'%}"
+               href="{% url 'activism:create_event'%}"
                data-toggle="modal"
-               data-target="#form-modal" {% endcomment %} >
+               data-target="#form-modal">
         <i class="fa fa-calendar fa-lg" style="margin-right:10px"></i> Новое мероприятие </i>
     </a></center>
     {% endif %}

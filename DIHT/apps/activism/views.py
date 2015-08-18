@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from activism.models import Event, Task
-from activism.forms import TaskForm, TaskCreateForm
+from activism.forms import TaskForm, EventForm
 
 
 logger = logging.getLogger('DIHT.custom')
@@ -26,20 +26,30 @@ class IndexView(LoginRequiredMixin, ListView):
 
 
 class EventsView (LoginRequiredMixin, ListView):
-	model = Event
-	template_name = 'activism/events.html'
-	context_object_name = 'events'
-	
-	def get_context_data(self, **kwargs):
-		context = super(EventsView, self).get_context_data(**kwargs)
-		context['events'] = context['events'].filter(status__in=['open'])
-		return context
+    model = Event
+    template_name = 'activism/events.html'
+    context_object_name = 'events'
+
+    def get_context_data(self, **kwargs):
+        context = super(EventsView, self).get_context_data(**kwargs)
+        context['events'] = context['events'].filter(status__in=['open'])
+        return context
+
+
+class EventCreateView(LoginRequiredMixin, CreateView):
+    model = Event
+    template_name = 'activism/event_create.html'
+    fields = ('name', )
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super(EventCreateView, self).form_valid(form)
 
 
 class EventView(LoginRequiredMixin, UpdateView):
     model = Event
     template_name = 'activism/event.html'
-    fields = ('description', 'assignees')
+    form_class = EventForm
 
     def get_context_data(self, **kwargs):
         context = super(EventView, self).get_context_data(**kwargs)
@@ -54,7 +64,7 @@ class EventView(LoginRequiredMixin, UpdateView):
 class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
     template_name = 'activism/task_create.html'
-    form_class = TaskCreateForm
+    fields = ('event', 'name', 'number_of_assignees', 'hours_predict')
 
     def form_valid(self, form):
         form.instance.creator = self.request.user

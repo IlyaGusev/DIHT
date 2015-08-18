@@ -17,7 +17,7 @@ class Event(Model):
     name = CharField("Название", max_length=50)
     creator = ForeignKey(User, verbose_name="Создатель")
     date_created = DateField("Дата создания", default=timezone.now)
-    date_held = DateField("Дата проведения")
+    date_held = DateField("Дата проведения", default=timezone.now)
     description = TextField("Описание", blank=True)
     assignees = ManyToManyField(User, "Ответственные", related_name="events", blank=True)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=4)

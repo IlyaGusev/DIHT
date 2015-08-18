@@ -1,5 +1,6 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
+{% load add_class %}
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}<script src="{% static 'js/activism/event.js' %}"></script>
@@ -8,8 +9,8 @@
         <div class="row well namezone">
 			<h3 class="event-name nametext">{{ event.name }}</h3>
 		</div>
-		<div class = "row pagezone">
-			<div class = "col-md-12">
+		<div class="row pagezone">
+			<div class="col-md-12">
 				<div class="section">
 					<h5 class="section-name">Информация</h5>
 					<hr class="just-a-line">
@@ -35,16 +36,11 @@
                                 {% endfor %}
 								{% if user == event.creator %} 
 									<span class="pull-right">
-									<a href="#" class="green" id="assign">Назначить   <i class="fa fa-plus fa-lg "></i></a>
-									</span>
-
-                                    <select class="pull-right selector hidden" id="assignee-selector">
-                                        {% for user in users %}
-                                        {% if user.username != 'admin' %}
-										<option class="selector-item" value="{{ user.pk }}">{{ user.get_full_name }}</option>
-                                        {% endif %}
-                                        {% endfor %}
-									</select>
+                                        <a href="#" class="green" id="assign">Назначить <i class="fa fa-plus fa-lg "></i></a>
+                                    </span>
+                                    <span class="pull-right">
+                                        {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                    </span>
                                     <br>
 								{% endif %}
 						</div>
@@ -58,8 +54,24 @@
                             {{ event.get_status_display }}
                             </span>
                             <br>
-							<span class="param">Дата проведения:</span> <i class = "pull-right">{{ event.date_held }}</i><br>
-							<span class="param">Дата создания:</span> <i class = "pull-right">{{ event.date_created }}</i><br>
+							<span class="param">Дата создания:</span>
+                            <span class = "pull-right">{{ event.date_created }}</span><br>
+                            <span class="param">Дата проведения:</span>
+                            {% if user == event.creator %}
+                            <span class = "pull-right">
+                                <span id="date_held">
+                                    {{ event.date_held }}
+                                    <a href="#" class="light"><i class="fa fa-pencil" id="date_held-pencil"></i></a>
+                                </span>
+                                <span class="hidden" id="date_held_formatted">{{ event.date_held|date:'Y-m-d' }}</span>
+                                <span id="dateedit" class="hidden">
+                                    <input id="datepicker" type="date" value="{{event.date_held|date:'Y-m-d'}}">
+                                </span>
+                            </span>
+                            {% else %}
+                            <span class="pull-right">{{ event.date_held }}</span>
+                            {% endif %}
+                            <br>
 						</div>
 					</div>
 				</div>
@@ -121,8 +133,6 @@
 					
 				</div>
 			</div>
-			<!--div class = "col-md-4">
-			</div-->
 		</div>
 
 
