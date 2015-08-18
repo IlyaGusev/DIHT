@@ -8,7 +8,7 @@
         <div class="row well namezone">
 			<h3 class="event-name nametext">{{ event.name }}</h3>
 		</div>
-		<div class = "row">
+		<div class = "row pagezone">
 			<div class = "col-md-8">
 				<div class="section">
 					<h5 class="section-name">Информация</h5>
@@ -33,7 +33,7 @@
 									</span>
 									<br>
                                 {% endfor %}
-								{% if user == event.creator %}
+								{% if user == event.creator %} 
 									<span class="pull-right">
 									<a href="#" class="green" id="assign">Назначить   <i class="fa fa-plus fa-lg "></i></a>
 									</span>
@@ -64,7 +64,7 @@
 					</div>
 				</div>
 				<div class="section">
-					<h5 class="section-name">Описание <a href="#" class="light">{% if user == event.creator %}<i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5> 
+					<h5 class="section-name">Описание {% if user == event.creator %}<a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5> 
 					<hr class="just-a-line">
 					{% if user == event.creator %}
 					<span class = "visible" id="desc">{{ event.description }}</span>
