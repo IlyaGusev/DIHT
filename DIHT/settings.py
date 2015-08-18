@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'taggit',
     'braces',
     'autocomplete_light',
+    'sorl.thumbnail',
     'social.apps.django_app.default',
     'main',
     'accounts',
@@ -121,11 +122,14 @@ USE_L10N = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-
-STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
 )
+
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static') + '/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') + '/'
 
 # Custom
 LOGIN_URL = '/accounts/login/'

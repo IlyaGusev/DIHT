@@ -1,4 +1,5 @@
-from django.db.models import Model, OneToOneField, BooleanField, CharField, IntegerField, ForeignKey, DateTimeField
+from django.db.models import Model, OneToOneField, BooleanField, CharField, \
+    IntegerField, ForeignKey, DateTimeField, ImageField
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils import timezone
@@ -15,7 +16,28 @@ class Profile(Model):
     middle_name = CharField("Отчество", max_length=30, blank=True)
 
     def __str__(self):
-        return u'Profile of user: %s' % self.user.username
+        return 'Профиль пользвателя: %s' % self.user.username
+
+    class Meta:
+        verbose_name = "Профиль"
+        verbose_name_plural = "Профили"
+
+
+def upload_to(instance, filename):
+    return 'avatars/%s/%s' % (instance.user.username, filename)
+
+
+class Avatar(Model):
+    user = OneToOneField(User)
+    img = ImageField(max_length=1024, blank=True, upload_to=upload_to)
+    date_uploaded = DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return 'Аватар пользвателя: %s' % self.user.username
+
+    class Meta:
+        verbose_name = "Аватар"
+        verbose_name_plural = "Аватары"
 
 
 class MoneyOperation(Model):

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
-from accounts.models import Profile, MoneyOperation
+from accounts.models import Profile, MoneyOperation, Avatar
 from washing.models import BlackListRecord
 
 admin.site.unregister(User)
@@ -15,9 +15,12 @@ class BlackListInline(admin.StackedInline):
     model = BlackListRecord
 
 
-class ProfileAdmin(UserAdmin):
-    inlines = [ProfileInline, BlackListInline]
+class AvatarInline(admin.StackedInline):
+    model = Avatar
 
+
+class ProfileAdmin(UserAdmin):
+    inlines = [ProfileInline, BlackListInline, AvatarInline]
 
 
 def cancel_money_operation(modeladmin, request, queryset):
@@ -32,4 +35,5 @@ class MoneyOperationAdmin(admin.ModelAdmin):
     actions = [cancel_money_operation]
 
 admin.site.register(User, ProfileAdmin)
+admin.site.register(Avatar)
 admin.site.register(MoneyOperation, MoneyOperationAdmin)

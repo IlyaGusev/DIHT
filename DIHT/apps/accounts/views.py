@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.db import transaction
 from django.core.mail import EmailMessage
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm
-from accounts.models import Profile
+from accounts.models import Profile, Avatar
 from washing.models import BlackListRecord
 from django.http import JsonResponse
 from braces.views import LoginRequiredMixin, UserPassesTestMixin
@@ -42,6 +42,7 @@ class SignUpView(FormView):
                                sex=form['sex'])
 
         BlackListRecord.objects.create(user=user, is_blocked=False)
+        Avatar.objects.create(user=user)
         user.is_active = False
         user.save()
         logger.info('Пользователь '+str(form['first_name'])+' '+str(form['last_name'])+' ('+str(form['username'])+') только что зарегистрировался на сайте.')
@@ -99,3 +100,12 @@ class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def form_invalid(self, form):
         super(ProfileUpdateView, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)
+
+
+class AvatarUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Avatar
+    fields = ('img', )
+    success_url = reverse_lazy('main:home')
+
+    def test_func(self, user):
+        return self.get_object().user.id == user.id

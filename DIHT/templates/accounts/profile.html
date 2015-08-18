@@ -1,5 +1,6 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
+{% load thumbnail%}
 {% block title %} Личный кабинет {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}<script src="{% static 'js/profile.js' %}"></script>{% endblock %}
@@ -8,7 +9,23 @@
     <h3 class="profile-name nametext"> Профиль: <span class="grey">{{ profile.user.username }} </span> </h3>
 </div>
 <div class="row">
-	<div class="col-md-offset-3 col-md-2"><div align="center"><img class = "round avatar" src="/static/img/standart_avatar.png"></div></div>
+	<div class="col-md-offset-3 col-md-2">
+        <div align="center">
+            {% if profile.user.avatar.img %}
+                {% thumbnail profile.user.avatar.img "150x150" crop="center" as pic %}
+                <a href="{{MEDIA_URL}}{{profile.user.avatar.img.url}}"><img src="{{ pic.url }}"></a>
+                {% endthumbnail %}
+            {% else %}
+            <img class="round avatar" src="/static/img/standart_avatar.png">
+            {% endif %}
+            {% if profile.user == request.user %}
+            <label class="btn btn-default btn-sm">
+                Изменить аватар
+                <input id="fileinput" href="{% url 'accounts:change_avatar' pk=profile.user.avatar.pk %}" type="file" style="display: none;"/>
+            </label>
+            {% endif %}
+        </div>
+    </div>
 	<div class="col-md-4">
 		<div style="vertical-align: middle;">
 			<hr class="just-a-line">
@@ -26,6 +43,7 @@
 		</div>
 	</div>
 </div>
+<br>
 <div class="row">
 	<div class = "tabs">
 		<ul class = "nav nav-tabs col-md-offset-3 col-md-6">
