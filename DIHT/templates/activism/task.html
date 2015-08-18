@@ -115,14 +115,13 @@
                     <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
                         СРОЧНОЕ
                     </span>
-                    <br>
                     {% endif %}
                     {% if task.is_hard %}
                     <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
                         ТРУДНОЕ
                     </span>
-                    <br>
                     {% endif %}
+                    <br>
                     <span class="param">Сроки:</span>
                     {% if user == task.creator %}
                     <span class = "pull-right">

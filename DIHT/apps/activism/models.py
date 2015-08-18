@@ -57,7 +57,7 @@ class Task(Model):
     candidates = ManyToManyField(User, "Кандидаты", related_name="tasks_approve", blank=True)
     assignees = ManyToManyField(User, "Назначенные", related_name="tasks", blank=True)
     datetime_created = DateTimeField("Время создания", default=timezone.now)
-    datetime_limit = DateTimeField("До какого времени надо сделать")
+    datetime_limit = DateTimeField("До какого времени надо сделать", default=timezone.now)
     datetime_closed = DateTimeField("Время закрытия", blank=True, null=True)
     datetime_last_modified = DateTimeField("Время последнего изменения", default=timezone.now)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=15)

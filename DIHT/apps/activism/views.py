@@ -40,10 +40,14 @@ class EventView(LoginRequiredMixin, UpdateView):
         return JsonResponse(form.errors, status=400)
 
 
-class TaskCreateView(CreateView):
+class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
     template_name = 'activism/task_create.html'
     form_class = TaskCreateForm
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super(TaskCreateView, self).form_valid(form)
 
 
 class TaskView(LoginRequiredMixin, UpdateView):

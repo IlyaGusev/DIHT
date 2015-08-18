@@ -131,49 +131,44 @@ class CancelRecordView(LoginRequiredMixin, TemplateView):
         return super(CancelRecordView, self).get(request, *args, **kwargs)
 
 
-class BlockDayView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+class VirtualBlockDayView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     template_name = "washing/block_day.html"
-    permission_required = "washing.add_nonworkingday"
     raise_exception = True
 
     def get_context_data(self, **kwargs):
-        context = super(BlockDayView, self).get_context_data(**kwargs)
+        context = super(VirtualBlockDayView, self).get_context_data(**kwargs)
         machines = WashingMachine.objects.filter(is_active=True)
         context['machines'] = machines
         return context
 
+
+def parse_block(request):
+    machine_id = request.POST['machine']
+    if machine_id == 'all':
+        machines = WashingMachine.objects.filter(is_active=True)
+    else:
+        machines = WashingMachine.objects.filter(id=machine_id)
+    date = request.POST['date']
+    return machines, date
+
+
+class BlockDayView(VirtualBlockDayView):
+    permission_required = "washing.add_nonworkingday"
+
     @method_decorator(transaction.atomic)
     def post(self, request, *args, **kwargs):
-        machine_id = request.POST['machine']
-        if machine_id == 'all':
-            machines = WashingMachine.objects.filter(is_active=True)
-        else:
-            machines = WashingMachine.objects.filter(id=machine_id)
-        date = request.POST['date']
+        machines, date = parse_block(request)
         for machine in machines:
             NonWorkingDay.objects.create(date=dt.datetime.strptime(date, '%d.%m.%Y').date(), machine=machine)
         return super(BlockDayView, self).get(request, *args, **kwargs)
 
 
-class UnblockDayView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
-    template_name = "washing/block_day.html"
+class UnblockDayView(VirtualBlockDayView):
     permission_required = 'washing.delete_nonworkingday'
-    raise_exception = True
-
-    def get_context_data(self, **kwargs):
-        context = super(UnblockDayView, self).get_context_data(**kwargs)
-        machines = WashingMachine.objects.filter(is_active=True)
-        context['machines'] = machines
-        return context
 
     @method_decorator(transaction.atomic)
     def post(self, request, *args, **kwargs):
-        machine_id = request.POST['machine']
-        if machine_id == 'all':
-            machines = WashingMachine.objects.filter(is_active=True)
-        else:
-            machines = WashingMachine.objects.filter(id=machine_id)
-        date = request.POST['date']
+        machines, date = parse_block(request)
         for machine in machines:
             NonWorkingDay.objects.filter(date=dt.datetime.strptime(date, '%d.%m.%Y').date(), machine=machine).delete()
         return super(UnblockDayView, self).get(request, *args, **kwargs)
