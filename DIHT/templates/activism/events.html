@@ -1,0 +1,43 @@
+﻿{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load has_group %}
+{% block title %} Сайт общежития №2 (ФИВТ) - Биржа {% endblock %}
+{% block main_active %} class = "active" {% endblock %}
+{% block custom_scripts %}
+	<link rel="stylesheet" href="{% static 'css/activism.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="row well namezone">
+    <h3 class="task-name nametext"> Мероприятия </h3>
+</div>
+<div class = "row pagezone">
+	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+        {% for event in events %}
+		<div class="panel panel-primary">
+			<div class="panel-heading dash-panel" role="tab" id="heading{{task.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.pk}}" aria-expanded="false" aria-controls="body{{task.pk}}">
+				<h4>{{ event.name }}</h4>
+			</div>
+			<div id="body{{task.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{task.id}}">
+				<div class="panel-body">
+					{{ event.description }} <br><br>
+                    <span class="grey">Дата проведения: </span><span>{{ event.date_held }}</span>
+                    <a class="pull-right" href="{% url 'activism:event' pk=event.pk %}">Страница мероприятия <i class="fa fa-chevron-right"></i></a>
+				</div>
+			</div>
+		</div>
+        {% endfor %}
+	</div>
+    
+    {% if request.user|has_group:"Руководящая группа" %}
+    
+    <center><a class="btn btn-default robotobold"
+               {% comment %} href="{% url 'activism:create_task'%}"
+               data-toggle="modal"
+               data-target="#form-modal" {% endcomment %} >
+        <i class="fa fa-calendar fa-lg" style="margin-right:10px"></i> Новое мероприятие </i>
+    </a></center>
+    {% endif %}
+</div>
+{% include "modal.html" %}
+{% endblock %}

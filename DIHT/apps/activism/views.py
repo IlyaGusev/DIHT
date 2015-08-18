@@ -25,6 +25,17 @@ class IndexView(LoginRequiredMixin, ListView):
         return context
 
 
+class EventsView (LoginRequiredMixin, ListView):
+	model = Event
+	template_name = 'activism/events.html'
+	context_object_name = 'events'
+	
+	def get_context_data(self, **kwargs):
+		context = super(EventsView, self).get_context_data(**kwargs)
+		context['events'] = context['events'].filter(status__in=['open'])
+		return context
+
+
 class EventView(LoginRequiredMixin, UpdateView):
     model = Event
     template_name = 'activism/event.html'

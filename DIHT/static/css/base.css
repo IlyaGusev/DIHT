@@ -42,6 +42,9 @@ html {
 	border-right: 1px solid #dddddd;
 	border-bottom: 1px solid #dddddd;
 	padding-top:15px;
+    padding-bottom: 30px;
+    padding-left:15px;
+    padding-right:15px;
 }
 
 .nametext {
