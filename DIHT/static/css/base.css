@@ -33,6 +33,15 @@ html {
 .namezone {
 	padding-top: 10px;
 	padding-bottom: 10px;
+	border-radius: 0px;
+	margin-bottom: 0px;
+}
+
+.pagezone {
+	border-left: 1px solid #dddddd;
+	border-right: 1px solid #dddddd;
+	border-bottom: 1px solid #dddddd;
+	padding-top:15px;
 }
 
 .nametext {
