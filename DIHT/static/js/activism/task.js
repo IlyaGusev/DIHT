@@ -31,7 +31,7 @@ $(function() {
         dat['datetime_limit'] = $('#datelimit_formatted').text();
         dat['assignees'] = get_ids('.assignee');
         dat['candidates'] = get_ids('.candidate');
-        dat['number_of_assignees'] = $('#num-field').val();
+        dat['number_of_assignees'] = $('#num').text().split(' ')[0];
         dat['event'] = $('.event-name')[0].id;
 
         for (key in dict)
@@ -40,6 +40,7 @@ $(function() {
         dat['datetime_limit'] = dat['datetime_limit'].replace('T', ' ');
 
         data = dict_to_string(dat);
+        console.log(data);
         $.ajax({
             type: 'POST',
             url: window.location.href,

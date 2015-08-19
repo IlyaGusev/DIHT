@@ -20,7 +20,7 @@ class Event(Model):
     date_held = DateField("Дата проведения", default=timezone.now)
     description = TextField("Описание", blank=True)
     assignees = ManyToManyField(User, "Ответственные", related_name="events", blank=True)
-    status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=4)
+    status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=6)
 
     class Meta:
         verbose_name = "Мероприятие"
