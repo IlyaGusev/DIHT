@@ -18,27 +18,86 @@
 <-- -->
 
 <div class="row well namezone">
-    <h3 class="task-name nametext"> Dashboard </h3>
+    <h3 class="task-name nametext"> Доска активиста </h3>
 </div>
 <div class = "row pagezone">
     <div class="row">
         <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">Ближайшие мероприятия</div>
+            <div class="panel panel-default dash-pan">
+                <div class="panel-heading"><i class="fa fa-calendar" style="margin-right:5px;"></i> Ближайшие мероприятия</div>
                 <div class="panel-body">
-                    Panel content
+                    {% for event in events %}
+                        <a class="green" href="{% url 'activism:event' pk=event.pk %}">{{ event.name }}</a><br>
+                    {% endfor %}
+                    <a class="pull-right" href="{% url 'activism:events' %}">Все <i class="fa fa-chevron-right"></i></a>
                 </div>
             </div>
-            <div class="panel panel-default">
-                <div class="panel-heading">Мои задачи</div>
+            {% if bids|length > 0 %}
+            <div class="panel panel-default dash-pan">
+                <div class="panel-heading"><i class="fa fa-hand-paper-o" style="margin-right:5px;"></i> Мои заявки</div>
                 <div class="panel-body">
-                    Panel content
+                    {% for task in bids %}
+                        <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
+                        {% if user in task.candidates.all %}
+                        <span class="label lbl label-default pull-right">В ожидании</span>
+                        {% elif user in task.rejected.all %}
+                        <span class="label lbl label-danger pull-right">Отклонено</span>
+                        {% elif user in task.assignees.all %}
+                        <span class="label lbl label-success pull-right">Одобрено</span>
+                        {% endif %}
+                        <br>
+                    {% endfor %}
                 </div>
             </div>
+            {% endif %}
+            {% if tasks_current|length > 0 %}
+            <div class="panel panel-default dash-pan">
+                <div class="panel-heading"><i class="fa fa-tasks" style="margin-right:5px;"></i> Мои задачи</div>
+                <div class="panel-body">
+                    {% for task in tasks_current %}
+                        <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
+                        {% if task.status == 'resolved' %}
+                            <span class="label lbl label-primary pull-right">
+                        {% elif task.status == 'in_progress' %}
+                            <span class="label lbl label-warning pull-right">
+                        {% endif %}
+                                {{ task.get_status_display }}
+                            </span>
+                        <br>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% if tasks_created|length > 0 %}
+            <div class="panel panel-default dash-pan">
+                <div class="panel-heading"><i class="fa fa-tasks" style="margin-right:5px;"></i> Созданные мной</div>
+                <div class="panel-body">
+                    {% for task in tasks_created %}
+                        <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
+                        {% if task.status == 'closed' %}
+                            <span class="label lbl pull-right label-success">
+                        {% elif task.status == 'resolved' %}
+                            <span class="label lbl pull-right label-primary">
+                        {% elif task.status == 'in_progress' %}
+                            <span class="label lbl pull-right label-warning">
+                        {% elif task.status == 'open' %}
+                            <span class="label lbl pull-right label-default">
+                        {% elif task.status == 'in_labor' %}
+                            <span class="label lbl pull-right label-danger">
+                        {% elif task.status == 'volunteers' %}
+                            <span class="label lbl pull-right label-info ">
+                        {% endif %}
+                                {{ task.get_status_display }}</span>
+                        <br>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8"> 
+            <center><h4>Пул доступных задач</h4></center>
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                {% for task in tasks %}
+                {% for task in labor %}
                 {% if task.is_urgent%}
                 <div class="panel panel-danger">
                 {% elif task.is_hard%}
@@ -79,56 +138,6 @@
                 {% endfor %}
             </div>
         </div>
-    
-    {% comment %}
-	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-        {% for task in tasks %}
-        {% if task.is_urgent%}
-		<div class="panel panel-danger">
-        {% elif task.is_hard%}
-        <div class="panel panel-warning">
-		{% else %}
-		<div class="panel panel-default">
-        {% endif %}
-			<div class="panel-heading dash-panel" role="tab" id="heading{{task.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.pk}}" aria-expanded="false" aria-controls="body{{task.pk}}">
-				<h4>{{ task.name }}</h4>
-			</div>
-			<div id="body{{task.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{task.id}}">
-				<div class="panel-body">
-                    {% if task.event %}
-					<a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>/
-                    {% endif %}
-                    <a href="{% url 'activism:task' pk=task.pk %}">{{ task.name }}</a> <br>
-					{{ task.description }} <br>
-                    {% for tag in task.tags.all %}
-					<a href="#">#{{tag}}</a>
-                    {% endfor %}
-                    <br>
-					<span class = "param">Волонтерские Часы:</span> <span class="value-accent">{{ task.hours_predict }}</span><br>
-					<span class = "param">Сделать до:</span> <span class="date-accent">{{ task.datetime_limit }}</span>
-                    {% if request.user in task.candidates.all %}
-                    <a class="btn btn-primary pull-right disabled" href="{% url 'activism:task' pk=task.pk %}">Заявка подана</a>
-                    {% elif request.user in task.assignees.all %}
-                    <a class="btn btn-primary pull-right disabled" href="{% url 'activism:task' pk=task.pk %}">Заявка одобрена</a>
-                    {% else %}
-                    <a class="btn btn-primary pull-right" href="{% url 'activism:do_task' pk=task.pk %}">Хочу выполнить!</a>
-                    {% endif %}
-					<br>
-					<span class = "param">Активисты:</span>
-                    <span class="value-accent">{{task.number_of_assignees}}</span>
-                    <span class = "param">(набрано <span class="value-accent">{{task.assignees.all.count}}</span>)</span>
-				</div>
-			</div>
-		</div>
-        {% endfor %}
-	</div>
-    <center><a class="btn btn-default green robotobold"
-               href="{% url 'activism:create_task'%}"
-               data-toggle="modal"
-               data-target="#form-modal">
-        <i class="fa fa-plus fa-lg" style="margin-right:20px"></i> Создать задачу <i class="fa fa-plus fa-lg" style="margin-left:20px"></i>
-    </a></center>
-    {% endcomment %}
-</div>
+    </div>
 {% include "modal.html" %}
 {% endblock %}

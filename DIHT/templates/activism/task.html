@@ -147,7 +147,7 @@
                         {% for candidate in task.candidates.all %}
                         <span class="pull-right">
                             <a href="{% url 'accounts:profile' pk=assignee.pk %}" class="candidate" id="{{candidate.}}">{{ candidate.get_full_name }}</a>
-                            <a href="#" class="blue approve" data-toggle="tooltip" data-placement="left" title="Назначить на задачу"> <i class="fa fa-thumbs-up fa-lg"></i> </a>
+                            <a href="#" class="blue approve" data-toggle="tooltip" data-placement="left" title="Назначить на задачу"> <i class="fa fa-o-thumbs-up fa-lg"></i> </a>
                         </span>
                         <br>
                         {% endfor %}

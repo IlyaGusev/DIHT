@@ -15,10 +15,10 @@
 	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
         {% for event in events %}
 		<div class="panel panel-primary">
-			<div class="panel-heading dash-panel" role="tab" id="heading{{task.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.pk}}" aria-expanded="false" aria-controls="body{{task.pk}}">
+			<div class="panel-heading dash-panel" role="tab" id="heading{{event.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{event.pk}}" aria-expanded="false" aria-controls="body{{event.pk}}">
 				<h4>{{ event.name }}</h4>
 			</div>
-			<div id="body{{task.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{task.id}}">
+			<div id="body{{event.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{event.id}}">
 				<div class="panel-body">
 					{{ event.description }} <br><br>
                     <span class="grey">Дата проведения: </span><span>{{ event.date_held }}</span>

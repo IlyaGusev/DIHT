@@ -1,5 +1,5 @@
 import logging
-from django.views.generic import ListView, View, CreateView
+from django.views.generic import ListView, View, CreateView, TemplateView
 from braces.views import LoginRequiredMixin
 from django.views.generic.edit import UpdateView
 from django.core.urlresolvers import reverse
@@ -9,23 +9,32 @@ from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from activism.models import Event, Task
 from activism.forms import TaskForm, EventForm
+from itertools import chain
 
 
 logger = logging.getLogger('DIHT.custom')
 
 
-class IndexView(LoginRequiredMixin, ListView):
-    model = Task
+class IndexView(LoginRequiredMixin, TemplateView):
     template_name = 'activism/dashboard.html'
-    context_object_name = 'tasks'
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['tasks'] = context['tasks'].filter(status__in=['in_labor'])
+        context['labor'] = Task.objects.filter(status__in=['in_labor'])
+        context['events'] = \
+            Event.objects.filter(status='open').order_by('date_held')[:5]
+        user = self.request.user
+        context['bids'] = \
+            sorted(chain(user.tasks_approve.all(),
+                         user.tasks.filter(status__in=['in_labor']),
+                         user.tasks_rejected.exclude(status='closed')),
+                   key=lambda instance: instance.datetime_limit)
+        context['tasks_current'] = user.tasks.filter(status__in=['in_progress', 'resolved']).order_by('datetime_limit')
+        context['tasks_created'] = user.tasks_created.exclude(status='closed')
         return context
 
 
-class EventsView (LoginRequiredMixin, ListView):
+class EventsView(LoginRequiredMixin, ListView):
     model = Event
     template_name = 'activism/events.html'
     context_object_name = 'events'

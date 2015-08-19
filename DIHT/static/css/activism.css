@@ -1,7 +1,22 @@
 .dash-panel {
-	cursor: pointer;
-	padding-top: 5px;
-	padding-bottom: 5px;
+    cursor: pointer;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.dash-pan {
+    margin-bottom: 10px;
+}
+
+.dash-pan .panel-heading{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 16px;
+}
+
+.dash-pan .panel-body {
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .dash-panel h4 {
@@ -10,15 +25,15 @@
 }
 
 .not-assigned {
-	color: red;
+    color: red;
 }
 
 .event-urgent {
-	color: red;
+    color: red;
 }
 
 .selector{
-	font-size: 12px;
+    font-size: 12px;
 }
 
 .deck{

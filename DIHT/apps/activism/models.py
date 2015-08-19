@@ -56,6 +56,7 @@ class Task(Model):
     number_of_assignees = PositiveSmallIntegerField("Количество людей", blank=False, null=False)
     candidates = ManyToManyField(User, "Кандидаты", related_name="tasks_approve", blank=True)
     assignees = ManyToManyField(User, "Назначенные", related_name="tasks", blank=True)
+    rejected = ManyToManyField(User, "Отклоненные", related_name="tasks_rejected", blank=True)
     datetime_created = DateTimeField("Время создания", default=timezone.now)
     datetime_limit = DateTimeField("До какого времени надо сделать", default=timezone.now)
     datetime_closed = DateTimeField("Время закрытия", blank=True, null=True)

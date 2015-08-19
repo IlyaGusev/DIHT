@@ -4,48 +4,48 @@
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}<script src="{% static 'js/activism/event.js' %}"></script>
-	<link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
 {% block content %}
         <div class="row well namezone">
-			<h3 class="event-name nametext">{{ event.name }}</h3>
-		</div>
-		<div class="row pagezone">
-			<div class="col-md-12">
-				<div class="section">
-					<h5 class="section-name">Информация</h5>
-					<hr class="just-a-line">
-					<div class = "row">
-						<div class = "col-md-6">
-							<span class="param">Создатель:</span>
-							{% if user == event.creator %}
-							<span class="pull-right">{{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
-							{% else %}
-							<a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
-							{% endif %}
+            <h3 class="event-name nametext">{{ event.name }}</h3>
+        </div>
+        <div class = "row pagezone">
+            <div class = "col-md-12">
+                <div class="section">
+                    <h5 class="section-name">Информация</h5>
+                    <hr class="just-a-line">
+                    <div class = "row">
+                        <div class = "col-md-6">
+                            <span class="param">Создатель:</span>
+                            {% if user == event.creator %}
+                            <span class="pull-right">{{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
+                            {% else %}
+                            <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
+                            {% endif %}
                             <br>
-							<span class="param">Ответственные:</span>
+                            <span class="param">Ответственные:</span>
                                 {% for assignee in event.assignees.all %}
-								
-								<span class="pull-right">
-									<a href="{% url 'accounts:profile' pk=assignee.pk %}" class="assignee" id="{{assignee.pk}}">{{ assignee.get_full_name }}</a>
-									{% if user == event.creator %}
-									<a href="#" class="red resign"> <i class="fa fa-times fa-lg"></i> </a>
-									{% endif %}
-									</span>
-									<br>
+                                
+                                <span class="pull-right">
+                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}" class="assignee" id="{{assignee.pk}}">{{ assignee.get_full_name }}</a>
+                                    {% if user == event.creator %}
+                                    <a href="#" class="red resign"> <i class="fa fa-times fa-lg"></i> </a>
+                                    {% endif %}
+                                    </span>
+                                    <br>
                                 {% endfor %}
-								{% if user == event.creator %} 
-									<span class="pull-right">
+                                {% if user == event.creator %} 
+                                    <span class="pull-right">
                                         <a href="#" class="green" id="assign">Назначить <i class="fa fa-plus fa-lg "></i></a>
                                     </span>
                                     <span class="pull-right">
                                         {{ form.assignees_autocomplete|add_class:"hidden" }}
                                     </span>
                                     <br>
-								{% endif %}
-						</div>
-						<div class = "col-md-6">
-							<span class="param">Cтатус:</span>
+                                {% endif %}
+                        </div>
+                        <div class = "col-md-6">
+                            <span class="param">Cтатус:</span>
                             {% if event.status == 'closed' %}
                             <span class="label label-success pull-right">
                             {% elif event.status == 'open' %}
@@ -54,7 +54,7 @@
                             {{ event.get_status_display }}
                             </span>
                             <br>
-							<span class="param">Дата создания:</span>
+                            <span class="param">Дата создания:</span>
                             <span class = "pull-right">{{ event.date_created }}</span><br>
                             <span class="param">Дата проведения:</span>
                             {% if user == event.creator %}
@@ -72,68 +72,72 @@
                             <span class="pull-right">{{ event.date_held }}</span>
                             {% endif %}
                             <br>
-						</div>
-					</div>
-				</div>
-				<div class="section">
-					<h5 class="section-name">Описание {% if user == event.creator %}<a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5> 
-					<hr class="just-a-line">
-					{% if user == event.creator %}
-					<span class = "visible" id="desc">{{ event.description }}</span>
-					<textarea class="form-control hidden" id="desc-area" rows="4">{{ event.description }}</textarea>
-					{% else %}
-					<span id="desc">{{ event.description }}</span>
-					{% endif %}
-					
-				</div>
-				<div class = "section">
-					<h5 class="section-name">Задачи</h5>
-					<table class = "table usual-letters">
-						<tr>
-							<th>Номер</th>
-							<th>Задача</th>
-							<th>Исполнитель(-и)</th>
-							<th>Статус</th>
-						</tr>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <h5 class="section-name">Описание {% if user == event.creator %}<a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5> 
+                    <hr class="just-a-line">
+                    {% if user == event.creator %}
+                    <span class = "visible" id="desc">{{ event.description }}</span>
+                    <textarea class="form-control hidden" id="desc-area" rows="4">{{ event.description }}</textarea>
+                    {% else %}
+                    <span id="desc">{{ event.description }}</span>
+                    {% endif %}
+                    
+                </div>
+                <div class = "section">
+                    <h5 class="section-name">Задачи</h5>
+                    <table class = "table usual-letters">
+                        <tr>
+                            <th>Номер</th>
+                            <th>Задача</th>
+                            <th>Исполнитель(-и)</th>
+                            <th>Статус</th>
+                        </tr>
                         {% for task in event.tasks.all %}
-						<tr>
-							<td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
-							<td>{{ task.name }}</td>
-							<td> {% for assignee in task.assignees.all %}
+                        <tr>
+                            <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
+                            <td>{{ task.name }}</td>
+                            <td> {% for assignee in task.assignees.all %}
                                 <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a><br>
                                 {% endfor %}
                             </td>
                             <td>
-							<span class="">
+                            <span class="">
                             {% if task.status == 'closed' %}
-							    <span class="label label-success">
+                                <span class="label lbl label-success">
                             {% elif task.status == 'resolved' %}
-                                <span class="label label-primary">
+                                <span class="label lbl label-primary">
                             {% elif task.status == 'in_progress' %}
-                                <span class="label label-warning">
+                                <span class="label lbl label-warning">
                             {% elif task.status == 'open' %}
-                                <span class="label label-default">
+                                <span class="label lbl label-default">
                             {% elif task.status == 'in_labor' %}
-                                <span class="label label-danger">
+                                <span class="label lbl label-danger">
                             {% elif task.status == 'volunteers' %}
-                                <span class="label label-info ">
+                                <span class="label lbl label-info ">
                             {% endif %}
-                                    {{ task.get_status_display }}
-                                </span>
-							</span>
+                                    {{ task.get_status_display }}</span>
+                            </span>
                             </td>
-						</tr>
+                        </tr>
                         {% endfor %}
-						<tr>
-							<td colspan="4"><center><a href="#" class="btn btn-default green robotobold">
-								<i class="fa fa-plus fa-lg" style="margin-right:20px"></i> Создать задачу <i class="fa fa-plus fa-lg" style="margin-left:20px"></i>
-							</a></center></td>
-						</tr>
-					</table>
-					
-				</div>
-			</div>
-		</div>
+                        <tr>
+                            <td colspan="4"><center><a href="{% url 'activism:create_task' %}" 
+                            class="btn btn-default green robotobold"
+                            data-toggle="modal"
+                            data-target="#form-modal">
+                                <i class="fa fa-plus fa-lg" style="margin-right:20px"></i> Создать задачу <i class="fa fa-plus fa-lg" style="margin-left:20px"></i>
+                            </a></center></td>
+                        </tr>
+                    </table>
+                    
+                </div>
+            </div>
+            <!--div class = "col-md-4">
+            </div-->
+        </div>
 
-
+{% include 'modal.html' %}
 {% endblock %}

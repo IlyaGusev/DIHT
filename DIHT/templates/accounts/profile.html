@@ -12,7 +12,7 @@
 	<div class="col-md-offset-3 col-md-2">
         <div align="center">
             {% if profile.user.avatar.img %}
-                {% thumbnail profile.user.avatar.img "150x150" crop="center" as pic %}
+                {% thumbnail profile.user.avatar.img "128x128" crop="center" as pic %}
                 <a href="{{MEDIA_URL}}{{profile.user.avatar.img.url}}"><img src="{{ pic.url }}"></a>
                 {% endthumbnail %}
             {% else %}
