@@ -122,11 +122,13 @@
                             <span class = "param">Волонтерские Часы:</span> <span class="value-accent">{{ task.hours_predict }}</span><br>
                             <span class = "param">Сделать до:</span> <span class="date-accent">{{ task.datetime_limit }}</span>
                             {% if request.user in task.candidates.all %}
-                            <a class="btn btn-primary pull-right disabled" href="{% url 'activism:task' pk=task.pk %}">Заявка подана</a>
+                            <a class="btn btn-primary pull-right disabled">Заявка подана</a>
                             {% elif request.user in task.assignees.all %}
-                            <a class="btn btn-primary pull-right disabled" href="{% url 'activism:task' pk=task.pk %}">Заявка одобрена</a>
+                            <a class="btn btn-primary pull-right disabled">Заявка одобрена</a>
+                            {% elif request.user in task.rejected.all %}
+                            <a class="btn btn-primary pull-right disabled">Заявка отклонена</a>
                             {% else %}
-                            <a class="btn btn-primary pull-right" href="{% url 'activism:do_task' pk=task.pk %}">Хочу выполнить!</a>
+                            <a class="btn btn-primary pull-right" href="{% url 'activism:task_action' pk=task.pk action='do' %}">Хочу выполнить!</a>
                             {% endif %}
                             <br>
                             <span class = "param">Активисты:</span>

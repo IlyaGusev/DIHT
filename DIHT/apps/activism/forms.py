@@ -1,6 +1,4 @@
 from autocomplete_light import ModelForm, ModelChoiceField
-from django.forms import HiddenInput, DateTimeInput
-from django import forms
 from activism.models import Task, Event
 import autocomplete_light
 
@@ -14,7 +12,7 @@ class TaskForm(ModelForm):
         model = Task
         fields = ('hours_predict', 'description', 'datetime_limit',
                   'assignees', 'candidates', 'number_of_assignees',
-                  'event')
+                  'event', 'rejected')
 
 
 class EventForm(ModelForm):
