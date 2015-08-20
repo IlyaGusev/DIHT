@@ -4,20 +4,17 @@
 {% block title %} Сайт общежития №2 (ФИВТ) - Биржа {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
-	<link rel="stylesheet" href="{% static 'css/activism.css' %}">
+    <link rel="stylesheet" href="{% static 'css/activism.css' %}">
     <script src="{% static 'js/activism/dashboard.js' %}"></script>
 {% endblock %}
 {% block content %}
 
-
-<!-- Open only for non-activists>
-	<div class="jumbotron" align="center">
-		OLOLOLOOLOLOLOL
-		<br>
-		<button class="btn btn-primary btn-lg">Я готов!</button>
-	</div>
-<-- -->
-
+{% if not user|has_group:'Активисты' %}
+    <div class="jumbotron robotomedium" align="center">
+        <p>Здесь когда-нибудь будет текст, вдохновляющий первокурсников стать активистами. Но так как я не умею писать красивые тексты, пусть это сделает кто-то другой (например, Надя).</p>
+        <button class="btn btn-primary" style="margin:20px">Я готов!</button>
+    </div>
+{% else %}
 <div class="row well namezone">
     <h3 class="task-name nametext"> Доска активиста </h3>
 </div>
@@ -174,5 +171,7 @@
             </div>
         </div>
     </div>
+</div>
+{% endif %}
 {% include "modal.html" %}
 {% endblock %}
