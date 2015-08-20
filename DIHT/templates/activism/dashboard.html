@@ -4,19 +4,17 @@
 {% block title %} Сайт общежития №2 (ФИВТ) - Биржа {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
-	<link rel="stylesheet" href="{% static 'css/activism.css' %}">
+    <link rel="stylesheet" href="{% static 'css/activism.css' %}">
+    <script src="{% static 'js/activism/dashboard.js' %}"></script>
 {% endblock %}
 {% block content %}
 
-
-<!-- Open only for non-activists>
-	<div class="jumbotron" align="center">
-		OLOLOLOOLOLOLOL
-		<br>
-		<button class="btn btn-primary btn-lg">Я готов!</button>
-	</div>
-<-- -->
-
+{% if not user|has_group:'Активисты' %}
+    <div class="jumbotron robotomedium" align="center">
+        <p>Здесь когда-нибудь будет текст, вдохновляющий первокурсников стать активистами. Но так как я не умею писать красивые тексты, пусть это сделает кто-то другой (например, Надя).</p>
+        <button class="btn btn-primary" style="margin:20px">Я готов!</button>
+    </div>
+{% else %}
 <div class="row well namezone">
     <h3 class="task-name nametext"> Доска активиста </h3>
 </div>
@@ -24,8 +22,14 @@
     <div class="row">
         <div class="col-md-4">
             <div class="panel panel-default dash-pan">
-                <div class="panel-heading"><i class="fa fa-calendar" style="margin-right:5px;"></i> Ближайшие мероприятия</div>
-                <div class="panel-body">
+                <div class="panel-heading"><i class="fa fa-calendar fa-fw" style="margin-right:5px;"></i>&nbsp;Ближайшие мероприятия 
+                <span class="pull-right">
+                    <a class="grey" role="button" data-toggle="collapse" href="#dash-events" aria-expanded="true" aria-controls="dash-events">
+                        <i style="margin-top: 5px;" class="drop-controller fa fa-lg fa-caret-down"></i>
+                    </a>
+                </span>
+                </div>
+                <div class="panel-body collapse in" id="dash-events">
                     {% for event in events %}
                         <a class="green" href="{% url 'activism:event' pk=event.pk %}">{{ event.name }}</a><br>
                     {% endfor %}
@@ -34,8 +38,13 @@
             </div>
             {% if bids|length > 0 %}
             <div class="panel panel-default dash-pan">
-                <div class="panel-heading"><i class="fa fa-hand-paper-o" style="margin-right:5px;"></i> Мои заявки</div>
-                <div class="panel-body">
+                <div class="panel-heading"><i class="fa fa-hand-paper-o fa-fw" style="margin-right:5px;"></i>&nbsp;Мои заявки 
+                <span class="pull-right">
+                    <a class="grey" role="button" data-toggle="collapse" href="#dash-bids" aria-expanded="true" aria-controls="dash-bids">
+                        <i style="margin-top: 5px;" class="drop-controller fa fa-lg fa-caret-down"></i>
+                    </a>
+                </span></div>
+                <div class="panel-body collapse in" id="dash-bids">
                     {% for task in bids %}
                         <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
                         {% if user in task.candidates.all %}
@@ -52,8 +61,14 @@
             {% endif %}
             {% if tasks_current|length > 0 %}
             <div class="panel panel-default dash-pan">
-                <div class="panel-heading"><i class="fa fa-tasks" style="margin-right:5px;"></i> Мои задачи</div>
-                <div class="panel-body">
+                <div class="panel-heading"><i class="fa fa-tasks fa-fw" style="margin-right:5px;"></i>&nbsp;Мои задачи
+                <span class="pull-right">
+                    <a class="grey" role="button" data-toggle="collapse" href="#dash-assigned" aria-expanded="true" aria-controls="dash-assigned">
+                        <i style="margin-top: 5px;" class="drop-controller fa fa-lg fa-caret-down"></i>
+                    </a>
+                </span>
+                </div>
+                <div class="panel-body collapse in" id="dash-assigned">
                     {% for task in tasks_current %}
                         <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
                         {% if task.status == 'resolved' %}
@@ -70,8 +85,15 @@
             {% endif %}
             {% if tasks_created|length > 0 %}
             <div class="panel panel-default dash-pan">
-                <div class="panel-heading"><i class="fa fa-tasks" style="margin-right:5px;"></i> Созданные мной</div>
-                <div class="panel-body">
+                <div class="panel-heading">
+                <span class="fa fa-user fa-fw"></span>&nbsp;Созданные мной
+                <span class="pull-right">
+                    <a class="grey" role="button" data-toggle="collapse" href="#dash-created" aria-expanded="true" aria-controls="dash-created">
+                        <i style="margin-top: 5px;" class="drop-controller fa fa-lg fa-caret-down"></i>
+                    </a>
+                </span>
+                </div>
+                <div class="panel-body collapse in" id="dash-created">
                     {% for task in tasks_created %}
                         <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
                         {% if task.status == 'closed' %}
@@ -95,7 +117,7 @@
             {% endif %}
         </div>
         <div class="col-md-8"> 
-            <center><h4>Пул доступных задач</h4></center>
+            <center><h4>Биржа задач</h4></center>
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                 {% for task in labor %}
                 {% if task.is_urgent%}
@@ -138,8 +160,20 @@
                     </div>
                 </div>
                 {% endfor %}
+                {% if request.user|has_group:'Руководящая группа' or user.events.all.count > 0 %}
+                <center>
+                    <a href="{% url 'activism:create_task' %}" 
+                        class="btn btn-default robotobold"
+                        data-toggle="modal"
+                        data-target="#form-modal">
+                        <i class="fa fa-tasks fa-lg" style="margin-right:10px"></i> Новая задача</i>
+                    </a>
+                </center>
+                {% endif %}
             </div>
         </div>
     </div>
+</div>
+{% endif %}
 {% include "modal.html" %}
 {% endblock %}

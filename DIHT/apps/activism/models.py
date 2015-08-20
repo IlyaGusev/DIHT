@@ -30,7 +30,7 @@ class Event(Model):
         return reverse('activism:event', kwargs={'pk': self.pk})
 
     def __str__(self):
-        return str(self.name)+" by "+str(self.creator)
+        return str(self.name)
 
 
 class TaggedTask(TaggedItemBase):
