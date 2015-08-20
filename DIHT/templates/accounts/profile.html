@@ -1,6 +1,7 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
 {% load thumbnail%}
+{% load has_group %}
 {% block title %} Личный кабинет {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}<script src="{% static 'js/profile.js' %}"></script>{% endblock %}
@@ -8,8 +9,9 @@
 <div class=" row well namezone">
     <h3 class="profile-name nametext"> Профиль: <span class="grey">{{ profile.user.username }} </span> </h3>
 </div>
-<div class="row">
-	<div class="col-md-offset-3 col-md-2">
+
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-offset-3 col-md-2">
         <div align="center">
             {% if profile.user.avatar.img %}
                 {% thumbnail profile.user.avatar.img "128x128" crop="center" as pic %}
@@ -19,110 +21,120 @@
             <img class="round avatar" src="/static/img/standart_avatar.png">
             {% endif %}
             {% if profile.user == request.user %}
-            <label class="btn btn-default btn-sm">
+            <label class="btn btn-default btn-sm" style="margin-top: 5px;">
                 Изменить аватар
                 <input id="fileinput" href="{% url 'accounts:change_avatar' pk=profile.user.avatar.pk %}" type="file" style="display: none;"/>
             </label>
             {% endif %}
         </div>
     </div>
-	<div class="col-md-4">
-		<div style="vertical-align: middle;">
-			<hr class="just-a-line">
-			<span id="fullname" class="robotomedium">{{ profile_user.last_name }} {{ profile_user.first_name }} {{ profile.middle_name }}</span>
-			<br>
-			<span id="level" class="grey">Уровень 2</span>
-			<br>
-			{% for group in profile_user.groups.all %}
-			{{ group }};<br>
-			{% endfor %}
-			4 курс
-			<br>
-			<hr class="just-a-line">
-			<br>
-		</div>
-	</div>
+    <div class="col-md-4">
+        <div style="vertical-align: middle;">
+            <hr class="just-a-line">
+            <span id="fullname" class="robotomedium">{{ profile_user.last_name }} {{ profile_user.first_name }} {{ profile.middle_name }}</span>
+            <br>
+            {% if profile.user|has_group:'Активисты' %}<span id="level" class="grey">Уровень 2</span>
+            <br>{% endif %}
+            {% comment %}  {% for group in profile_user.groups.all %}
+            {{ group }};<br>
+            {% endfor %}  {% endcomment %}
+            4 курс
+            <br>
+            <hr class="just-a-line">
+            <br>
+        </div>
+    </div>
 </div>
 <br>
 <div class="row">
-	<div class = "tabs">
-		<ul class = "nav nav-tabs col-md-offset-3 col-md-6">
-			<li class = "active"><a href="#tab-acc" data-toggle="tab">Аккаунт</a></li>
-			{% if profile.user == request.user %}
-			<li><a href="#tab-tsk" data-toggle="tab">Задачи</a></li>
-			{% endif %}
-			<li><a href="#tab-ach" data-toggle="tab">Достижения</a></li>
-			{% if profile.user == request.user %}
-			<li><a href="#tab-wsh" data-toggle="tab">Стиралка</a></li>
-			{% endif %}
-		</ul>
-		<div class = "tab-content col-md-offset-3 col-md-6">
-			<div class = "tab-pane active" id="tab-acc">
-				{% if profile.user == request.user %}
-				<button style = "margin-bottom:10px;" class = "btn btn-sm btn-default"
-						href="{% url 'accounts:edit_profile' pk=profile.pk %}"
-						data-toggle="modal"
-						data-target="#form-modal"><i class="fa fa-pencil"></i> Изменить</button>
-				<br>
-				{% endif %}
-				<span class="param">Группа:</span> <span class="pull-right">{{ profile.group_number }}</span> <br>
-				<span class="param">Общежитие:</span>  <span class="pull-right">{{ profile.hostel }}</span><br>
-				<span class="param">Комната:</span>  <span class="pull-right">{{ profile.room_number }}</span><br>
-				<span class="param">Телефон:</span> <span class="pull-right"> {{ profile.mobile }}</span> <br>
-				{% if profile.user == request.user %}
-				<div>
-				<span class="grey" style="vertical-align:bottom;">Добавить соц. сеть:</span>
-				<span style="right:inherit;">
-					<a href="{% url 'accounts:social:begin' 'facebook' %}">
-						<span class="fa-stack" color="#3b579d">
-							<i class="fa fa-square fa-stack-2x"></i>
-							<i class="fa fa-vk fa-stack-1x fa-inverse"></i>
-						</span>
-					</a>
-					<a href="{% url 'accounts:social:begin' 'vk-oauth2' %}">
-						<span class="fa-stack" color="#537599">
-							<i class="fa fa-square fa-stack-2x"></i>
-							<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-						</span>
-					</a>
-				</span>
-				</div>
-				{% endif %}
-			</div>
-			{% if profile.user == request.user %}
-			<div class="tab-pane" id="tab-tsk">
-				<p><b>Созданные задачи:</b></p>
-				<ul>
-				{% for task in profile_user.tasks_created.all %}
-					<li><a href="{% url 'activism:task' pk=task.pk %}"> {{ task.name }} </a></li>
-				{% endfor %}
-				</ul>
-				<p><b>Задачи, на которые подана заявка:</b></p>
-				<ul>
-				{% for task in profile_user.tasks_approve.all %}
-					<li><a href="{% url 'activism:task' pk=task.pk %}"> {{ task.name }} </a></li>
-				{% endfor %}
-				</ul>
-				<p><b>Текущие задачи:</b></p>
-				<ul>
-				{% for task in profile_user.tasks.all %}
-					<li><a href="{% url 'activism:task' pk=task.pk %}"> {{ task.name }} </a></li>
-				{% endfor %}
-				</ul>
-			</div>
-			{% endif %}
-			<div class = "tab-pane" id="tab-ach">
-			</div>
-			{% if profile.user == request.user %}
-			<div class = "tab-pane" id="tab-wsh">
-				<p><b>Записи:</b></p>
-				{% for record in records %}
-					<p>{{ record.machine.name }}, {{ record.datetime_from.date }}, с {{ record.datetime_from.time }} до {{ record.datetime_to.time }} </p>
-				{% endfor %}
-			</div>
-			{% endif %}
-		</div>
-	</div>
+    <div class = "tabs">
+        <ul class = "nav nav-tabs col-md-offset-3 col-md-6">
+            <li class = "active"><a href="#tab-acc" data-toggle="tab">Контакты</a></li>
+            {% if profile.user == request.user and profile.user|has_group:'Активисты' %}
+            <li><a href="#tab-tsk" data-toggle="tab">Задачи</a></li>
+            {% endif %}
+            {% if profile.user|has_group:'Активисты' %}
+            <li><a href="#tab-ach" data-toggle="tab">Достижения</a></li>
+            {% endif %}
+            {% if profile.user == request.user %}
+            <li><a href="#tab-wsh" data-toggle="tab">Стиралка</a></li>
+            {% endif %}
+        </ul>
+        <div class = "tab-content col-md-offset-3 col-md-6">
+            <div class = "tab-pane active" id="tab-acc">
+                {% if profile.user == request.user %}
+                <button style = "margin-bottom:10px;" class = "btn btn-sm btn-default"
+                        href="{% url 'accounts:edit_profile' pk=profile.pk %}"
+                        data-toggle="modal"
+                        data-target="#form-modal"><i class="fa fa-pencil"></i> Изменить</button>
+                <br>
+                {% endif %}
+                <span class="param">Группа:</span> <span class="pull-right">{{ profile.group_number }}</span> <br>
+                <span class="param">Общежитие:</span>  <span class="pull-right">{{ profile.hostel }}</span><br>
+                <span class="param">Комната:</span>  <span class="pull-right">{{ profile.room_number }}</span><br>
+                <span class="param">Телефон:</span> <span class="pull-right"> {{ profile.mobile }}</span> <br>
+                {% if profile.user == request.user %}
+                <div>
+                <span class="grey" style="vertical-align:bottom;">Добавить соц. сеть:</span>
+                <span style="right:inherit;">
+                    <a href="{% url 'accounts:social:begin' 'facebook' %}">
+                        <span class="fa-stack" color="#3b579d">
+                            <i class="fa fa-square fa-stack-2x"></i>
+                            <i class="fa fa-vk fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                    <a href="{% url 'accounts:social:begin' 'vk-oauth2' %}">
+                        <span class="fa-stack" color="#537599">
+                            <i class="fa fa-square fa-stack-2x"></i>
+                            <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                </span>
+                </div>
+                {% endif %}
+            </div>
+            {% if profile.user == request.user and profile.user|has_group:'Активисты'%}
+            <div class="tab-pane" id="tab-tsk">
+                <h5>Текущие задачи</h5>
+                <table class = "table usual-letters">
+                    {% for task in profile.user.tasks.all %}
+                        {% if task.status != 'closed' %}
+                        <tr>
+                                <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
+                                <td>{{ task.name }}</td>
+                                <td>{% if task.hours_real %}{{ task.hours_real }} ВЧ{% else %}---{% endif %}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+                <h5>Готовые задачи</h5>
+                <table class = "table usual-letters">
+                    {% for task in profile.user.tasks.all %}
+                        {% if task.status == 'closed' %}
+                        <tr>
+                                <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
+                                <td>{{ task.name }}</td>
+                                <td>{{ task.hours_real }} ВЧ</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+            {% if profile.user|has_group:'Активисты' %}
+            <div class = "tab-pane" id="tab-ach">
+            </div>
+            {% endif %}
+            {% if profile.user == request.user %}
+            <div class = "tab-pane" id="tab-wsh">
+                <h5>Записи:<h5>
+                {% for record in records %}
+                    <p>{{ record.machine.name }}, {{ record.datetime_from.date }}, с {{ record.datetime_from.time }} до {{ record.datetime_to.time }} </p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% include "modal.html" %}
 {% endblock %}
