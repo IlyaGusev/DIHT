@@ -1,9 +1,10 @@
 from django.conf.urls import url
 from activism.views import EventView, TaskView, IndexView, TaskCreateView, \
-    EventsView, EventCreateView, TaskActionView, EventActionView
+    EventsView, EventCreateView, TaskActionView, EventActionView, UnlockView
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^unlock/$', UnlockView.as_view(), name='unlock'),
     url(r'^events/$', EventsView.as_view(), name='events'),
     url(r'^events/create/$', EventCreateView.as_view(), name='create_event'),
     url(r'^events/(?P<pk>[0-9]*)/$', EventView.as_view(), name='event'),

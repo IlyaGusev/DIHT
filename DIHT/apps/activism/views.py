@@ -23,6 +23,15 @@ class CreatorMixin(SingleObjectMixin):
             raise PermissionDenied
 
 
+class UnlockView(LoginRequiredMixin, View):
+    raise_exception = True
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        user.groups.add(Group.objects.get(name="Активисты"))
+        return HttpResponseRedirect(reverse('activism:index'))
+
+
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = 'activism/dashboard.html'
 

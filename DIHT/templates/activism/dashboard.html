@@ -12,7 +12,7 @@
 {% if not user|has_group:'Активисты' %}
     <div class="jumbotron robotomedium" align="center">
         <p>Здесь когда-нибудь будет текст, вдохновляющий первокурсников стать активистами. Но так как я не умею писать красивые тексты, пусть это сделает кто-то другой (например, Надя).</p>
-        <button class="btn btn-primary" style="margin:20px">Я готов!</button>
+        <a class="btn btn-primary" href="{% url 'activism:unlock' %}" style="margin:20px">Я готов!</a>
     </div>
 {% else %}
 <div class="row well namezone">
