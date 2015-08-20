@@ -21,10 +21,10 @@
             <img class="round avatar" src="/static/img/standart_avatar.png">
             {% endif %}
             {% if profile.user == request.user %}
-            <label class="btn btn-default btn-sm" style="margin-top: 5px;">
+            <button class="btn btn-default btn-sm hidden-sm hidden-xs" style="margin-top: 5px;">
                 Изменить аватар
                 <input id="fileinput" href="{% url 'accounts:change_avatar' pk=profile.user.avatar.pk %}" type="file" style="display: none;"/>
-            </label>
+            </button>
             {% endif %}
         </div>
     </div>
@@ -41,7 +41,6 @@
             4 курс
             <br>
             <hr class="just-a-line">
-            <br>
         </div>
     </div>
 </div>

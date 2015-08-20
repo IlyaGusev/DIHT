@@ -117,11 +117,12 @@ class ChangeTaskStatusView(SingleObjectMixin, LoginRequiredMixin, View):
         action = kwargs['action']
         user = request.user
         is_creator = (user == task.creator)
+        is_assignee = (user in task.assignees.all())
         is_enough = (task.assignees.all().count() >= task.number_of_assignees)
         table = {'in_labor': {'open': ('in_labor', is_creator)},
                  'in_progress': {'in_labor': ('in_progress', is_creator and is_enough),
                                  'open': ('in_progress', is_creator and is_enough)},
-                 'resolved': {'in_progress': ('resolved', is_creator)},
+                 'resolved': {'in_progress': ('resolved', is_assignee and is_creator)},
                  'not_resolved': {'resolved': ('in_progress', is_creator)},
                  'close': {'resolved': ('closed', is_creator),
                            'in_progress': ('closed', is_creator)},
