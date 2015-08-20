@@ -1,8 +1,21 @@
 from autocomplete_light import ModelForm, ModelChoiceField
+from django.contrib.auth.models import Group
 from activism.models import Task, Event
 import autocomplete_light
 
 autocomplete_light.autodiscover()
+
+
+class TaskCreateForm(ModelForm):
+    def __init__(self, user, *args, **kwargs):
+        super(TaskCreateForm, self).__init__(*args, **kwargs)
+        if not Group.objects.get(name="Руководящая группа") in user.groups.all():
+            self.fields['event'].queryset = user.events.filter(status='open')
+            self.fields['event'].empty_label = None
+
+    class Meta:
+        model = Task
+        fields = ('event', 'name', 'number_of_assignees', 'hours_predict')
 
 
 class TaskForm(ModelForm):

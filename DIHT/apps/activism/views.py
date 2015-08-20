@@ -1,19 +1,19 @@
 import logging
+from itertools import chain
+from django.core.exceptions import PermissionDenied
 from django.views.generic import ListView, View, CreateView, TemplateView
-from braces.views import LoginRequiredMixin
 from django.views.generic.edit import UpdateView
 from django.core.urlresolvers import reverse
 from django.views.generic.detail import SingleObjectMixin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
+from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
 from activism.models import Event, Task
-from activism.forms import TaskForm, EventForm
-from itertools import chain
-from django.core.exceptions import PermissionDenied
-
+from activism.forms import TaskForm, EventForm, TaskCreateForm
 
 logger = logging.getLogger('DIHT.custom')
+
 
 class CreatorMixin(SingleObjectMixin):
     def post(self, request, *args, **kwargs):
@@ -41,10 +41,12 @@ class IndexView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class EventsView(LoginRequiredMixin, ListView):
+class EventsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     model = Event
     template_name = 'activism/events.html'
     context_object_name = 'events'
+    group_required = "Активисты"
+    raise_exception = True
 
     def get_context_data(self, **kwargs):
         context = super(EventsView, self).get_context_data(**kwargs)
@@ -52,20 +54,24 @@ class EventsView(LoginRequiredMixin, ListView):
         return context
 
 
-class EventCreateView(LoginRequiredMixin, CreateView):
+class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     model = Event
     template_name = 'activism/event_create.html'
     fields = ('name', )
+    group_required = "Руководящая группа"
+    raise_exception = True
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
         return super(EventCreateView, self).form_valid(form)
 
 
-class EventView(LoginRequiredMixin, CreatorMixin, UpdateView):
+class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, UpdateView):
     model = Event
     template_name = 'activism/event.html'
     form_class = EventForm
+    group_required = "Активисты"
+    raise_exception = True
 
     def get_context_data(self, **kwargs):
         context = super(EventView, self).get_context_data(**kwargs)
@@ -82,8 +88,9 @@ class EventView(LoginRequiredMixin, CreatorMixin, UpdateView):
         return JsonResponse(form.errors, status=400)
 
 
-class EventActionView(SingleObjectMixin, LoginRequiredMixin, View):
+class EventActionView(SingleObjectMixin, GroupRequiredMixin, LoginRequiredMixin, View):
     model = Event
+    group_required = "Активисты"
     raise_exception = True
 
     def get(self, request, *args, **kwargs):
@@ -100,24 +107,38 @@ class EventActionView(SingleObjectMixin, LoginRequiredMixin, View):
             raise PermissionDenied
 
 
-class TaskCreateView(LoginRequiredMixin, CreateView):
+class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Task
     template_name = 'activism/task_create.html'
-    fields = ('event', 'name', 'number_of_assignees', 'hours_predict')
+    form_class = TaskCreateForm
+    raise_exception = True
+
+    def get_form_kwargs(self):
+        kwargs = super(TaskCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def test_func(self, user):
+        return user.events.count() != 0 or Group.objects.get(name="Руководящая группа") in user.groups.all()
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
         return super(TaskCreateView, self).form_valid(form)
 
 
-class TaskView(LoginRequiredMixin, CreatorMixin, UpdateView):
+class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView):
     model = Task
     template_name = 'activism/task.html'
     form_class = TaskForm
+    group_required = "Активисты"
+    raise_exception = True
 
     def form_valid(self, form):
         task = self.get_object()
         user = self.request.user
+        if Group.objects.get(name="Руководящая группа") not in user.groups.all():
+            if form.cleaned_data['event'] not in user.events.all():
+                return super(TaskView, self).form_invalid(form)
         result = super(TaskView, self).form_valid(form)
         if user in task.assignees.all() and user in task.candidates.all():
             task.candidates.remove(user)
@@ -127,9 +148,13 @@ class TaskView(LoginRequiredMixin, CreatorMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(TaskView, self).get_context_data(**kwargs)
-        context['events'] = Event.objects.all()
+        user = self.request.user
+        if Group.objects.get(name="Руководящая группа") not in user.groups.all():
+            context['events'] = user.events.all()
+        else:
+            context['events'] = Event.objects.all()
         context['users'] = User.objects.all()
-        context['can_edit'] = (self.request.user == context['task'].creator) and \
+        context['can_edit'] = (user == context['task'].creator) and \
                               (context['task'].status == 'open' or context['task'].status == 'in_labor')
         return context
 
@@ -138,8 +163,9 @@ class TaskView(LoginRequiredMixin, CreatorMixin, UpdateView):
         return JsonResponse(form.errors, status=400)
 
 
-class TaskActionView(LoginRequiredMixin, SingleObjectMixin, View):
+class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, View):
     model = Task
+    group_required = "Активисты"
     raise_exception = True
 
     def get(self, request, *args, **kwargs):

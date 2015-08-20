@@ -1,6 +1,6 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
-{% load add_class %}
+{% load add_class has_group %}
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
@@ -65,7 +65,9 @@
                                 <a href="#" class="light"><i class="fa fa-pencil" id="event-pencil"></i></a>
                             </span>
                             <select class="pull-right selector hidden" id="event-edit">
+                                {% if user|has_group:'Руководящая группа' %}
                                 <option class="selector-item" value="">Нет</option>
+                                {% endif %}
                                 {% for event in events %}
                                 <option class="selector-item" value="{{ event.pk }}">{{ event.name }}</option>
                                 {% endfor %}
