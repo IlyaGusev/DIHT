@@ -15,6 +15,13 @@ from django.core.exceptions import PermissionDenied
 
 logger = logging.getLogger('DIHT.custom')
 
+class CreatorMixin(SingleObjectMixin):
+    def post(self, request, *args, **kwargs):
+        if request.user == self.get_object().creator:
+            return super(CreatorMixin, self).post(request, args, kwargs)
+        else:
+            raise PermissionDenied
+
 
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = 'activism/dashboard.html'
@@ -55,19 +62,42 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         return super(EventCreateView, self).form_valid(form)
 
 
-class EventView(LoginRequiredMixin, UpdateView):
+class EventView(LoginRequiredMixin, CreatorMixin, UpdateView):
     model = Event
     template_name = 'activism/event.html'
     form_class = EventForm
 
     def get_context_data(self, **kwargs):
         context = super(EventView, self).get_context_data(**kwargs)
+        event = self.get_object()
+        user = self.request.user
+        is_creator = (user == event.creator)
+        can_close = (event.tasks.all().exclude(status="closed").count() == 0)
         context['users'] = User.objects.all()
+        context['can_close'] = (is_creator and can_close and event.status == 'open')
         return context
 
     def form_invalid(self, form):
         super(EventView, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)
+
+
+class EventActionView(SingleObjectMixin, LoginRequiredMixin, View):
+    model = Event
+    raise_exception = True
+
+    def get(self, request, *args, **kwargs):
+        event = self.get_object()
+        action = kwargs['action']
+        user = request.user
+        is_creator = (user == event.creator)
+        can_close = (event.tasks.exclude(status="closed").count() == 0)
+        if is_creator and can_close and action == "close" and event.status == 'open':
+            event.status = 'closed'
+            event.save()
+            return HttpResponseRedirect(reverse('activism:index'))
+        else:
+            raise PermissionDenied
 
 
 class TaskCreateView(LoginRequiredMixin, CreateView):
@@ -80,7 +110,7 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
         return super(TaskCreateView, self).form_valid(form)
 
 
-class TaskView(LoginRequiredMixin, UpdateView):
+class TaskView(LoginRequiredMixin, CreatorMixin, UpdateView):
     model = Task
     template_name = 'activism/task.html'
     form_class = TaskForm
@@ -108,7 +138,7 @@ class TaskView(LoginRequiredMixin, UpdateView):
         return JsonResponse(form.errors, status=400)
 
 
-class ChangeTaskStatusView(SingleObjectMixin, LoginRequiredMixin, View):
+class TaskActionView(LoginRequiredMixin, SingleObjectMixin, View):
     model = Task
     raise_exception = True
 

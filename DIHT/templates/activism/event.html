@@ -13,7 +13,11 @@
             {% if user == event.creator and event.status == 'open'%}
             <div class = "row">
                 <div class="col-md-12" style="padding-left:40px;">
-                <a class="btn btn-default"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
+                {% if can_close %}
+                    <a class="btn btn-default" href="{% url 'activism:event_action' pk=event.pk action='close'%}"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
+                {% else %}
+                    <a class="btn btn-default disabled"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
+                {% endif %}
                 </div>
             </div>
             {% endif %}
