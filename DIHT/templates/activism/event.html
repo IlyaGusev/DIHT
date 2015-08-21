@@ -3,7 +3,9 @@
 {% load add_class %}
 {% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
-{% block custom_scripts %}<script src="{% static 'js/activism/event.js' %}"></script>
+{% block custom_scripts %}
+    <script src="{% static 'js/activism.js' %}"></script>
+    <script src="{% static 'js/activism/event.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
 {% block content %}
         <div class="row well namezone">

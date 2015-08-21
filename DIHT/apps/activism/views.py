@@ -74,6 +74,11 @@ class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
         form.instance.creator = self.request.user
         return super(EventCreateView, self).form_valid(form)
 
+    def form_invalid(self, form):
+        super(EventCreateView, self).form_invalid(form)
+        return JsonResponse(form.errors, status=400)
+
+
 
 class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, UpdateView):
     model = Event
@@ -133,6 +138,11 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def form_valid(self, form):
         form.instance.creator = self.request.user
         return super(TaskCreateView, self).form_valid(form)
+
+    def form_invalid(self, form):
+        super(TaskCreateView, self).form_invalid(form)
+        return JsonResponse(form.errors, status=400)
+
 
 
 class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView):
