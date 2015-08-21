@@ -45,7 +45,7 @@ class SignUpView(FormView):
         Avatar.objects.create(user=user)
         user.is_active = False
         user.save()
-        logger.info('Пользователь '+str(form['first_name'])+' '+str(form['last_name'])+' ('+str(form['username'])+') только что зарегистрировался на сайте.')
+        # logger.info('Пользователь '+str(form['first_name'])+' '+str(form['last_name'])+' ('+str(form['username'])+') только что зарегистрировался на сайте.')
 
 
 class ResetPasswordView(FormView):
@@ -60,7 +60,7 @@ class ResetPasswordView(FormView):
         if email.send() == 1:
             user.set_password(password)
             user.save()
-            logger.info('Пользователь ' + user.get_full_name() + ' (' + user.username + ') изменил свой пароль через функцию восстановления пароля.')
+            # logger.info('Пользователь ' + user.get_full_name() + ' (' + user.username + ') изменил свой пароль через функцию восстановления пароля.')
         return super(ResetPasswordView, self).form_valid(form)
 
 

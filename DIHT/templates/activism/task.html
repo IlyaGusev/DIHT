@@ -19,23 +19,23 @@
             {% if task.status == 'open' %}
                 <a class="btn btn-default"
                    href="{% url 'activism:task_action' pk=task.pk action='in_labor'%}"><i class="fa fa-users"></i> На биржу </a>
-                <a class="btn btn-default {% if task.assignees.all.count < task.number_of_assignees %} disabled {% endif %}"
+                <a class="btn btn-default confirm {% if task.assignees.all.count < task.number_of_assignees %} disabled {% endif %}"
                    href="{% url 'activism:task_action' pk=task.pk action='in_progress'%}"><i class="fa fa-bolt fa-lg yellow"></i> Начать </a>
             {% elif task.status == 'in_labor' %}
                 <a class="btn btn-default"
                    href="{% url 'activism:task_action' pk=task.pk action='open'%}"><i class="fa fa-user-times"></i> Снять с биржи </a>
-                <a class="btn btn-default {% if task.assignees.all.count < task.number_of_assignees %} disabled {% endif %}"
+                <a class="btn btn-default confirm {% if task.assignees.all.count < task.number_of_assignees %} disabled {% endif %}"
                    href="{% url 'activism:task_action' pk=task.pk action='in_progress'%}"><i class="fa fa-bolt fa-lg yellow"></i> Начать </a>
             {% elif task.status == 'resolved'%}
                 <a class="btn btn-default"
                    href="{% url 'activism:task_action' pk=task.pk action='not_resolved'%}"><i class="fa fa-lg fa-exclamation red"></i> Не готово</a>
             {% endif %}
             {% if task.status == 'resolved' or task.status == 'in_progress' %}
-                <a class="btn btn-default"
+                <a class="btn btn-default confirm"
                    href="{% url 'activism:task_action' pk=task.pk action='close'%}"><i class="fa fa-check fa-lg green"></i> Закрыть задачу</a>
             {% endif %}
             {% if task.status == 'open' or task.status == 'in_labor' %}
-                <a class="btn btn-default"
+                <a class="btn btn-default confirm"
                    href="{% url 'activism:task_action' pk=task.pk action='delete'%}"><i class="fa fa-lg fa-trash-o red"></i> Удалить </a>
             {% endif %}
             </div>
@@ -277,4 +277,20 @@
 </div>
 {% endif %}
 
+<div class="modal" id="confirm-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Подтверждение</h3>
+            </div>
+            <div id="form-modal-body" class="modal-body">
+                Это приведёт к необратимым изменениям. Вы уверены, что хотите это сделать?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="submit-modal" data-dismiss="modal">Да</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

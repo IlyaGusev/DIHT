@@ -159,7 +159,11 @@
                             {% endfor %}
                             <br>
                             <span class = "param">Волонтерские Часы:</span> <span class="value-accent">{{ task.hours_predict }}</span><br>
-                            <span class = "param">Сделать до:</span> <span class="date-accent">{{ task.datetime_limit }}</span>
+                            <span class = "param">Сделать до:</span> <span class="date-accent">{{ task.datetime_limit }}</span><br>
+                            <span class = "param">Активисты:</span>
+                            <span class="value-accent">{{task.number_of_assignees}}</span>
+                            <span class = "param">(набрано <span class="value-accent">{{task.assignees.all.count}}</span>)</span>
+                            <br>
                             {% if request.user in task.candidates.all %}
                             <a class="btn btn-primary pull-right disabled">Заявка подана</a>
                             {% elif request.user in task.assignees.all %}
@@ -170,9 +174,6 @@
                             <a class="btn btn-primary pull-right" href="{% url 'activism:task_action' pk=task.pk action='do' %}">Хочу выполнить!</a>
                             {% endif %}
                             <br>
-                            <span class = "param">Активисты:</span>
-                            <span class="value-accent">{{task.number_of_assignees}}</span>
-                            <span class = "param">(набрано <span class="value-accent">{{task.assignees.all.count}}</span>)</span>
                         </div>
                     </div>
                 </div>

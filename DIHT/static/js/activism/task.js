@@ -125,4 +125,15 @@ $(function() {
         post_ajax({'candidates': candidates, 'rejected': rejected});
 	})
 
+	// Confirm modals
+	$('.confirm').click(function(ev){
+	    ev.preventDefault();
+	    $('#confirm-modal').modal('show');
+	    var btn_href = $(this)[0].href
+        $('#submit-modal').click(function(ev){
+            $('#confirm-modal').modal('hide');
+            window.location.replace(btn_href);
+        })
+	})
+
 });

@@ -99,53 +99,53 @@
                 </div>
                 <div class = "section">
                     <h5 class="section-name">Задачи</h5>
-                    <table class = "table usual-letters">
-                        <tr>
-                            <th>Номер</th>
-                            <th>Задача</th>
-                            <th>Исполнитель(-и)</th>
-                            <th>Статус</th>
-                        </tr>
-                        {% for task in event.tasks.all %}
-                        <tr>
-                            <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
-                            <td>{{ task.name }}</td>
-                            <td> {% for assignee in task.assignees.all %}
-                                <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a><br>
-                                {% endfor %}
-                            </td>
-                            <td>
-                            <span class="">
-                            {% if task.status == 'closed' %}
-                                <span class="label lbl label-success">
-                            {% elif task.status == 'resolved' %}
-                                <span class="label lbl label-primary">
-                            {% elif task.status == 'in_progress' %}
-                                <span class="label lbl label-warning">
-                            {% elif task.status == 'open' %}
-                                <span class="label lbl label-default">
-                            {% elif task.status == 'in_labor' %}
-                                <span class="label lbl label-danger">
-                            {% elif task.status == 'volunteers' %}
-                                <span class="label lbl label-info ">
-                            {% endif %}
-                                    {{ task.get_status_display }}</span>
-                            </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        {% if user == event.creator and event.status == 'open' %}
-                        <tr>
-                            <td colspan="4"><center><a href="{% url 'activism:create_task' %}" 
-                            class="btn btn-default robotobold"
-                            data-toggle="modal"
-                            data-target="#form-modal">
-                                <i class="fa fa-tasks fa-lg" style="margin-right:10px"></i> Новая задача</i>
-                            </a></center></td>
-                        </tr>
-                        {% endif %}
-                    </table>
-                    
+                    <div class="table-responsive">
+                        <table class = "table usual-letters">
+                            <tr>
+                                <th>Номер</th>
+                                <th>Задача</th>
+                                <th>Исполнитель(-и)</th>
+                                <th>Статус</th>
+                            </tr>
+                            {% for task in event.tasks.all %}
+                            <tr>
+                                <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
+                                <td>{{ task.name }}</td>
+                                <td> {% for assignee in task.assignees.all %}
+                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a><br>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                <span class="">
+                                {% if task.status == 'closed' %}
+                                    <span class="label lbl label-success">
+                                {% elif task.status == 'resolved' %}
+                                    <span class="label lbl label-primary">
+                                {% elif task.status == 'in_progress' %}
+                                    <span class="label lbl label-warning">
+                                {% elif task.status == 'open' %}
+                                    <span class="label lbl label-default">
+                                {% elif task.status == 'in_labor' %}
+                                    <span class="label lbl label-danger">
+                                {% elif task.status == 'volunteers' %}
+                                    <span class="label lbl label-info ">
+                                {% endif %}
+                                        {{ task.get_status_display }}</span>
+                                </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    {% if user == event.creator and event.status == 'open' %}
+                    <center><a href="{% url 'activism:create_task' %}"
+                        class="btn btn-default robotobold"
+                        data-toggle="modal"
+                        data-target="#form-modal">
+                            <i class="fa fa-tasks fa-lg" style="margin-right:10px"></i> Новая задача</i>
+                        </a>
+                    </center>
+                    {% endif %}
                 </div>
             </div>
             <!--div class = "col-md-4">
