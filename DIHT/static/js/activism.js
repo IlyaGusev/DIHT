@@ -11,9 +11,9 @@ $(function() {
             type: form.attr('method'),
             url: form.attr('action'),
             data: form.serialize(),
-            success: function() {
+            success: function(response) {
                 $("#form-modal").modal('hide');
-                window.location.reload();
+                window.location.replace(response.url)
             },
             error: function(request, status, error) {
                 view_modal_errors(form, request)

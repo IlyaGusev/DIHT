@@ -1,6 +1,7 @@
-from autocomplete_light import ModelForm, ModelChoiceField
+from autocomplete_light import ModelForm, ModelChoiceField, MultipleChoiceField
+from django.forms import HiddenInput
 from django.contrib.auth.models import Group
-from activism.models import Task, Event
+from activism.models import Task, Event, AssigneeTask
 import autocomplete_light
 
 autocomplete_light.autodiscover()
@@ -12,6 +13,8 @@ class TaskCreateForm(ModelForm):
         if not Group.objects.get(name="Руководящая группа") in user.groups.all():
             self.fields['event'].queryset = user.events.filter(status='open')
             self.fields['event'].empty_label = None
+        else:
+            self.fields['event'].queryset = Event.objects.filter(status='open')
 
     class Meta:
         model = Task
@@ -26,6 +29,12 @@ class TaskForm(ModelForm):
         fields = ('hours_predict', 'description', 'datetime_limit',
                   'assignees', 'candidates', 'number_of_assignees',
                   'event', 'rejected')
+
+    def save(self, commit=True):
+        for pk in self['assignees']:
+            participate = AssigneeTask.objects.get_or_create(task=self.instance.pk, user=pk)
+        return super(TaskForm, self).save(commit)
+
 
 
 class EventForm(ModelForm):

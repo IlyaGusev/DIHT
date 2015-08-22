@@ -9,7 +9,7 @@ from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
-from activism.models import Event, Task
+from activism.models import Event, Task, AssigneeTask
 from activism.forms import TaskForm, EventForm, TaskCreateForm
 
 logger = logging.getLogger('DIHT.custom')
@@ -42,10 +42,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
         user = self.request.user
         context['bids'] = \
             sorted(chain(user.tasks_approve.all(),
-                         user.tasks.filter(status__in=['open', 'in_labor']),
+                         user.participates.filter(task__status__in=['open', 'in_labor']),
                          user.tasks_rejected.exclude(status='closed')),
                    key=lambda instance: instance.datetime_limit)
-        context['tasks_current'] = user.tasks.filter(status__in=['in_progress', 'resolved']).order_by('datetime_limit')
+        context['tasks_current'] = user.participates.filter(task__status__in=['in_progress', 'resolved']).order_by('datetime_limit')
         context['tasks_created'] = user.tasks_created.exclude(status='closed')
         return context
 
@@ -72,7 +72,8 @@ class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
-        return super(EventCreateView, self).form_valid(form)
+        result = super(EventCreateView, self).form_valid(form)
+        return JsonResponse({'url': result.url}, status=200)
 
     def form_invalid(self, form):
         super(EventCreateView, self).form_invalid(form)
@@ -137,7 +138,8 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
-        return super(TaskCreateView, self).form_valid(form)
+        result = super(TaskCreateView, self).form_valid(form)
+        return JsonResponse({'url': result.url}, status=200)
 
     def form_invalid(self, form):
         super(TaskCreateView, self).form_invalid(form)
@@ -158,10 +160,11 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView)
         if Group.objects.get(name="Руководящая группа") not in user.groups.all():
             if form.cleaned_data['event'] not in user.events.all():
                 return super(TaskView, self).form_invalid(form)
+        form.cleaned_data['assignees'] = AssigneeTask.objects.filter(user__pk__in=form['assignees'])
         result = super(TaskView, self).form_valid(form)
-        if user in task.assignees.all() and user in task.candidates.all():
+        if task.participates.filter(user=user).count() > 0 and user in task.candidates.all():
             task.candidates.remove(user)
-        if user in task.assignees.all() and user in task.rejected.all():
+        if task.participates.filter(user=user).count() > 0 and user in task.rejected.all():
             task.rejected.remove(user)
         return result
 
