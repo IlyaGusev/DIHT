@@ -39,7 +39,7 @@ class IndexView(TemplateView):
             schedule[day] = collections.OrderedDict()
             for machine in machines:
                 machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
-                if machine_params.count() > 0:
+                if machine_params.exists():
                     params = machine_params[0]
 
                     times = (24 * 60 - params.start_minute - params.start_hour * 60) // \
@@ -55,11 +55,11 @@ class IndexView(TemplateView):
                         d = dt.datetime.combine(day, dt.time(start_hour, start_minute, 0))
 
                         status = 'OK'
-                        if machine.regular_non_working_days.filter(day_of_week=day.weekday()).count() > 0:
+                        if machine.regular_non_working_days.filter(day_of_week=day.weekday()).exists():
                             status = 'DISABLE'
-                        if machine.non_working_days.filter(date=day).count() > 0:
+                        if machine.non_working_days.filter(date=day).exists():
                             status = 'DISABLE'
-                        if machine.records.filter(datetime_from=d).count() > 0:
+                        if machine.records.filter(datetime_from=d).exists():
                             if machine.records.get(datetime_from=d).user == self.request.user:
                                 status = "YOURS"
                             else:

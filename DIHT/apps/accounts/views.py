@@ -64,13 +64,17 @@ class ResetPasswordView(FormView):
         return super(ResetPasswordView, self).form_valid(form)
 
 
-class CheckUsernameView(View):
+class CheckUniqueView(View):
     def get(self, request, *args, **kwargs):
         username = request.GET['username']
-        if User.objects.all().filter(username=username).count() > 0:
-            result = {'exist': "1"}
-        else:
-            result = {'exist': "0"}
+        email = request.GET['email']
+        result = {'username': '0', 'email': '0'}
+        if username != '':
+            if User.objects.all().filter(username=username).exists():
+                result['username'] = '1'
+        if email != '':
+            if User.objects.all().filter(email=email).exists():
+                result['email'] = '1'
         return JsonResponse(result, status=200)
 
 

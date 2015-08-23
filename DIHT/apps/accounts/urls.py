@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 from django.views.generic import TemplateView
 from accounts.views import SignUpView, ResetPasswordView, ProfileView, ProfileUpdateView, \
-    CheckUsernameView, AvatarUpdateView
+    CheckUniqueView, AvatarUpdateView
 
 urlpatterns = [
     url(r'^signup/$', SignUpView.as_view(), name='signup'),
@@ -16,7 +16,7 @@ urlpatterns = [
     url(r'^profile/(?P<pk>[0-9]*)/$', ProfileView.as_view(), name='profile'),
     url(r'^profile/edit/(?P<pk>[0-9]*)/$', ProfileUpdateView.as_view(), name='edit_profile'),
 
-    url(r'^check_username/$', CheckUsernameView.as_view(), name='check_username'),
+    url(r'^check_unique/$', CheckUniqueView.as_view(), name='check_unique'),
     url(r'^avatar/change/(?P<pk>[0-9]*)/$', AvatarUpdateView.as_view(), name='change_avatar'),
 
     url('', include('social.apps.django_app.urls', namespace='social')),

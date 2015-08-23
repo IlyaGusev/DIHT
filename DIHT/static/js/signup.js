@@ -3,12 +3,24 @@ var mistakes = 0
 function check_username() {
     var request = new XMLHttpRequest();
     var error = ''
-    request.open('GET', '/accounts/check_username/?username='+$('#id_username').val(), false);  // `false` makes the request synchronous
+    request.open('GET', '/accounts/check_unique/?username='+$('#id_username').val()+'&email=', false);  // `false` makes the request synchronous
     request.send(null);
 
     if (request.status === 200)
-        if (JSON.parse(request.responseText).exist == '1')
+        if (JSON.parse(request.responseText).username == '1')
             error = 'Логин занят';
+    return error
+}
+
+function check_email() {
+    var request = new XMLHttpRequest();
+    var error = ''
+    request.open('GET', '/accounts/check_unique/?email='+$('#id_email').val()+'&username=', false);  // `false` makes the request synchronous
+    request.send(null);
+
+    if (request.status === 200)
+        if (JSON.parse(request.responseText).email == '1')
+            error = 'Почта уже используется';
     return error
 }
 
@@ -31,6 +43,7 @@ function check_field(event) {
     }
     if (event.data == 'email'){
         if (!(/^.+@.+\..+$/.test($('#id_email').val()))) error += 'Формат example@domain.com';
+        error += check_email();
     }
     if (event.data == 'mobile'){
         if (!(/^\+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/.test($('#id_mobile').val()))) error += 'Формат телефона +74951234567';

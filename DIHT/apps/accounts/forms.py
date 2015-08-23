@@ -94,6 +94,11 @@ class SignUpForm(ModelForm):
                 _('Неверная длина пароля.'))
         return self.cleaned_data['password']
 
+    def clean_email(self):
+        if User.objects.filter(email=self.cleaned_data['email']).exists():
+            raise ValidationError(_('Этот e-mail уже используется.'))
+        return self.cleaned_data['email']
+
 
 class ProfileForm(ModelForm):
     class Meta:
