@@ -84,6 +84,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
         user = self.get_object()
         context['records'] = user.records.filter(datetime_to__gte=timezone.now()).order_by('-datetime_to').reverse()
         context['profile'] = Profile.objects.get(user__id=user.id)
+        context['task_hours'] = user.participated.filter(task__status__in=['closed', 'resolved'])
         return context
 
 

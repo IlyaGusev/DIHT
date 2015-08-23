@@ -172,7 +172,7 @@
                             {% elif request.user in task.rejected.all %}
                             <a class="btn btn-primary pull-right disabled">Заявка отклонена</a>
                             {% else %}
-                            <a class="btn btn-primary pull-right" href="{% url 'activism:task_action' pk=task.pk action='do' %}">Хочу выполнить!</a>
+                            <a class="btn btn-primary pull-right action" href="{% url 'activism:task_action' pk=task.pk action='do' %}">Хочу выполнить!</a>
                             {% endif %}
                             <br>
                         </div>

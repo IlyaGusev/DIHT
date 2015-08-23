@@ -26,7 +26,7 @@ $(function() {
         return a;
     }
 
-    function post_ajax(dict){
+    function post_task(dict){
         var dat = {};
         $.each(fields, function (key, value) {
             dat[value] = $(key+'-current').text();
@@ -70,7 +70,7 @@ $(function() {
         $(key+'-field').blur(function() {
             var dict = {}
             dict[value] = $(key+'-field').val()
-            post_ajax(dict);
+            post_task(dict);
             transfer_class('hidden', key, key+'-edit');
         });
 	});
@@ -82,7 +82,7 @@ $(function() {
 	})
 
 	$('#event-edit').blur(function() {
-	    post_ajax({'event': $('#event-edit option:selected').val()})
+	    post_task({'event': $('#event-edit option:selected').val()})
 		transfer_class('hidden', '#event', '#event-edit');
 	})
 
@@ -96,7 +96,7 @@ $(function() {
 	$('#id_assignees_autocomplete-autocomplete').blur(function() {
 	    var assignees = get_ids('.assignee');
         assignees.push($("#id_assignees_autocomplete option:selected" ).val())
-        post_ajax({'assignees': assignees});
+        post_task({'assignees': assignees});
         transfer_class('hidden', '#assign', '#id_assignees_autocomplete-autocomplete');
 	})
 
@@ -106,7 +106,7 @@ $(function() {
 		resign_id = $(this).prev()[0].id;
 		var assignees = get_ids('.assignee');
         assignees.splice($.inArray(resign_id, assignees), 1);
-        post_ajax({'assignees': assignees});
+        post_task({'assignees': assignees});
 	})
 
 
@@ -117,7 +117,7 @@ $(function() {
 		candidates.splice($.inArray(approve_id, candidates), 1);
 		var assignees = get_ids('.assignee');
 		assignees.push(approve_id);
-        post_ajax({'candidates': candidates, 'assignees': assignees});
+        post_task({'candidates': candidates, 'assignees': assignees});
 	})
 
 
@@ -128,18 +128,6 @@ $(function() {
 		candidates.splice($.inArray(reject_id, candidates), 1);
 		var rejected = get_ids('.rejected');
 		rejected.push(reject_id);
-        post_ajax({'candidates': candidates, 'rejected': rejected});
+        post_task({'candidates': candidates, 'rejected': rejected});
 	})
-
-	// Confirm modals
-	$('.confirm').click(function(ev){
-	    ev.preventDefault();
-	    $('#confirm-modal').modal('show');
-	    var btn_href = $(this)[0].href
-        $('#submit-modal').click(function(ev){
-            $('#confirm-modal').modal('hide');
-            window.location.replace(btn_href);
-        })
-	})
-
 });

@@ -175,6 +175,7 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView)
         context['users'] = User.objects.all()
         context['can_edit'] = (user == context['task'].creator) and \
                               (context['task'].status == 'open' or context['task'].status == 'in_labor')
+        context['through'] = context['task'].participants.all()
         return context
 
     def form_invalid(self, form):
@@ -187,7 +188,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
     group_required = "Активисты"
     raise_exception = True
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         task = self.get_object()
         action = kwargs['action']
         user = request.user
@@ -197,7 +198,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         table = {'in_labor': {'open': ('in_labor', is_creator)},
                  'in_progress': {'in_labor': ('in_progress', is_creator and is_enough),
                                  'open': ('in_progress', is_creator and is_enough)},
-                 'resolved': {'in_progress': ('resolved', is_assignee and is_creator)},
+                 'resolved': {'in_progress': ('resolved', is_assignee)},
                  'not_resolved': {'resolved': ('in_progress', is_creator)},
                  'close': {'resolved': ('closed', is_creator),
                            'in_progress': ('closed', is_creator)},
@@ -209,14 +210,14 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                user not in task.rejected.all():
                 task.candidates.add(request.user)
                 task.save()
-                return HttpResponseRedirect(reverse('activism:index'))
+                return JsonResponse({'url': reverse('activism:index')}, status=200)
             else:
                 raise PermissionDenied
 
         if action == 'delete':
             if is_creator and (task.status == 'in_labor' or task.status == 'open'):
                 task.delete()
-                return HttpResponseRedirect(reverse('activism:index'))
+                return JsonResponse({'url': reverse('activism:index')}, status=200)
             else:
                 raise PermissionDenied
 
@@ -224,13 +225,21 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
             init = table[action]
             if init.get(task.status) is not None:
                 if init[task.status][1]:
+                    if action == 'resolved' or action == 'close':
+                        for user in task.assignees.all():
+                            user_hours = request.POST['hours_'+str(user.pk)]
+                            through = task.participants.get(user=user)
+                            through.hours = user_hours
+                            if action == 'close':
+                                through.approved = True
+                            through.save()
                     task.status = init[task.status][0]
                     task.save()
                     if task.status != 'in_labor':
                         if task.candidates.count() != 0:
                             task.rejected.add(*task.candidates.all())
                             task.candidates.clear()
-                    return HttpResponseRedirect(reverse('activism:task', kwargs={'pk': task.pk}))
+                    return JsonResponse({'url': reverse('activism:task', kwargs={'pk': task.pk})}, status=200)
                 else:
                     raise PermissionDenied
             else:
