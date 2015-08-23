@@ -80,12 +80,14 @@ $(function() {
 	})
 
 	$('#close-modal').on('shown.bs.modal', function () {
-        var inp = $(this).find('.real-hours')
-        inp.next().find('.final-hours').text(inp.val())
-        inp.next().next().val(inp.val())
-        $('#close-modal').on('change', '.real-hours', function(ev){
+        $(this).find('.real-hours').each(function() {
+            var inp = $(this)
             inp.next().find('.final-hours').text(inp.val())
             inp.next().next().val(inp.val())
-        })
+            $('#close-modal').on('change', '.real-hours', function(ev){
+                inp.next().find('.final-hours').text(inp.val())
+                inp.next().next().val(inp.val())
+            })
+        });
     });
 });

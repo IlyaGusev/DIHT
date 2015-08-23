@@ -326,6 +326,7 @@
                     </label>
                     <input class="form-control hidden final-hours-hidden" id="id_hours_{{entity.user.pk}}" min="0" name="hours_{{entity.user.pk}}" step="any"
                            type="number" value="{{entity.hours|stringformat:'.1f'}}">
+                    <br>
                     {% endfor %}
                 </div>
                 <div class="modal-footer">

@@ -51,7 +51,7 @@ class Task(Model):
     creator = ForeignKey(User, verbose_name="Создатель", related_name="tasks_created")
     event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True, null=True)
     description = TextField("Описание", blank=True)
-    tags = TaggableManager(through=TaggedTask)
+    tags = TaggableManager(through=TaggedTask, blank=True)
     hours_predict = FloatField("Расчётное количество часов",
                                validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
                                blank=False, null=False)
