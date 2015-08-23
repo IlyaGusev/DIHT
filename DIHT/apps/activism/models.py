@@ -80,8 +80,8 @@ class Task(Model):
 
 
 class AssigneeTask(Model):
-    user = ForeignKey(User, verbose_name="Назначенный", related_name='participates')
-    task = ForeignKey(Task, verbose_name="Задача", related_name='participates')
+    user = ForeignKey(User, verbose_name="Назначенный", related_name='participated')
+    task = ForeignKey(Task, verbose_name="Задача", related_name='participants')
     hours = FloatField("Реальные часы", blank=True, null=True)
     approved = BooleanField("Подтверждено", default=False)
 

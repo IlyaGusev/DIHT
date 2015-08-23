@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
 {% block content %}
         <div class="row well namezone">
-            <h3 class="event-name nametext">{{ event.name }}</h3>
+            <h3 class="event-name">{{ event.name }}</h3>
         </div>
         <div class = "row pagezone">
             {% if user == event.creator and event.status == 'open'%}
@@ -113,8 +113,8 @@
                             <tr>
                                 <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
                                 <td>{{ task.name }}</td>
-                                <td> {% for assignee in task.assignees.all %}
-                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a><br>
+                                <td> {% for part in task.participants.all %}
+                                    <a href="{% url 'accounts:profile' pk=part.user.pk %}">{{ part.user.get_full_name }}</a><br>
                                     {% endfor %}
                                 </td>
                                 <td>
@@ -141,9 +141,8 @@
                     </div>
                     {% if user == event.creator and event.status == 'open' %}
                     <center><a href="{% url 'activism:create_task' %}"
-                        class="btn btn-default robotobold"
-                        data-toggle="modal"
-                        data-target="#form-modal">
+                               class="btn btn-default robotobold"
+                               data-target="#form-modal">
                             <i class="fa fa-tasks fa-lg" style="margin-right:10px"></i> Новая задача</i>
                         </a>
                     </center>

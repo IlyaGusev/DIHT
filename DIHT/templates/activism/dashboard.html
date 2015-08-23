@@ -182,10 +182,9 @@
                 {% if request.user|has_group:'Руководящая группа' or user.events.all.count > 0 %}
                 <center>
                     <a href="{% url 'activism:create_task' %}" 
-                        class="btn btn-default robotobold"
-                        style="margin-top: 10px;"
-                        data-toggle="modal"
-                        data-target="#form-modal">
+                       class="btn btn-default robotobold"
+                       style="margin-top: 10px;"
+                       data-target="#form-modal">
                         <i class="fa fa-tasks fa-lg" style="margin-right:10px"></i> Новая задача</i>
                     </a>
                 </center>

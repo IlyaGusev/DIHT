@@ -223,16 +223,16 @@
                 <span class="param">Расчетные:</span>
                 <span class="pull-right">
                     <span id="est-hours">
-                        {% if task.hours_predict %}{{ task.hours_predict|stringformat:"f" }} час.{% endif %}
+                        {% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}
                         <a href="#" class="light"><i class="fa fa-pencil" id="est-hours-pencil"></i></a>
                     </span>
                     <span id="est-hours-edit" class="hidden">
-                        <input id="est-hours-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict|stringformat:"f" }}{% endif %}"> час.
+                        <input id="est-hours-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }}{% endif %}"> час.
                     </span>
                 </span>
             {% else %}
                 <span class="param">Расчетные:</span>
-                <span class="pull-right">{% if task.hours_predict %}{{ task.hours_predict|stringformat:"f" }} час.{% endif %}</span>
+                <span class="pull-right">{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1zf" }} час.{% endif %}</span>
                 <br>
             {% endif %}
             {% if task.hours_real  %}

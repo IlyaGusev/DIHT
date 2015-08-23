@@ -42,10 +42,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
         user = self.request.user
         context['bids'] = \
             sorted(chain(user.tasks_approve.all(),
-                         user.participates.filter(task__status__in=['open', 'in_labor']),
+                         user.task_set.filter(status__in=['open', 'in_labor']),
                          user.tasks_rejected.exclude(status='closed')),
                    key=lambda instance: instance.datetime_limit)
-        context['tasks_current'] = user.participates.filter(task__status__in=['in_progress', 'resolved']).order_by('datetime_limit')
+        context['tasks_current'] = user.task_set.filter(status__in=['in_progress', 'resolved']).order_by('datetime_limit')
         context['tasks_created'] = user.tasks_created.exclude(status='closed')
         return context
 
@@ -78,7 +78,6 @@ class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     def form_invalid(self, form):
         super(EventCreateView, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)
-
 
 
 class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, UpdateView):
@@ -146,7 +145,6 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return JsonResponse(form.errors, status=400)
 
 
-
 class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView):
     model = Task
     template_name = 'activism/task.html'
@@ -160,11 +158,10 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView)
         if Group.objects.get(name="Руководящая группа") not in user.groups.all():
             if form.cleaned_data['event'] not in user.events.all():
                 return super(TaskView, self).form_invalid(form)
-        form.cleaned_data['assignees'] = AssigneeTask.objects.filter(user__pk__in=form['assignees'])
         result = super(TaskView, self).form_valid(form)
-        if task.participates.filter(user=user).count() > 0 and user in task.candidates.all():
+        if user in task.assignees.all() and user in task.candidates.all():
             task.candidates.remove(user)
-        if task.participates.filter(user=user).count() > 0 and user in task.rejected.all():
+        if user in task.assignees.all() and user in task.rejected.all():
             task.rejected.remove(user)
         return result
 

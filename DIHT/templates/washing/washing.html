@@ -50,7 +50,8 @@
                         colspan="{{ machines|length|add:'1' }}"
                         class="text-center btn-open-modal"
                         href="{% url 'washing:block_day' %}"
-                        id="{{day| date:'d.m.Y'}}">
+                        id="{{day| date:'d.m.Y'}}"
+                        data-target="#form-modal">
                         {{day| date:"d.m.Y (l)"}}
                     </th>
                     {% else %}
@@ -67,9 +68,8 @@
                     {% for machine, status in records.items %}
                     {% if status.0 == 'OK' %}
                         {% if user.is_authenticated and not user.black_list_record.is_blocked%}
-                        <td class="status1 btn-open-modal" href="{% url 'washing:create_record'%}"
-                            data-toggle="modal"
-                            data-target="#form-modal"
+                        <td class="status1 btn-open-modal"
+                            href="{% url 'washing:create_record'%}"
                             id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
                         {% else %}
                         <td class="status1"></td>
@@ -80,9 +80,8 @@
                     <td class="status0"></td>
                     {% elif status.0 == 'YOURS' %}
                         {% if user.is_authenticated and day != current %}
-                        <td class="status3 btn-open-modal" href="{% url 'washing:cancel_record'%}"
-                            data-toggle="modal"
-                            data-target="#form-modal"
+                        <td class="status3 btn-open-modal"
+                            href="{% url 'washing:cancel_record'%}"
                             id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
                         {% else %}
                         <td class="status3"></td>

@@ -40,6 +40,11 @@ $(function() {
         for (key in dict)
             dat[key] = dict[key];
         dat['datetime_limit'] = dat['datetime_limit'].replace('T', ' ');
+        var ass = ""
+        for (key in dat['assignees']){
+           ass += dat['assignees'][key]+','
+        }
+        dat['assignees'] = ass
 
         data = dict_to_string(dat);
         console.log(data)

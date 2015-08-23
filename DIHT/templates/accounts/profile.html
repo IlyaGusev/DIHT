@@ -62,10 +62,10 @@
         <div class = "tab-content col-md-offset-3 col-md-6">
             <div class = "tab-pane active" id="tab-acc">
                 {% if profile.user == request.user %}
-                <button style = "margin-bottom:10px;" class = "btn btn-sm btn-default"
-                        href="{% url 'accounts:edit_profile' pk=profile.pk %}"
-                        data-toggle="modal"
-                        data-target="#form-modal"><i class="fa fa-pencil"></i> Изменить</button>
+                <a style = "margin-bottom:10px;"
+                   class = "btn btn-sm btn-default"
+                   href="{% url 'accounts:edit_profile' pk=profile.pk %}"
+                   data-target="#form-modal"><i class="fa fa-pencil"></i> Изменить</a>
                 <br>
                 {% endif %}
                 <span class="param">Группа:</span> <span class="pull-right">{{ profile.group_number }}</span> <br>
