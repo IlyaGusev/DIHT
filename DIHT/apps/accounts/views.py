@@ -89,6 +89,12 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context['records'] = user.records.filter(datetime_to__gte=timezone.now()).order_by('-datetime_to').reverse()
         context['profile'] = Profile.objects.get(user__id=user.id)
         context['task_hours'] = user.participated.filter(task__status__in=['closed', 'resolved'])
+        if context['profile'].group_number != '':
+            grade = int(str(timezone.now().date().year)[-1])-int(str(context['profile'].group_number)[0])
+            if timezone.now().date().month >= 8:
+                context['grade'] = grade+1
+            else:
+                context['grade'] = grade
         return context
 
 

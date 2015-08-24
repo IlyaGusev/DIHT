@@ -35,11 +35,20 @@
             <br>
             {% if profile.user|has_group:'Активисты' %}<span id="level" class="grey">Уровень 2</span>
             <br>{% endif %}
-            {% comment %}  {% for group in profile_user.groups.all %}
-            {{ group }};<br>
-            {% endfor %}  {% endcomment %}
-            4 курс
+            {% if profile.sign != '' %}
+                {{ profile.sign }}
+            {% elif profile.user|has_group:'Руководящая группа' %}
+                Руководящая группа
+            {% elif profile.user|has_group:'Активисты' %}
+                Активист
+            {% else %}
+                Пользователь
+            {% endif %}
             <br>
+            {% if grade %}
+            {{ grade }} курс
+            <br>
+            {% endif%}
             <hr class="just-a-line">
         </div>
     </div>
