@@ -84,6 +84,10 @@ body {
     font-size: 16px;
 }
 
+.big-letters {
+    font-size: 18px;
+}
+
 .just-a-line {
 	margin: 4px 0px;
 	border-color: #BBBBBB;
