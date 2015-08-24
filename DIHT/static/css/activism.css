@@ -2,6 +2,7 @@
     cursor: pointer;
     padding-top: 5px;
     padding-bottom: 5px;
+    padding-left: 5px;
 }
 
 .dash-pan {
@@ -38,4 +39,42 @@
 
 .deck{
     display:none !important;
+}
+
+.sector-label {
+    display: inline-block;
+    width: 10px;
+}
+
+.sector-label.purple
+{
+    background: #9911dd;
+    color: #9911dd;
+}
+
+.sector-label.red
+{
+    background: #fa0000;
+    color: #fa0000;
+}
+
+.sector-label.yellow
+{
+    background: #eeff00;
+    color: #eeff00;
+}
+.sector-label.green
+{
+    background: #00e900;
+    color: #00e900;
+}
+.sector-label.blue
+{
+    background: #07A0DB;
+    color: #07A0DB;
+}
+.sector-label.grey
+{
+    background: #aaaaaa;
+    color: #aaaaaa;
 }

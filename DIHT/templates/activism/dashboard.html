@@ -146,14 +146,14 @@
                 <div class="panel panel-default">
                 {% endif %}
                     <div class="panel-heading dash-panel" role="tab" id="heading{{task.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.pk}}" aria-expanded="false" aria-controls="body{{task.pk}}">
-                        <h4>{{ task.name }}</h4>
+                        <div class="sector-label grey"></div>
+                        <span class="big-letters">&nbsp;{{ task.name }}</span>
+                        <span class="pull-right light">{% if task.event %}{{task.event}}{% else %}Без мероприятия{% endif %}</span>
                     </div>
                     <div id="body{{task.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{task.id}}">
                         <div class="panel-body">
                             {% if task.event %}
-                            <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>/
-                            {% endif %}
-                            <a href="{% url 'activism:task' pk=task.pk %}">{{ task.name }}</a> <br>
+                            <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>/{% endif %}<a href="{% url 'activism:task' pk=task.pk %}">{{ task.name }}</a> <br>
                             {{ task.description }} <br>
                             {% for tag in task.tags.all %}
                             <a href="#">#{{tag}}</a>
