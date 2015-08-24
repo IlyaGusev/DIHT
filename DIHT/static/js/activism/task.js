@@ -33,6 +33,7 @@ $(function() {
         });
 
         dat['event'] = $('#event-current').text();
+        dat['sector'] = $('#sector-current').text();
         dat['assignees'] = get_ids('.assignee');
         dat['candidates'] = get_ids('.candidate');
         dat['rejected'] = get_ids('.rejected');
@@ -84,6 +85,18 @@ $(function() {
 	$('#event-edit').blur(function() {
 	    post_task({'event': $('#event-edit option:selected').val()})
 		transfer_class('hidden', '#event', '#event-edit');
+	})
+    
+
+    // Sectors
+    $('#sector-pencil').click(function() {
+	    transfer_class('hidden', '#sector-edit', '#sector');
+		$('#sector-edit').focus();
+	})
+
+	$('#sector-edit').blur(function() {
+	    post_task({'sector': $('#sector-edit option:selected').val()})
+		transfer_class('hidden', '#sector', '#sector-edit');
 	})
 
 

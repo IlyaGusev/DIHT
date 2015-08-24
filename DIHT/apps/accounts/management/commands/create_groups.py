@@ -27,6 +27,8 @@ class Command(BaseCommand):
                                                 Permission.objects.get(codename='change_moneyoperation'),
                                                 Permission.objects.get(codename='delete_moneyoperation')]),
                   ]
+
+
         for g in groups:
             group, created = Group.objects.get_or_create(name=g[0])
             if created:

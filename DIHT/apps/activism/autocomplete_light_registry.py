@@ -7,7 +7,7 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
     model = User
     search_fields = ['^first_name', '^last_name']
     attrs = {
-        'data-autcomplete-minimum-characters': 1,
+        'data-autcomplete-minimum-characters': 0,
         'placeholder': 'Имя или фамилия',
     }
 

@@ -18,7 +18,7 @@ class TaskCreateForm(ModelForm):
 
     class Meta:
         model = Task
-        fields = ('event', 'name', 'number_of_assignees', 'hours_predict')
+        fields = ('event', 'sector', 'name', 'number_of_assignees', 'hours_predict')
 
 
 class TaskForm(ModelForm):
@@ -29,7 +29,7 @@ class TaskForm(ModelForm):
         model = Task
         fields = ('hours_predict', 'description', 'datetime_limit',
                   'candidates', 'number_of_assignees',
-                  'event', 'rejected')
+                  'event', 'rejected', 'sector')
         widgets = {
             'assignees': HiddenInput(),
         }
@@ -51,4 +51,4 @@ class EventForm(ModelForm):
 
     class Meta:
         model = Event
-        fields = ('description', 'assignees', 'date_held')
+        fields = ('description', 'assignees', 'date_held', 'sector')

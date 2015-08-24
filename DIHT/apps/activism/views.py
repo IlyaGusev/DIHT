@@ -1,7 +1,7 @@
 import logging
 from itertools import chain
 from django.core.exceptions import PermissionDenied
-from django.views.generic import ListView, View, CreateView, TemplateView
+from django.views.generic import ListView, View, CreateView, TemplateView, DetailView
 from django.views.generic.edit import UpdateView
 from django.core.urlresolvers import reverse
 from django.views.generic.detail import SingleObjectMixin
@@ -9,7 +9,7 @@ from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
-from activism.models import Event, Task, AssigneeTask
+from activism.models import Event, Task, AssigneeTask, Sector
 from activism.forms import TaskForm, EventForm, TaskCreateForm
 
 logger = logging.getLogger('DIHT.custom')
@@ -66,7 +66,7 @@ class EventsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
 class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     model = Event
     template_name = 'activism/event_create.html'
-    fields = ('name', )
+    fields = ('name', 'sector')
     group_required = "Руководящая группа"
     raise_exception = True
 
@@ -95,6 +95,7 @@ class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, UpdateVie
         can_close = (event.tasks.all().exclude(status="closed").count() == 0)
         context['users'] = User.objects.all()
         context['can_close'] = (is_creator and can_close and event.status == 'open')
+        context['sectors'] = Sector.objects.all()
         return context
 
     def form_invalid(self, form):
@@ -172,6 +173,7 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView)
             context['events'] = user.events.all()
         else:
             context['events'] = Event.objects.all()
+        context['sectors'] = Sector.objects.all()
         context['users'] = User.objects.all()
         context['can_edit'] = (user == context['task'].creator) and \
                               (context['task'].status == 'open' or context['task'].status == 'in_labor')
@@ -246,3 +248,8 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                 raise PermissionDenied
         else:
             raise PermissionDenied
+
+
+class SectorView(LoginRequiredMixin, DetailView):
+    model = Sector
+    template_name = "activism/sector.html"

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load add_class %}
+{% block title %} Сайт общежития №2 (ФИВТ) - Сектор {% endblock %}
+{% block main_active %} class = "active" {% endblock %}
+{% block custom_scripts %}
+    <script src="{% static 'js/activism.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
+{% block content %}
+ <div class="row well namezone">
+     <h3>{{sector.name}}</h3>
+ </div>
+
+{% include 'modal.html' %}
+{% endblock %}
+

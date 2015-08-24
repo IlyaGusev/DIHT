@@ -1,7 +1,7 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
 {% load add_class has_group %}
-{% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
+{% block title %} Сайт общежития №2 (ФИВТ) - Задача {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
     <script src="{% static 'js/activism.js' %}"></script>
@@ -82,6 +82,35 @@
                             <span class="pull-right">
                                 {% if task.event %}
                                     <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
+                                {% else %}
+                                    <span>Нет</span>
+                                {% endif %}
+                            </span>
+                        {% endif %}
+                    <br>
+
+                    <span class="param">Сектор:</span>
+                        {% if can_edit %}
+                            <span class="pull-right" id="sector">
+                                {% if task.sector %}
+                                    <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
+                                {% else %}
+                                    <span>Нет</span>
+                                {% endif %}
+                                <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
+                            </span>
+                            <select class="pull-right selector hidden" id="sector-edit">
+                                {% if user|has_group:'Руководящая группа' %}
+                                <option class="selector-item" value="">Нет</option>
+                                {% endif %}
+                                {% for sector in sectors %}
+                                <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            <span class="pull-right">
+                                {% if task.sector %}
+                                    <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
                                 {% else %}
                                     <span>Нет</span>
                                 {% endif %}
@@ -263,11 +292,15 @@
     {% else %}
     <span id="event-current"></span>
     {% endif %}
+    {% if task.sector %}
+    <span id="sector-current">{{ task.sector.pk }}</span>
+    {% else %}
+    <span id="sector-current"></span>
+    {% endif %}
     <span id="num-current">{{ task.number_of_assignees }}</span>
     <span id="limit-current">{{ task.datetime_limit|date:'Y-m-d\TH:i' }}</span>
     <span id="est-hours-current" >{{ task.hours_predict|stringformat:"f" }}</span>
     <span id="desc-current">{{ task.description }}</span>
-    <span class="param">Кандидаты:</span>
     {% for assignee in task.assignees.all %}
         <span class="assignee">{{ assignee.pk }}</span>
     {% endfor %}

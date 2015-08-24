@@ -1,7 +1,7 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
-{% load add_class %}
-{% block title %} Сайт общежития №2 (ФИВТ) {% endblock %}
+{% load add_class has_group %}
+{% block title %} Сайт общежития №2 (ФИВТ) - Мероприятие {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
     <script src="{% static 'js/activism.js' %}"></script>
@@ -36,26 +36,58 @@
                             <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
                             {% endif %}
                             <br>
-                            <span class="param">Ответственные:</span>
+
+                            <span class="param">Сектор:</span>
+                                {% if user == event.creator  and event.status == 'open' %}
+                                    <span class="pull-right" id="sector">
+                                        {% if event.sector %}
+                                            <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
+                                        {% else %}
+                                            <span>Нет</span>
+                                        {% endif %}
+                                        <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
+                                    </span>
+                                    <select class="pull-right selector hidden" id="sector-edit">
+                                        <option class="selector-item" value="">Нет</option>
+                                        {% for sector in sectors %}
+                                        <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% else %}
+                                    <span class="pull-right">
+                                        {% if event.sector %}
+                                            <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
+                                        {% else %}
+                                            <span>Нет</span>
+                                        {% endif %}
+                                    </span>
+                                {% endif %}
+                            <br>
+                            
+                            {% if event.assignees.all.count == 0 %}
+                                <span class="param">Нет ответственных</span>
+                            {% else %}
+                                <span class="param">Ответственные:</span>
                                 {% for assignee in event.assignees.all %}
-                                
-                                <span class="pull-right">
-                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}" class="assignee" id="{{assignee.pk}}">{{ assignee.get_full_name }}</a>
+                                    <span class="pull-right">
+                                        <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a>
                                     {% if user == event.creator  and event.status == 'open' %}
-                                    <a href="#" class="red resign"> <i class="fa fa-user-times fa-lg"></i> </a>
+                                        <a href="#" class="red resign"> <i class="fa fa-user-times fa-lg"></i> </a>
                                     {% endif %}
                                     </span>
                                     <br>
                                 {% endfor %}
-                                {% if user == event.creator  and event.status == 'open' %} 
-                                    <span class="pull-right">
-                                        <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
-                                    </span>
-                                    <span class="pull-right">
-                                        {{ form.assignees_autocomplete|add_class:"hidden" }}
-                                    </span>
-                                    <br>
-                                {% endif %}
+                            {% endif %}
+                            {% if user == event.creator  and event.status == 'open' %}
+                                <span class="pull-right">
+                                    <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
+                                </span>
+                                <span class="pull-right">
+                                    {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                </span>
+                                <br>
+                            {% endif %}
+
                         </div>
                         <div class = "col-md-6">
                             <span class="param">Cтатус:</span>
@@ -67,18 +99,19 @@
                             {{ event.get_status_display }}
                             </span>
                             <br>
+
                             <span class="param">Дата создания:</span>
-                            <span class = "pull-right">{{ event.date_created }}</span><br>
+                            <span class = "pull-right">{{ event.date_created }}</span>
+                            <br>
                             <span class="param">Дата проведения:</span>
-                            {% if user == event.creator  and event.status == 'open' %}
+                            {% if user == event.creator and event.status == 'open' %}
                             <span class = "pull-right">
                                 <span id="date_held">
                                     {{ event.date_held }}
                                     <a href="#" class="light"><i class="fa fa-pencil" id="date_held-pencil"></i></a>
                                 </span>
-                                <span class="hidden" id="date_held_formatted">{{ event.date_held|date:'Y-m-d' }}</span>
-                                <span id="dateedit" class="hidden">
-                                    <input id="datepicker" type="date" value="{{event.date_held|date:'Y-m-d'}}">
+                                <span id="date_held-edit" class="hidden">
+                                    <input id="date_held-field" type="date" value="{{event.date_held|date:'Y-m-d'}}">
                                 </span>
                             </span>
                             {% else %}
@@ -91,13 +124,14 @@
                 <div class="section">
                     <h5 class="section-name">Описание {% if user == event.creator and event.status == 'open' %}<a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5> 
                     <hr class="just-a-line">
-                    {% if user == event.creator and event.status == 'open' %}
-                    <span class = "visible" id="desc">{{ event.description }}</span>
-                    <textarea class="form-control hidden" id="desc-area" rows="4">{{ event.description }}</textarea>
-                    {% else %}
+
                     <span id="desc">{{ event.description }}</span>
+                    {% if user == event.creator and event.status == 'open' %}
+                    <span class="hidden" id="desc-edit">
+                        <textarea class="form-control" id="desc-field" rows="4">{{ event.description }}</textarea>
+                    </span>
                     {% endif %}
-                    
+
                 </div>
                 <div class = "section">
                     <h5 class="section-name">Задачи</h5>
@@ -152,6 +186,22 @@
             <!--div class = "col-md-4">
             </div-->
         </div>
+
+{% if request.user == event.creator %}
+<div class="hidden currents">
+    {% if event.sector %}
+    <span id="sector-current">{{ event.sector.pk }}</span>
+    {% else %}
+    <span id="sector-current"></span>
+    {% endif %}
+    <span id="date_held-current">{{ event.date_held|date:'Y-m-d' }}</span>
+    <span id="desc-current">{{ event.description }}</span>
+    {% for assignee in event.assignees.all %}
+        <span class="assignee">{{ assignee.pk }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+
 
 {% include 'modal.html' %}
 {% endblock %}

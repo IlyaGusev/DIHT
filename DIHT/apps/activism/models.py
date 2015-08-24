@@ -10,6 +10,19 @@ from taggit.models import TaggedItemBase
 from django.core.urlresolvers import reverse
 
 
+class Sector(Model):
+    name = CharField("Название", max_length=50)
+    description = TextField("Описание", blank=True)
+    main = ForeignKey(User, verbose_name="Руководитель", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Сектор"
+        verbose_name_plural = "Секторы"
+
+    def __str__(self):
+        return str(self.name)
+
+
 class Event(Model):
     STATUS_CHOICES = (
         ('closed', 'Проведено'),
@@ -22,6 +35,7 @@ class Event(Model):
     description = TextField("Описание", blank=True)
     assignees = ManyToManyField(User, "Ответственные", related_name="events", blank=True)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=6)
+    sector = ForeignKey(Sector, related_name="events", verbose_name="Сектор", blank=True, null=True)
 
     class Meta:
         verbose_name = "Мероприятие"
@@ -47,6 +61,7 @@ class Task(Model):
         ('in_labor', 'На бирже'),
     )
 
+
     name = CharField("Название", max_length=50)
     creator = ForeignKey(User, verbose_name="Создатель", related_name="tasks_created")
     event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True, null=True)
@@ -64,6 +79,7 @@ class Task(Model):
     datetime_closed = DateTimeField("Время закрытия", blank=True, null=True)
     datetime_last_modified = DateTimeField("Время последнего изменения", default=timezone.now)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=15)
+    sector = ForeignKey(Sector, related_name="tasks", verbose_name="Сектор", blank=True, null=True)
     is_urgent = BooleanField("Срочное", default=False)
     is_hard = BooleanField("Тяжёлое", default=False)
 
@@ -85,7 +101,8 @@ class Task(Model):
 class AssigneeTask(Model):
     user = ForeignKey(User, verbose_name="Назначенный", related_name='participated')
     task = ForeignKey(Task, verbose_name="Задача", related_name='participants')
-    hours = FloatField("Реальные часы", blank=True, null=True)
+    hours = FloatField("Реальные часы", blank=True, null=True,
+                       validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
     approved = BooleanField("Подтверждено", default=False)
 
     def __str__(self):

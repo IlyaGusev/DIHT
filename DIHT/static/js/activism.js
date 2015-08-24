@@ -8,8 +8,10 @@ $(function() {
 
     $('#form-modal').on('shown.bs.modal', function () {
         if ($(this).find('form').hasClass('task-create-form'))
-            if ($('.event-name').text() != "")
+            if ($('.event-name').text() != ""){
                 $(this).find("#id_event option:contains("+$('.event-name').text()+")").attr('selected','selected');
+                $(this).find("#id_sector option:contains("+$('.sector-name').text()+")").attr('selected','selected');
+            }
     });
 
     $('#form-modal').on('submit', '.task-create-form,.event-create-form', function(ev) {
