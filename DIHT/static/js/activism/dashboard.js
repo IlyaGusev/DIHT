@@ -3,6 +3,4 @@ $(function() {
         $(this).toggleClass('fa-caret-up');
         $(this).toggleClass('fa-caret-down');
     })
-    
-    $('.sector-label').text('.');
 });

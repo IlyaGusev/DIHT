@@ -20,8 +20,7 @@
     padding-bottom: 5px;
 }
 
-.dash-panel h4 {
-    margin-top: 5px;
+.dash-panel .big-letters {
     margin-bottom: 5px;
 }
 
@@ -44,37 +43,55 @@
 .sector-label {
     display: inline-block;
     width: 10px;
+    margin-left: 3px;
+    margin-right: 6px;
 }
 
 .sector-label.purple
 {
-    background: #9911dd;
     color: #9911dd;
 }
-
+.dash-panel:hover .sector-label.purple
+{
+    color: #bb22ee;
+}
 .sector-label.red
 {
-    background: #fa0000;
     color: #fa0000;
 }
-
+.dash-panel:hover .sector-label.red
+{
+    color: #ff4400;
+}
 .sector-label.yellow
 {
-    background: #eeff00;
     color: #eeff00;
+}
+.dash-panel:hover .sector-label.yellow
+{
+    color: #ffdd00;
 }
 .sector-label.green
 {
-    background: #00e900;
     color: #00e900;
+}
+.dash-panel:hover .sector-label.green
+{
+    color: #00bb00;
 }
 .sector-label.blue
 {
-    background: #07A0DB;
     color: #07A0DB;
+}
+.dash-panel:hover .sector-label.blue
+{
+    color: #0077cc;
 }
 .sector-label.grey
 {
-    background: #aaaaaa;
     color: #aaaaaa;
+}
+.dash-panel:hover .sector-label.grey
+{
+    color: #888888;
 }
