@@ -212,6 +212,29 @@
                         <span class="pull-right">{{ task.datetime_limit }}</span>
                         {% endif %}
                     <br>
+
+                    <span class="param">Тэги:</span>
+                        {% if can_edit %}
+                        <span class="pull-right">
+                            <span id="tags">
+                                {% for tag in task.tags.all %}
+                                    &nbsp#{{ tag }}
+                                {% endfor %}
+                                <a href="#" class="light"><i class="fa fa-pencil" id="tags-pencil"></i></a>
+                            </span>
+                            <span id="tags-edit" class="hidden">
+                                {{ form.tags }}
+                            </span>
+                        </span>
+                        {% else %}
+                        <span class="pull-right">
+                            {% for tag in task.tags.all %}
+                                &nbsp{{ tag }}
+                            {% endfor %}
+                        </span>
+                        {% endif %}
+                    <br>
+
                     <br>
 
                     {% if user == task.creator %}
@@ -310,6 +333,7 @@
     {% for rejecter in task.rejected.all %}
         <span class="rejected">{{rejecter.pk}}</span>
     {% endfor %}
+    <span id="tags-current">{% for tag in task.tags.all %}{{ tag }},{% endfor %}</span>
 </div>
 {% endif %}
 

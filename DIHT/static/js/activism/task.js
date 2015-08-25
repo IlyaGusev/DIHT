@@ -34,6 +34,7 @@ $(function() {
 
         dat['event'] = $('#event-current').text();
         dat['sector'] = $('#sector-current').text();
+        dat['tags'] = $('#tags-current').text();
         dat['assignees'] = get_ids('.assignee');
         dat['candidates'] = get_ids('.candidate');
         dat['rejected'] = get_ids('.rejected');
@@ -61,6 +62,7 @@ $(function() {
             }
         });
     };
+
 
     $.each(fields, function (key, value) {
 	    $(key+'-pencil').click(function() {
@@ -97,6 +99,17 @@ $(function() {
 	$('#sector-edit').blur(function() {
 	    post_task({'sector': $('#sector-edit option:selected').val()})
 		transfer_class('hidden', '#sector', '#sector-edit');
+	})
+
+    // Tags
+	$('#tags-pencil').click(function() {
+	    transfer_class('hidden', '#tags-edit', '#tags');
+		$('#id_tags').focus();
+	})
+
+    $('#id_tags').blur(function() {
+	    post_task({'tags': $('#id_tags').val()})
+		transfer_class('hidden', '#tags', '#tags-edit');
 	})
 
 
