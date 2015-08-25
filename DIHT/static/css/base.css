@@ -1,15 +1,6 @@
 a.fivt-logo {
 	padding: 10px 15px;
 }
-
-ul.navbar-form  li {
-	float:left;
-}
-
-ul.navbar-form  li  a{
-	padding:5px 15px;
-}
-
 a {
 	text-decoration: none !important;
 }
@@ -53,4 +44,42 @@ html {
 
 #cell-for-vk-widget {
 	padding: 0px;
+}
+
+
+/* Fix for jumbrotron on mobiles */
+@media (max-width: 768px) {
+  .jumbotron {
+    padding: 2px 10px;
+    font-size:12px;
+  }
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html,
+body {
+    height: 100%;
+    /* The html and body elements cannot have any padding or margin. */
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    /* Negative indent footer by it's height */
+    margin: 0 auto -60px;
+}
+
+/* Set the fixed height of the footer here */
+#push, #footer {
+    height: 60px;
+}
+#footer {
+    background-color: #f5f5f5;
+}
+
+.container .credit {
+    margin: 20px 0;
 }
