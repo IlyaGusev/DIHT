@@ -58,6 +58,20 @@ body {
 	font-family: RobotoLight;
 } 
 
+/* Sizes */
+
+.usual-letters {
+	font-size: 14px;
+}
+
+.bigger-letters {
+    font-size: 16px;
+}
+
+.big-letters {
+    font-size: 18px;
+}
+
 /* Effects */
 
 .value-accent {
@@ -74,18 +88,6 @@ body {
 
 .lbl {
     font-size:90%;
-}
-
-.usual-letters {
-	font-size: 14px;
-}
-
-.bigger-letters {
-    font-size: 16px;
-}
-
-.big-letters {
-    font-size: 18px;
 }
 
 .just-a-line {
@@ -107,6 +109,12 @@ body {
 }
 
 /* Images */
+
+img.avatar {
+    border-radius:5px;
+    -webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
 
 img.round {
 	width: 128px;

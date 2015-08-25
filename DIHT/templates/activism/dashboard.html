@@ -32,7 +32,7 @@
                 </div>
                 <div class="panel-body collapse in" id="dash-events">
                     {% for event in events %}
-                        <a class="green" href="{% url 'activism:event' pk=event.pk %}">{{ event.name }}</a><br>
+                        <a class="" href="{% url 'activism:event' pk=event.pk %}">{{ event.name }}</a><br>
                     {% endfor %}
                     <a class="pull-right" href="{% url 'activism:events' %}">Все <i class="fa fa-chevron-right"></i></a>
                 </div>
@@ -145,7 +145,7 @@
                 {% else %}
                 <div class="panel panel-default">
                 {% endif %}
-                    <div class="panel-heading dash-panel" role="tab" id="heading{{task.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.pk}}" aria-expanded="false" aria-controls="body{{task.pk}}">
+                    <div class="panel-heading labor-pan" role="tab" id="heading{{task.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.pk}}" aria-expanded="false" aria-controls="body{{task.pk}}">
                         {% if task.sector.name == 'Проектный сектор' %}
                         <div class="sector-label purple"><i class='fa fa-lg fa-circle'></i></div>
                         {% elif task.sector.name == 'Информационный сектор' %}

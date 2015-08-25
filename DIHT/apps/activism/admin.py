@@ -1,5 +1,5 @@
 from django.contrib import admin
-from activism.models import Task, Event, AssigneeTask
+from activism.models import Task, Event, AssigneeTask, Sector
 
 
 class AssigneeTaskInline(admin.StackedInline):
@@ -12,5 +12,6 @@ class TaskAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Event)
+admin.site.register(Sector)
 admin.site.register(AssigneeTask)
 admin.site.register(Task, TaskAdmin)

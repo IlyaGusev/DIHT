@@ -69,17 +69,17 @@ body {
     height: auto !important;
     height: 100%;
     /* Negative indent footer by it's height */
-    margin: 0 auto -60px;
+    margin: 0 auto -40px;
 }
 
 /* Set the fixed height of the footer here */
 #push, #footer {
-    height: 60px;
+    height: 40px;
 }
 #footer {
     background-color: #f5f5f5;
 }
 
 .container .credit {
-    margin: 20px 0;
+    margin: 10px 0;
 }

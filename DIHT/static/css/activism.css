@@ -1,9 +1,13 @@
-.dash-panel {
+/* Task panels in labor */
+
+.labor-pan {
     cursor: pointer;
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 5px;
 }
+
+/* Left panels on dashboard */
 
 .dash-pan {
     margin-bottom: 10px;
@@ -20,8 +24,21 @@
     padding-bottom: 5px;
 }
 
-.dash-panel .big-letters {
-    margin-bottom: 5px;
+/* Panel on Sector page */
+
+.sevent-pan {
+    margin-bottom: 10px;
+}
+
+.sevent-pan .panel-heading{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 16px;
+}
+
+.sevent-pan .panel-body {
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .not-assigned {
@@ -39,6 +56,8 @@
 .deck{
     display:none !important;
 }
+
+/* Color labels in dashboard */
 
 .sector-label {
     display: inline-block;
