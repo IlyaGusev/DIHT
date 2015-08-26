@@ -74,6 +74,10 @@ body {
 
 /* Effects */
 
+p {
+    margin-bottom: 2px;
+}
+
 .value-accent {
 	font-family: RobotoBold;
 	font-size: 16;
@@ -96,7 +100,17 @@ body {
 }
 
 .param {
+    display: inline-block;
 	color: #777777;
+    width: 50%;
+    /*font-size: 12px;*/
+}
+
+.tsk-param {
+    display: inline-block;
+	color: #777777; 
+    width: 40%;
+    /*font-size: 12px;*/
 }
 
 .section {

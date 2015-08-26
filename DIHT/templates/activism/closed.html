@@ -1,0 +1,20 @@
+﻿{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load has_group %}
+{% block title %} Закрытые задачи {% endblock %}
+{% block main_active %} class = "active" {% endblock %}
+{% block custom_scripts %}
+    <script src="{% static 'js/activism.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/activism.css' %}">
+{% endblock %}
+{% block content %}
+<div class="row well namezone">
+    <h3 class="task-name nametext"> Закрытые задачи </h3>
+</div>
+<div class = "row pagezone">
+    {% for task in tasks %}
+        <a>{{task.name}}</a><br>
+    {% endfor %}
+</div>
+{% include "modal.html" %}
+{% endblock %}

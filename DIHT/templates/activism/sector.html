@@ -16,11 +16,11 @@
         <img src="{% static 'img/3.jpg' %}" class="img-responsive"></img>
     </div>
     <div class="col-md-7">
-        <p><span class="robotobold" style="margin-right:10px;">Руководитель:</span>
+        <p style="margin-bottom:10px;"><span class="robotobold" style="margin-right:10px;">Руководитель:</span>
         <a href="{% url 'accounts:profile' pk=sector.main.pk %}">{% if sector.main.avatar.img %}
-                {% thumbnail sector.main.avatar.img "22x22" crop="center" as pic %}
-                <img src="{{ pic.url }}" class="avatar">
-                {% endthumbnail %}
+            {% thumbnail sector.main.avatar.img "22x22" crop="center" as pic %}
+            <img src="{{ pic.url }}" class="avatar">
+            {% endthumbnail %}
         {% endif %}{{ sector.main.get_full_name }}</a></p>
         {{ sector.description }}
     </div>

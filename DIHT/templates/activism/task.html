@@ -1,6 +1,7 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
 {% load add_class has_group %}
+{% load thumbnail %}
 {% block title %} Задача {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
@@ -60,9 +61,10 @@
             <div class = "row">
                 <div class = "col-md-6">
 
-                    <span class="param">Мероприятие:</span>
+                    <p>
+                    <span class="tsk-param">Мероприятие:</span>
                         {% if can_edit %}
-                            <span class="pull-right" id="event">
+                            <span class="" id="event">
                                 {% if task.event %}
                                     <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
                                 {% else %}
@@ -70,7 +72,7 @@
                                 {% endif %}
                                 <a href="#" class="light"><i class="fa fa-pencil" id="event-pencil"></i></a>
                             </span>
-                            <select class="pull-right selector hidden" id="event-edit">
+                            <select class=" selector hidden" id="event-edit">
                                 {% if user|has_group:'Руководящая группа' %}
                                 <option class="selector-item" value="">Нет</option>
                                 {% endif %}
@@ -79,7 +81,7 @@
                                 {% endfor %}
                             </select>
                         {% else %}
-                            <span class="pull-right">
+                            <span class="">
                                 {% if task.event %}
                                     <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
                                 {% else %}
@@ -87,11 +89,11 @@
                                 {% endif %}
                             </span>
                         {% endif %}
-                    <br>
-
-                    <span class="param">Сектор:</span>
+                    </p>
+                    <p>
+                    <span class="tsk-param">Сектор:</span>
                         {% if can_edit %}
-                            <span class="pull-right" id="sector">
+                            <span class="" id="sector">
                                 {% if task.sector %}
                                     <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
                                 {% else %}
@@ -99,7 +101,7 @@
                                 {% endif %}
                                 <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                             </span>
-                            <select class="pull-right selector hidden" id="sector-edit">
+                            <select class="selector hidden" id="sector-edit">
                                 {% if user|has_group:'Руководящая группа' %}
                                 <option class="selector-item" value="">Нет</option>
                                 {% endif %}
@@ -108,7 +110,7 @@
                                 {% endfor %}
                             </select>
                         {% else %}
-                            <span class="pull-right">
+                            <span class="">
                                 {% if task.sector %}
                                     <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
                                 {% else %}
@@ -116,18 +118,28 @@
                                 {% endif %}
                             </span>
                         {% endif %}
-                    <br>
-
-                    <span class="param">Создатель:</span>
+                    </p>
+                    <p>
+                    <span class="tsk-param">Создатель:</span>
                         {% if user == task.creator %}
-                        <span class="pull-right">{{ task.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
-                        {% else %}
-                        <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class="pull-right">{{ task.creator.get_full_name }}</a>
-                        {% endif %}
-                    <br>
-
-                    <span class="param">Количество людей:</span>
-                        <span class="pull-right">
+                            <span class="">{% if task.creator.avatar.img %}
+                                {% thumbnail task.creator.avatar.img "20x20" crop="center" as pic %}
+                                <img src="{{ pic.url }}" class="avatar">
+                                {% endthumbnail %}
+                            {% endif %} {{ task.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
+                            {% else %}
+                            <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class = "">
+                            {% if task.creator.avatar.img %}
+                                {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
+                                <img src="{{ pic.url }}" class="avatar">
+                                {% endthumbnail %}
+                            {% endif %}
+                            {{ task.creator.get_full_name }}</a>
+                            {% endif %}
+                    </p>
+                    <p style="margin-bottom:15px">
+                    <span class="tsk-param">Количество людей:</span>
+                        <span class="">
                             {% if can_edit %}
                                 <span id="num">{{ task.number_of_assignees }} чел.
                                     <a href="#" class="light"><i class="fa fa-pencil" id="num-pencil"></i></a>
@@ -139,94 +151,107 @@
                                 <span>{{ task.number_of_assignees }} чел.</span>
                             {% endif %}
                         </span>
-                    <br>
-                    <br>
+                    </p>
 
                 {% if task.assignees.all.count == 0 %}
-                    <span class="param">Нет исполнителей</span>
+                    <p><span style="white-space: nowrap"><span class="tsk-param">Нет исполнителей</span>
                 {% else %}
-                    <span class="param">Исполнители:</span>
+                    <p><span style="white-space: nowrap"><span class="tsk-param">Исполнители:</span>
                     {% for assignee in task.assignees.all %}
-                        <span class="pull-right">
-                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a>
+                        
+                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">
+                                {% if assignee.avatar.img %}
+                                    {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
+                                    <img src="{{ pic.url }}" class="avatar">
+                                    {% endthumbnail %}
+                                {% endif %}
+                                {{ assignee.get_full_name }}</a>
                         {% if can_edit %}
                             <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"> <i class="fa fa-user-times fa-lg"></i> </a>
                         {% endif %}
                         </span>
-                        <br>
+                        </p><p><span style="white-space: nowrap">
+                        <span class="tsk-param"></span>
                     {% endfor %}
                 {% endif %}
                 {% if can_edit %}
-                    <span class="pull-right">
+                    <span class="">
                         <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
                     </span>
-                    <span class="pull-right">
+                    <span class="">
                         {{ form.assignees_autocomplete|add_class:"hidden" }}
                     </span>
-                    <br>
-                {% endif %}
+                    
+                {% endif %}</span></p>
                 </div>
                 <div class = "col-md-6">
-
-                    <span class="param">Статус:</span>
+                    <p>
+                    <span class="tsk-param">Статус:</span>
                     {% if task.status == 'closed' %}
-                        <span class="label lbl label-success pull-right">
+                        <span class="label lbl label-success">
                     {% elif task.status == 'resolved' %}
-                        <span class="label lbl label-primary pull-right">
+                        <span class="label lbl label-primary">
                     {% elif task.status == 'in_progress' %}
-                        <span class="label lbl label-warning pull-right">
+                        <span class="label lbl label-warning">
                     {% elif task.status == 'open' %}
-                        <span class="label lbl label-default pull-right">
+                        <span class="label lbl label-default">
                     {% elif task.status == 'in_labor' %}
-                        <span class="label lbl label-danger pull-right">
+                        <span class="label lbl label-danger ">
                     {% elif task.status == 'volunteers' %}
-                        <span class="label lbl label-info pull-right">
+                        <span class="label lbl label-info">
                     {% endif %}
                             {{ task.get_status_display }}
                         </span>
-                    <br>
-                    <span class="param">Особенности:</span>
+                    </p>
+                    <p>
+                    <span class="tsk-param">Особенности:</span>
                     {% if task.is_urgent %}
-                    <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
+                    <span class="priotity" style="color:red; font-family:'RobotoBold'">
                         СРОЧНОЕ
                     </span>
                     {% endif %}
                     {% if task.is_hard %}
-                    <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
+                    <span class="priotity" style="color:red; font-family:'RobotoBold'">
                         ТРУДНОЕ
                     </span>
                     {% endif %}
-                    <br>
-
-                    <span class="param">Сроки:</span>
+                    </p>
+                    <p style="white-space:nowrap; margin-bottom: 15px;">
+                    <span class="tsk-param">Сроки:</span>
                         {% if can_edit %}
-                        <span class="pull-right">
-                            <span id="limit">{{ task.datetime_limit }}
-                                <a href="#" class="light"><i class="fa fa-pencil" id="limit-pencil"></i></a>
+                        <span class="">
+                            <span id="limit" >{{ task.datetime_limit }}
+                                <a href="#" class="light" ><i class="fa fa-pencil" id="limit-pencil"></i></a>
                             </span>
                             <span id="limit-edit" class="hidden">
                                 <input id="limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
                             </span>
                         </span>
                         {% else %}
-                        <span class="pull-right">{{ task.datetime_limit }}</span>
+                        {{ task.datetime_limit }}
                         {% endif %}
-                    <br>
-                    <br>
+                    </p>
 
                     {% if user == task.creator %}
                         {% if task.candidates.all.count == 0 %}
                             <span class="grey">Нет кандидатов</span>
                         {% else %}
-                            <span class="param">Кандидаты:</span>
+                            <p><span style="white-space: nowrap"><span class="tsk-param">Кандидаты:</span>
                             {% for candidate in task.candidates.all %}
-                            <span class="pull-right">
-                                <a href="{% url 'accounts:profile' pk=assignee.pk %}" id="{{candidate.pk}}">{{ candidate.get_full_name }}</a>
+                            
+                                <a href="{% url 'accounts:profile' pk=assignee.pk %}" id="{{candidate.pk}}">
+                                {% if candidate.avatar.img %}
+                                    {% thumbnail candidate.avatar.img "22x22" crop="center" as pic %}
+                                    <img src="{{ pic.url }}" class="avatar">
+                                    {% endthumbnail %}
+                                {% endif %}
+                                {{ candidate.get_full_name }}</a>
                                 <a href="#" class="blue approve" title="Назначить на задачу"> <i class="fa fa-thumbs-o-up fa-lg"></i> </a>
                                 <a href="#" class="red reject" title="Отклонить заявку"> <i class="fa fa-thumbs-o-down fa-lg"></i> </a>
-                            </span>
-                            <br>
+                            </span></span></p><p><span style="white-space: nowrap">
+                                    <span class="tsk-param"> </span>
                             {% endfor %}
+                            </p>
                         {% endif %}
                     {% endif %}
                     <br>
@@ -252,7 +277,7 @@
             <h5 class="section-name">Волонтерские часы</h5>
             <hr class="just-a-line">
             {% if can_edit %}
-                <span class="param">Расчетные:</span>
+                <span class="tsk-param">Расчетные:</span>
                 <span class="pull-right">
                     <span id="est-hours">
                         {% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}
@@ -263,22 +288,22 @@
                     </span>
                 </span>
             {% else %}
-                <span class="param">Расчетные:</span>
+                <span class="tsk-param">Расчетные:</span>
                 <span class="pull-right">{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}</span>
                 <br>
             {% endif %}
             {% if task.hours_real  %}
-                <span class="param">Реальные:</span>
+                <span class="tsk-param">Реальные:</span>
                 <span class="pull-right">{% if task.hours_real %}{{ task.hours_real }} час.{% endif %}</span>
             {% endif %}
         </div>
         <div class="section">
             <h5 class="section-name">Даты</h5>
             <hr class="just-a-line">
-            <span class="param">Создано:</span> <span class="pull-right">{{ task.datetime_created }}</span> <br>
-            <span class="param">Последнее изменение:</span> <span class="pull-right">{{ task.datetime_last_modified }}</span> <br>
+            <span class="tsk-param">Создано:</span> <span class="pull-right">{{ task.datetime_created }}</span> <br>
+            <span class="tsk-param">Последнее изменение:</span> <span class="pull-right">{{ task.datetime_last_modified }}</span> <br>
             {% if task.datetime_closed %}
-            <span class="param">Закрыто:</span> <span class="pull-right">{{ task.datetime_closed }}</span>
+            <span class="tsk-param">Закрыто:</span> <span class="pull-right">{{ task.datetime_closed }}</span>
             {% endif %}
         </div>
     </div>

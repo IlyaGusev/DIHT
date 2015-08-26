@@ -253,3 +253,15 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
 class SectorView(LoginRequiredMixin, DetailView):
     model = Sector
     template_name = "activism/sector.html"
+    
+class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
+    model = Task
+    template_name = 'activism/closed.html'
+    group_required = "Активисты"
+    raise_exception = True
+    context_object_name = 'tasks'
+    
+    def get_context_data(self, **kwargs):
+        context = super(ClosedTasksView, self).get_context_data(**kwargs)
+        context['tasks'] = context['tasks'].filter(status__in=['closed']).order_by('-datetime_last_modified')
+        return context

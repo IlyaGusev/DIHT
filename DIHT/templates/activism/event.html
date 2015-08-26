@@ -1,5 +1,6 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
+{% load thumbnail %}
 {% load add_class has_group %}
 {% block title %} Мероприятие {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
@@ -9,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
 {% block content %}
         <div class="row well namezone">
-            <h3 class="event-name">{{ event.name }}</h3>
+            <h3 class="nametext">{{ event.name }}</h3>
         </div>
         <div class = "row pagezone">
             {% if user == event.creator and event.status == 'open'%}
@@ -29,17 +30,10 @@
                     <hr class="just-a-line">
                     <div class = "row">
                         <div class = "col-md-6">
-                            <span class="param">Создатель:</span>
-                            {% if user == event.creator %}
-                            <span class="pull-right">{{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
-                            {% else %}
-                            <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
-                            {% endif %}
-                            <br>
-
-                            <span class="param">Сектор:</span>
+                            <p>
+                            <div class="param">Сектор:</div>
                                 {% if user == event.creator  and event.status == 'open' %}
-                                    <span class="pull-right" id="sector">
+                                    <span class="" id="sector">
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
                                         {% else %}
@@ -47,14 +41,14 @@
                                         {% endif %}
                                         <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                                     </span>
-                                    <select class="pull-right selector hidden" id="sector-edit">
+                                    <select class="selector hidden" id="sector-edit">
                                         <option class="selector-item" value="">Нет</option>
                                         {% for sector in sectors %}
                                         <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
                                         {% endfor %}
                                     </select>
                                 {% else %}
-                                    <span class="pull-right">
+                                    <span class="">
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
                                         {% else %}
@@ -62,50 +56,79 @@
                                         {% endif %}
                                     </span>
                                 {% endif %}
-                            <br>
+                            </p>
+                            <p>
+                            <span class="param">Создатель:</span>
+                            {% if user == event.creator %}
+                            <span class="">{% if event.creator.avatar.img %}
+                                {% thumbnail event.creator.avatar.img "20x20" crop="center" as pic %}
+                                <img src="{{ pic.url }}" class="avatar">
+                                {% endthumbnail %}
+                            {% endif %} {{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
+                            {% else %}
+                            <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "">
+                            {% if event.creator.avatar.img %}
+                                {% thumbnail event.creator.avatar.img "22x22" crop="center" as pic %}
+                                <img src="{{ pic.url }}" class="avatar">
+                                {% endthumbnail %}
+                            {% endif %}
+                            {{ event.creator.get_full_name }}</a>
+                            {% endif %}
+                            </p>
+                            
                             
                             {% if event.assignees.all.count == 0 %}
-                                <span class="param">Нет ответственных</span>
+                                <p><span style="white-space: nowrap"><span class="param">Нет ответственных</span>
                             {% else %}
-                                <span class="param">Ответственные:</span>
+                                <p><span style="white-space: nowrap"><span class="param">Ответственные:</span>
                                 {% for assignee in event.assignees.all %}
-                                    <span class="pull-right">
-                                        <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a>
+                                    <span class="">
+                                        <a href="{% url 'accounts:profile' pk=assignee.pk %}">
+                                        {% if assignee.avatar.img %}
+                                            {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
+                                            <img src="{{ pic.url }}" class="avatar">
+                                            {% endthumbnail %}
+                                        {% endif %}
+                                        {{ assignee.get_full_name }}</a>
                                     {% if user == event.creator  and event.status == 'open' %}
                                         <a href="#" class="red resign"> <i class="fa fa-user-times fa-lg"></i> </a>
                                     {% endif %}
-                                    </span>
-                                    <br>
+                                    </span></span></p><p><span style="white-space: nowrap">
+                                    <span class="param"> </span>
                                 {% endfor %}
+                                
                             {% endif %}
                             {% if user == event.creator  and event.status == 'open' %}
-                                <span class="pull-right">
+                                <span class="">
                                     <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
                                 </span>
-                                <span class="pull-right">
+                                <span class="">
                                     {{ form.assignees_autocomplete|add_class:"hidden" }}
                                 </span>
-                                <br>
-                            {% endif %}
+                                
+                            {% endif %}</span></p>
+                            
 
                         </div>
                         <div class = "col-md-6">
+                            <p>
                             <span class="param">Cтатус:</span>
                             {% if event.status == 'closed' %}
-                            <span class="label label-success pull-right">
+                            <span class="label label-success">
                             {% elif event.status == 'open' %}
-                            <span class="label label-danger pull-right">
+                            <span class="label label-danger">
                             {% endif %}
                             {{ event.get_status_display }}
                             </span>
-                            <br>
-
+                            </p>
+                            <p>
                             <span class="param">Дата создания:</span>
-                            <span class = "pull-right">{{ event.date_created }}</span>
-                            <br>
+                            <span class = "">{{ event.date_created }}</span>
+                            </p>
+                            <p>
                             <span class="param">Дата проведения:</span>
                             {% if user == event.creator and event.status == 'open' %}
-                            <span class = "pull-right">
+                            
                                 <span id="date_held">
                                     {{ event.date_held }}
                                     <a href="#" class="light"><i class="fa fa-pencil" id="date_held-pencil"></i></a>
@@ -113,11 +136,11 @@
                                 <span id="date_held-edit" class="hidden">
                                     <input id="date_held-field" type="date" value="{{event.date_held|date:'Y-m-d'}}">
                                 </span>
-                            </span>
+                            
                             {% else %}
-                            <span class="pull-right">{{ event.date_held }}</span>
+                            <span class="">{{ event.date_held }}</span>
                             {% endif %}
-                            <br>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -148,7 +171,12 @@
                                 <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
                                 <td>{{ task.name }}</td>
                                 <td> {% for part in task.participants.all %}
-                                    <a href="{% url 'accounts:profile' pk=part.user.pk %}">{{ part.user.get_full_name }}</a><br>
+                                    <a href="{% url 'accounts:profile' pk=part.user.pk %}">
+                                    {% if part.user.avatar.img %}
+                                            {% thumbnail part.user.avatar.img "22x22" crop="center" as pic %}
+                                            <img src="{{ pic.url }}" class="avatar">
+                                            {% endthumbnail %}
+                                        {% endif %}{{ part.user.get_full_name }}</a><br>
                                     {% endfor %}
                                 </td>
                                 <td>
