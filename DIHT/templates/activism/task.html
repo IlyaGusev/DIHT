@@ -125,21 +125,6 @@
                         <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class="pull-right">{{ task.creator.get_full_name }}</a>
                         {% endif %}
                     <br>
-
-                    <span class="param">Количество людей:</span>
-                        <span class="pull-right">
-                            {% if can_edit %}
-                                <span id="num">{{ task.number_of_assignees }} чел.
-                                    <a href="#" class="light"><i class="fa fa-pencil" id="num-pencil"></i></a>
-                                </span>
-                                <span id="num-edit" class="hidden">
-                                    <input id="num-field" type="number" min="1" max="99" value="{{ task.number_of_assignees }}"> чел.
-                                </span>
-                            {% else %}
-                                <span>{{ task.number_of_assignees }} чел.</span>
-                            {% endif %}
-                        </span>
-                    <br>
                     <br>
 
                 {% if task.assignees.all.count == 0 %}
@@ -199,27 +184,19 @@
                     </span>
                     {% endif %}
                     <br>
-                    <span class="param">Тэги:</span>
-                        {% if can_edit %}
+                    <span class="param">Количество людей:</span>
                         <span class="pull-right">
-                            <span id="tags">
-                                {% for tag in task.tags.all %}
-                                    &nbsp#{{ tag }}
-                                {% endfor %}
-                                <a href="#" class="light"><i class="fa fa-pencil" id="tags-pencil"></i></a>
-                            </span>
-                            <span id="tags-edit" class="hidden">
-                                {{ form.tags }}
-                            </span>
+                            {% if can_edit %}
+                                <span id="num">{{ task.number_of_assignees }} чел.
+                                    <a href="#" class="light"><i class="fa fa-pencil" id="num-pencil"></i></a>
+                                </span>
+                                <span id="num-edit" class="hidden">
+                                    <input id="num-field" type="number" min="1" max="99" value="{{ task.number_of_assignees }}"> чел.
+                                </span>
+                            {% else %}
+                                <span>{{ task.number_of_assignees }} чел.</span>
+                            {% endif %}
                         </span>
-                        {% else %}
-                        <span class="pull-right">
-                            {% for tag in task.tags.all %}
-                                &nbsp{{ tag }}
-                            {% endfor %}
-                        </span>
-                        {% endif %}
-                    <br>
                     <br>
                     <br>
 
@@ -253,8 +230,29 @@
                 <textarea class="form-control" id="desc-field" rows="4">{{ task.description }}</textarea>
             </span>
             {% endif %}
-
         </div>
+        <div class="section">
+            {% if can_edit %}
+            <span>
+                <span id="tags">
+                    {% for tag in task.tags.all %}
+                        &nbsp#{{ tag }}
+                    {% endfor %}
+                    <a href="#" class="light"><i class="fa fa-pencil" id="tags-pencil"></i></a>
+                </span>
+                <span id="tags-edit" class="hidden">
+                    {{ form.tags }}
+                </span>
+            </span>
+            {% else %}
+            <span class="pull-right">
+                {% for tag in task.tags.all %}
+                    &nbsp{{ tag }}
+                {% endfor %}
+            </span>
+            {% endif %}
+        </div>
+        <br>
     </div>
     <div class = "col-md-4">
         <div class="section">
