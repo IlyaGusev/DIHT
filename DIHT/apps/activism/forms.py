@@ -7,7 +7,7 @@ import autocomplete_light
 
 
 class TaskCreateForm(ModelForm):
-    tags = TaggitField(widget=TaggitWidget('TagAutocomplete'))
+    tags = TaggitField(widget=TaggitWidget('TagAutocomplete'), required=False, label="Теги")
 
     def __init__(self, user, *args, **kwargs):
         super(TaskCreateForm, self).__init__(*args, **kwargs)
@@ -25,7 +25,7 @@ class TaskCreateForm(ModelForm):
 class TaskForm(ModelForm):
     assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
     assignees = CharField(required=False)
-    tags = TaggitField(widget=TaggitWidget('TagAutocomplete'))
+    tags = TaggitField(widget=TaggitWidget('TagAutocomplete'), required=False)
 
     class Meta:
         model = Task

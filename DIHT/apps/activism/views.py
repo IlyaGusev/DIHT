@@ -8,6 +8,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
+from django.utils import timezone
 from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
 from activism.models import Event, Task, AssigneeTask, Sector
 from activism.forms import TaskForm, EventForm, TaskCreateForm
@@ -234,6 +235,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                             through.hours = user_hours
                             if action == 'close':
                                 through.approved = True
+                                task.datetime_closed = timezone.now()
                             through.save()
                     task.status = init[task.status][0]
                     task.save()

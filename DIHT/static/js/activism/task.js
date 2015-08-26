@@ -156,4 +156,11 @@ $(function() {
 		rejected.push(reject_id);
         post_task({'candidates': candidates, 'rejected': rejected});
 	})
+
+	$(document).ready(function() {
+        if ($('#event-current').text()!='')
+            $('#event-edit option[value='+$('#event-current').text()+']').attr("selected",true);
+        if ($('#sector-current').text()!='')
+            $('#sector-edit option[value='+$('#sector-current').text()+']').attr("selected",true);
+    });
 });

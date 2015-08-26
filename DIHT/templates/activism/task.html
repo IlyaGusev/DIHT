@@ -165,6 +165,7 @@
                     </span>
                     <br>
                 {% endif %}
+                    <br>
                 </div>
                 <div class = "col-md-6">
 
@@ -185,6 +186,7 @@
                             {{ task.get_status_display }}
                         </span>
                     <br>
+
                     <span class="param">Особенности:</span>
                     {% if task.is_urgent %}
                     <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
@@ -197,22 +199,6 @@
                     </span>
                     {% endif %}
                     <br>
-
-                    <span class="param">Сроки:</span>
-                        {% if can_edit %}
-                        <span class="pull-right">
-                            <span id="limit">{{ task.datetime_limit }}
-                                <a href="#" class="light"><i class="fa fa-pencil" id="limit-pencil"></i></a>
-                            </span>
-                            <span id="limit-edit" class="hidden">
-                                <input id="limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
-                            </span>
-                        </span>
-                        {% else %}
-                        <span class="pull-right">{{ task.datetime_limit }}</span>
-                        {% endif %}
-                    <br>
-
                     <span class="param">Тэги:</span>
                         {% if can_edit %}
                         <span class="pull-right">
@@ -234,7 +220,7 @@
                         </span>
                         {% endif %}
                     <br>
-
+                    <br>
                     <br>
 
                     {% if user == task.creator %}
@@ -290,9 +276,12 @@
                 <span class="pull-right">{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}</span>
                 <br>
             {% endif %}
-            {% if task.hours_real  %}
+            {% if task.status == 'closed' or task.status == 'resolved' %}
                 <span class="param">Реальные:</span>
-                <span class="pull-right">{% if task.hours_real %}{{ task.hours_real }} час.{% endif %}</span>
+                {% for entity in through %}
+                    <span class="pull-right">{{entity.user.get_full_name}} - {{entity.hours}} час.</span>
+                    <br>
+                {% endfor %}
             {% endif %}
         </div>
         <div class="section">
@@ -300,6 +289,20 @@
             <hr class="just-a-line">
             <span class="param">Создано:</span> <span class="pull-right">{{ task.datetime_created }}</span> <br>
             <span class="param">Последнее изменение:</span> <span class="pull-right">{{ task.datetime_last_modified }}</span> <br>
+            <span class="param">Сроки:</span>
+                {% if can_edit %}
+                <span class="pull-right">
+                    <span id="limit">{{ task.datetime_limit }}
+                        <a href="#" class="light"><i class="fa fa-pencil" id="limit-pencil"></i></a>
+                    </span>
+                    <span id="limit-edit" class="hidden">
+                        <input id="limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
+                    </span>
+                </span>
+                {% else %}
+                <span class="pull-right">{{ task.datetime_limit }}</span>
+                {% endif %}
+            <br>
             {% if task.datetime_closed %}
             <span class="param">Закрыто:</span> <span class="pull-right">{{ task.datetime_closed }}</span>
             {% endif %}

@@ -8,184 +8,184 @@
     <script src="{% static 'js/activism/event.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
 {% block content %}
-        <div class="row well namezone">
-            <h3 class="event-name">{{ event.name }}</h3>
+<div class="row well namezone">
+    <h3 class="event-name nametext">{{ event.name }}</h3>
+</div>
+<div class = "row pagezone">
+    {% if user == event.creator and event.status == 'open'%}
+    <div class = "row">
+        <div class="col-md-12" style="padding-left:40px;">
+        {% if can_close %}
+            <a class="btn btn-default" href="{% url 'activism:event_action' pk=event.pk action='close'%}"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
+        {% else %}
+            <a class="btn btn-default disabled"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
+        {% endif %}
         </div>
-        <div class = "row pagezone">
-            {% if user == event.creator and event.status == 'open'%}
+    </div>
+    {% endif %}
+    <div class = "col-md-12">
+        <div class="section">
+            <h5 class="section-name">Информация</h5>
+            <hr class="just-a-line">
             <div class = "row">
-                <div class="col-md-12" style="padding-left:40px;">
-                {% if can_close %}
-                    <a class="btn btn-default" href="{% url 'activism:event_action' pk=event.pk action='close'%}"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
-                {% else %}
-                    <a class="btn btn-default disabled"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
-                {% endif %}
-                </div>
-            </div>
-            {% endif %}
-            <div class = "col-md-12">
-                <div class="section">
-                    <h5 class="section-name">Информация</h5>
-                    <hr class="just-a-line">
-                    <div class = "row">
-                        <div class = "col-md-6">
-                            <span class="param">Создатель:</span>
-                            {% if user == event.creator %}
-                            <span class="pull-right">{{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
-                            {% else %}
-                            <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
-                            {% endif %}
-                            <br>
+                <div class = "col-md-6">
+                    <span class="param">Создатель:</span>
+                    {% if user == event.creator %}
+                    <span class="pull-right">{{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
+                    {% else %}
+                    <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "pull-right">{{ event.creator.get_full_name }}</a>
+                    {% endif %}
+                    <br>
 
-                            <span class="param">Сектор:</span>
-                                {% if user == event.creator  and event.status == 'open' %}
-                                    <span class="pull-right" id="sector">
-                                        {% if event.sector %}
-                                            <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
-                                        {% else %}
-                                            <span>Нет</span>
-                                        {% endif %}
-                                        <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
-                                    </span>
-                                    <select class="pull-right selector hidden" id="sector-edit">
-                                        <option class="selector-item" value="">Нет</option>
-                                        {% for sector in sectors %}
-                                        <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
-                                        {% endfor %}
-                                    </select>
+                    <span class="param">Сектор:</span>
+                        {% if user == event.creator  and event.status == 'open' %}
+                            <span class="pull-right" id="sector">
+                                {% if event.sector %}
+                                    <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
                                 {% else %}
-                                    <span class="pull-right">
-                                        {% if event.sector %}
-                                            <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
-                                        {% else %}
-                                            <span>Нет</span>
-                                        {% endif %}
-                                    </span>
+                                    <span>Нет</span>
                                 {% endif %}
-                            <br>
-                            
-                            {% if event.assignees.all.count == 0 %}
-                                <span class="param">Нет ответственных</span>
-                            {% else %}
-                                <span class="param">Ответственные:</span>
-                                {% for assignee in event.assignees.all %}
-                                    <span class="pull-right">
-                                        <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a>
-                                    {% if user == event.creator  and event.status == 'open' %}
-                                        <a href="#" class="red resign"> <i class="fa fa-user-times fa-lg"></i> </a>
-                                    {% endif %}
-                                    </span>
-                                    <br>
+                                <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
+                            </span>
+                            <select class="pull-right selector hidden" id="sector-edit">
+                                <option class="selector-item" value="">Нет</option>
+                                {% for sector in sectors %}
+                                <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
                                 {% endfor %}
-                            {% endif %}
-                            {% if user == event.creator  and event.status == 'open' %}
-                                <span class="pull-right">
-                                    <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
-                                </span>
-                                <span class="pull-right">
-                                    {{ form.assignees_autocomplete|add_class:"hidden" }}
-                                </span>
-                                <br>
-                            {% endif %}
-
-                        </div>
-                        <div class = "col-md-6">
-                            <span class="param">Cтатус:</span>
-                            {% if event.status == 'closed' %}
-                            <span class="label label-success pull-right">
-                            {% elif event.status == 'open' %}
-                            <span class="label label-danger pull-right">
-                            {% endif %}
-                            {{ event.get_status_display }}
-                            </span>
-                            <br>
-
-                            <span class="param">Дата создания:</span>
-                            <span class = "pull-right">{{ event.date_created }}</span>
-                            <br>
-                            <span class="param">Дата проведения:</span>
-                            {% if user == event.creator and event.status == 'open' %}
-                            <span class = "pull-right">
-                                <span id="date_held">
-                                    {{ event.date_held }}
-                                    <a href="#" class="light"><i class="fa fa-pencil" id="date_held-pencil"></i></a>
-                                </span>
-                                <span id="date_held-edit" class="hidden">
-                                    <input id="date_held-field" type="date" value="{{event.date_held|date:'Y-m-d'}}">
-                                </span>
-                            </span>
-                            {% else %}
-                            <span class="pull-right">{{ event.date_held }}</span>
-                            {% endif %}
-                            <br>
-                        </div>
-                    </div>
-                </div>
-                <div class="section">
-                    <h5 class="section-name">Описание {% if user == event.creator and event.status == 'open' %}<a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5> 
-                    <hr class="just-a-line">
-
-                    <span id="desc">{{ event.description }}</span>
-                    {% if user == event.creator and event.status == 'open' %}
-                    <span class="hidden" id="desc-edit">
-                        <textarea class="form-control" id="desc-field" rows="4">{{ event.description }}</textarea>
-                    </span>
-                    {% endif %}
-
-                </div>
-                <div class = "section">
-                    <h5 class="section-name">Задачи</h5>
-                    <div class="table-responsive">
-                        <table class = "table usual-letters">
-                            <tr>
-                                <th>Номер</th>
-                                <th>Задача</th>
-                                <th>Исполнитель(-и)</th>
-                                <th>Статус</th>
-                            </tr>
-                            {% for task in event.tasks.all %}
-                            <tr>
-                                <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
-                                <td>{{ task.name }}</td>
-                                <td> {% for part in task.participants.all %}
-                                    <a href="{% url 'accounts:profile' pk=part.user.pk %}">{{ part.user.get_full_name }}</a><br>
-                                    {% endfor %}
-                                </td>
-                                <td>
-                                <span class="">
-                                {% if task.status == 'closed' %}
-                                    <span class="label lbl label-success">
-                                {% elif task.status == 'resolved' %}
-                                    <span class="label lbl label-primary">
-                                {% elif task.status == 'in_progress' %}
-                                    <span class="label lbl label-warning">
-                                {% elif task.status == 'open' %}
-                                    <span class="label lbl label-default">
-                                {% elif task.status == 'in_labor' %}
-                                    <span class="label lbl label-danger">
-                                {% elif task.status == 'volunteers' %}
-                                    <span class="label lbl label-info ">
+                            </select>
+                        {% else %}
+                            <span class="pull-right">
+                                {% if event.sector %}
+                                    <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
+                                {% else %}
+                                    <span>Нет</span>
                                 {% endif %}
-                                        {{ task.get_status_display }}</span>
-                                </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    {% if user == event.creator and event.status == 'open' %}
-                    <center><a href="{% url 'activism:create_task' %}"
-                               class="btn btn-default robotobold"
-                               data-target="#form-modal">
-                            <i class="fa fa-tasks fa-lg" style="margin-right:10px"></i> Новая задача</i>
-                        </a>
-                    </center>
+                            </span>
+                        {% endif %}
+                    <br>
+
+                    {% if event.assignees.all.count == 0 %}
+                        <span class="param">Нет ответственных</span>
+                    {% else %}
+                        <span class="param">Ответственные:</span>
+                        {% for assignee in event.assignees.all %}
+                            <span class="pull-right">
+                                <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a>
+                            {% if user == event.creator  and event.status == 'open' %}
+                                <a href="#" class="red resign"> <i class="fa fa-user-times fa-lg"></i> </a>
+                            {% endif %}
+                            </span>
+                            <br>
+                        {% endfor %}
                     {% endif %}
+                    {% if user == event.creator  and event.status == 'open' %}
+                        <span class="pull-right">
+                            <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
+                        </span>
+                        <span class="pull-right">
+                            {{ form.assignees_autocomplete|add_class:"hidden" }}
+                        </span>
+                        <br>
+                    {% endif %}
+
+                </div>
+                <div class = "col-md-6">
+                    <span class="param">Cтатус:</span>
+                    {% if event.status == 'closed' %}
+                    <span class="label label-success pull-right">
+                    {% elif event.status == 'open' %}
+                    <span class="label label-danger pull-right">
+                    {% endif %}
+                    {{ event.get_status_display }}
+                    </span>
+                    <br>
+
+                    <span class="param">Дата создания:</span>
+                    <span class = "pull-right">{{ event.date_created }}</span>
+                    <br>
+                    <span class="param">Дата проведения:</span>
+                    {% if user == event.creator and event.status == 'open' %}
+                    <span class = "pull-right">
+                        <span id="date_held">
+                            {{ event.date_held }}
+                            <a href="#" class="light"><i class="fa fa-pencil" id="date_held-pencil"></i></a>
+                        </span>
+                        <span id="date_held-edit" class="hidden">
+                            <input id="date_held-field" type="date" value="{{event.date_held|date:'Y-m-d'}}">
+                        </span>
+                    </span>
+                    {% else %}
+                    <span class="pull-right">{{ event.date_held }}</span>
+                    {% endif %}
+                    <br>
                 </div>
             </div>
-            <!--div class = "col-md-4">
-            </div-->
         </div>
+        <div class="section">
+            <h5 class="section-name">Описание {% if user == event.creator and event.status == 'open' %}<a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5>
+            <hr class="just-a-line">
+
+            <span id="desc">{{ event.description }}</span>
+            {% if user == event.creator and event.status == 'open' %}
+            <span class="hidden" id="desc-edit">
+                <textarea class="form-control" id="desc-field" rows="4">{{ event.description }}</textarea>
+            </span>
+            {% endif %}
+
+        </div>
+        <div class = "section">
+            <h5 class="section-name">Задачи</h5>
+            <div class="table-responsive">
+                <table class = "table usual-letters">
+                    <tr>
+                        <th>Номер</th>
+                        <th>Задача</th>
+                        <th>Исполнитель(-и)</th>
+                        <th>Статус</th>
+                    </tr>
+                    {% for task in event.tasks.all %}
+                    <tr>
+                        <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
+                        <td>{{ task.name }}</td>
+                        <td> {% for part in task.participants.all %}
+                            <a href="{% url 'accounts:profile' pk=part.user.pk %}">{{ part.user.get_full_name }}</a><br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                        <span class="">
+                        {% if task.status == 'closed' %}
+                            <span class="label lbl label-success">
+                        {% elif task.status == 'resolved' %}
+                            <span class="label lbl label-primary">
+                        {% elif task.status == 'in_progress' %}
+                            <span class="label lbl label-warning">
+                        {% elif task.status == 'open' %}
+                            <span class="label lbl label-default">
+                        {% elif task.status == 'in_labor' %}
+                            <span class="label lbl label-danger">
+                        {% elif task.status == 'volunteers' %}
+                            <span class="label lbl label-info ">
+                        {% endif %}
+                                {{ task.get_status_display }}</span>
+                        </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% if user == event.creator and event.status == 'open' %}
+            <center><a href="{% url 'activism:create_task' %}"
+                       class="btn btn-default robotobold"
+                       data-target="#form-modal">
+                    <i class="fa fa-tasks fa-lg" style="margin-right:10px"></i> Новая задача</i>
+                </a>
+            </center>
+            {% endif %}
+        </div>
+    </div>
+    <!--div class = "col-md-4">
+    </div-->
+</div>
 
 {% if request.user == event.creator %}
 <div class="hidden currents">
