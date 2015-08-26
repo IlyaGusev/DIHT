@@ -46,7 +46,7 @@
     {% elif user in task.assignees.all and task.status == 'in_progress' %}
         <div class = "row">
             <div class="col-md-12" style="padding-left:40px;">
-                <a class="btn btn-default action" id="resolved"
+                <a class="btn btn-default action" id="resolve"
                    href="{% url 'activism:task_action' pk=task.pk action='resolved'%}"><i class="fa fa-lg fa-check blue"></i> Готово</a>
             </div>
         </div>
@@ -173,16 +173,19 @@
                     <br>
 
                     <span class="param">Особенности:</span>
-                    {% if task.is_urgent %}
                     <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
-                        СРОЧНОЕ
-                    </span>
+                    {% if task.is_urgent %}
+                        &nbspСРОЧНОЕ
                     {% endif %}
                     {% if task.is_hard %}
-                    <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
-                        ТРУДНОЕ
-                    </span>
+                        &nbspТРУДНОЕ
                     {% endif %}
+                        {% if can_edit %}
+                        <a id='prop' href="{% url 'activism:task_action' pk=task.pk action='prop'%}" class="light action">
+                            <i class="fa fa-pencil" id="prop-pencil"></i>
+                        </a>
+                        {% endif %}
+                    </span>
                     <br>
                     <span class="param">Количество людей:</span>
                         <span class="pull-right">
@@ -200,7 +203,7 @@
                     <br>
                     <br>
 
-                    {% if user == task.creator %}
+                    {% if user == task.creator and task.status == 'in_labor' %}
                         {% if task.candidates.all.count == 0 %}
                             <span class="grey">Нет кандидатов</span>
                         {% else %}
@@ -338,6 +341,31 @@
 </div>
 {% endif %}
 
+
+<div class="modal" id="prop-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="prop-form" action="{% url 'activism:task_action' pk=task.pk action='prop'%}" method="POST" autocomplete="off">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h3>Особенности</h3>
+                </div>
+                <div id="prop-modal-body" class="modal-body">
+                    <label for="id_is_urgent">Срочное задание: </label>
+                    <input id="id_is_urgent" name="is_urgent" type="checkbox">
+                    <br>
+                    <label for="id_is_urgent">Трудное задание: </label>
+                    <input id="id_is_hard" name="is_hard" type="checkbox">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Подтвердить</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="resolve-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -371,6 +399,11 @@
                     <h3>Введите количество часов</h3>
                 </div>
                 <div id="close-modal-body" class="modal-body">
+                    <label id="hours-prop">Модификаторы:
+                        <span id="urgent">{% if task.is_urgent %} Срочное (x1.5) {% endif %}<span>
+                        <span id="hard">{% if task.is_hard %} Трудное (x1.5) {% endif %}</span>
+                    </label>
+                    <br>
                     {% for entity in through %}
                     <label for="id_rh_{{entity.user.pk}}">{{entity.user.get_full_name}} (реальные): </label>
                     <input class="form-control real-hours" id="id_rh_{{entity.user.pk}}" min="0" step="any" type="number"

@@ -3,12 +3,9 @@ from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 from django.forms import HiddenInput, CharField
 from django.contrib.auth.models import Group, User
 from activism.models import Task, Event, AssigneeTask
-import autocomplete_light
 
 
 class TaskCreateForm(ModelForm):
-    tags = TaggitField(widget=TaggitWidget('TagAutocomplete'), required=False, label="Теги")
-
     def __init__(self, user, *args, **kwargs):
         super(TaskCreateForm, self).__init__(*args, **kwargs)
         if not Group.objects.get(name="Руководящая группа") in user.groups.all():
@@ -19,7 +16,7 @@ class TaskCreateForm(ModelForm):
 
     class Meta:
         model = Task
-        fields = ('event', 'sector', 'name', 'number_of_assignees', 'hours_predict', 'tags')
+        fields = ('event', 'sector', 'name', 'number_of_assignees', 'hours_predict')
 
 
 class TaskForm(ModelForm):

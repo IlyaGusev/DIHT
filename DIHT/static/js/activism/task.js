@@ -49,7 +49,6 @@ $(function() {
         dat['assignees'] = ass
 
         data = dict_to_string(dat);
-        console.log(data)
         $.ajax({
             type: 'POST',
             url: window.location.href,

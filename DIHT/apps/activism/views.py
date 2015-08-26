@@ -198,6 +198,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         is_creator = (user == task.creator)
         is_assignee = (user in task.assignees.all())
         is_enough = (task.assignees.all().count() >= task.number_of_assignees)
+        can_edit = task.status == 'in_labor' or task.status == 'open'
         table = {'in_labor': {'open': ('in_labor', is_creator)},
                  'in_progress': {'in_labor': ('in_progress', is_creator and is_enough),
                                  'open': ('in_progress', is_creator and is_enough)},
@@ -206,6 +207,21 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                  'close': {'resolved': ('closed', is_creator),
                            'in_progress': ('closed', is_creator)},
                  'open': {'in_labor': ('open', is_creator)}}
+
+        if action == 'prop':
+            if is_creator and can_edit:
+                if request.POST.get('is_urgent') is not None:
+                    task.is_urgent = request.POST['is_urgent']
+                else:
+                    task.is_urgent = False
+                if request.POST.get('is_hard') is not None:
+                    task.is_hard = request.POST['is_hard']
+                else:
+                    task.is_hard = False
+                task.save()
+                return JsonResponse({'url': reverse('activism:task', kwargs={'pk': task.pk})}, status=200)
+            else:
+                raise PermissionDenied
 
         if action == 'do':
             if user not in task.candidates.all() and \
@@ -218,7 +234,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                 raise PermissionDenied
 
         if action == 'delete':
-            if is_creator and (task.status == 'in_labor' or task.status == 'open'):
+            if is_creator and can_edit:
                 task.delete()
                 return JsonResponse({'url': reverse('activism:index')}, status=200)
             else:
