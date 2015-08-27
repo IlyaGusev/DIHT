@@ -71,14 +71,16 @@
                                 {% endif %}
                                 <a href="#" class="light"><i class="fa fa-pencil" id="event-pencil"></i></a>
                             </span>
-                            <select class="pull-right selector hidden" id="event-edit">
-                                {% if user|has_group:'Руководящая группа' %}
-                                <option class="selector-item" value="">Нет</option>
-                                {% endif %}
-                                {% for event in events %}
-                                <option class="selector-item" value="{{ event.pk }}">{{ event.name }}</option>
-                                {% endfor %}
-                            </select>
+                            <span class="pull-right hidden" id="event-edit">
+                                <select class="selector" id="event-field">
+                                    {% if user|has_group:'Руководящая группа' %}
+                                    <option class="selector-item" value="">Нет</option>
+                                    {% endif %}
+                                    {% for event in events %}
+                                    <option class="selector-item" value="{{ event.pk }}">{{ event.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </span>
                         {% else %}
                             <span class="pull-right">
                                 {% if task.event %}
@@ -102,14 +104,16 @@
                                 {% endif %}
                                 <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                             </span>
-                            <select class="pull-right selector hidden" id="sector-edit">
-                                {% if user|has_group:'Руководящая группа' %}
-                                <option class="selector-item" value="">Нет</option>
-                                {% endif %}
-                                {% for sector in sectors %}
-                                <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
-                                {% endfor %}
-                            </select>
+                            <span class="pull-right hidden" id="sector-edit">
+                                <select class="selector" id="sector-field">
+                                    {% if user|has_group:'Руководящая группа' %}
+                                    <option class="selector-item" value="">Нет</option>
+                                    {% endif %}
+                                    {% for sector in sectors %}
+                                    <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </span>
                         {% else %}
                             <span class="pull-right">
                                 {% if task.sector %}
@@ -194,11 +198,11 @@
                     <span class="param">Количество людей:</span>
                         <span class="pull-right">
                             {% if can_edit %}
-                                <span id="num">{{ task.number_of_assignees }} чел.
-                                    <a href="#" class="light"><i class="fa fa-pencil" id="num-pencil"></i></a>
+                                <span id="number_of_assignees"><span id="number_of_assignees-current">{{ task.number_of_assignees }}</span> чел.
+                                    <a href="#" class="light"><i class="fa fa-pencil" id="number_of_assignees-pencil"></i></a>
                                 </span>
-                                <span id="num-edit" class="hidden">
-                                    <input id="num-field" type="number" min="1" max="99" value="{{ task.number_of_assignees }}"> чел.
+                                <span id="number_of_assignees-edit" class="hidden">
+                                    <input id="number_of_assignees-field" type="number" min="1" max="99" value="{{ task.number_of_assignees }}"> чел.
                                 </span>
                             {% else %}
                                 <span>{{ task.number_of_assignees }} чел.</span>
@@ -228,13 +232,13 @@
         </div>
         <div class="section">
             <h5 class="section-name">Описание <a href="#" class="light">
-                {% if user == task.creator and task.status != 'closed' %}<i class="fa fa-pencil" id="desc-pencil"></i>{% endif %}
+                {% if user == task.creator and task.status != 'closed' %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
             </a></h5>
             <hr class="just-a-line">
-            <span id="desc">{{ task.description }}</span>
+            <span id="description"><span id="description-current">{{ task.description }}</span></span>
             {% if user == task.creator and task.status != 'closed' %}
-            <span class="hidden" id="desc-edit">
-                <textarea class="form-control" id="desc-field" rows="4">{{ task.description }}</textarea>
+            <span class="hidden" id="description-edit">
+                <textarea class="form-control" id="description-field" rows="4">{{ task.description }}</textarea>
             </span>
             {% endif %}
         </div>
@@ -268,17 +272,17 @@
             {% if can_edit %}
                 <span class="param">Расчетные:</span>
                 <span class="pull-right">
-                    <span id="est-hours">
-                        {% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}
-                        <a href="#" class="light"><i class="fa fa-pencil" id="est-hours-pencil"></i></a>
+                    <span id="hours_predict">
+                        <span id="hours_predict-current">{{ task.hours_predict|stringformat:".1f" }}</span> час.
+                        <a href="#" class="light"><i class="fa fa-pencil" id="hours_predict-pencil"></i></a>
                     </span>
-                    <span id="est-hours-edit" class="hidden">
-                        <input id="est-hours-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }}{% endif %}"> час.
+                    <span id="hours_predict-edit" class="hidden">
+                        <input id="hours_predict-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }}{% endif %}"> час.
                     </span>
                 </span>
             {% else %}
                 <span class="param">Расчетные:</span>
-                <span class="pull-right">{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}</span>
+                <span class="pull-right">{{ task.hours_predict|stringformat:".1f" }} час.</span>
                 <br>
             {% endif %}
             {% if task.status == 'closed' or task.status == 'resolved' %}
@@ -297,11 +301,11 @@
             <span class="param">Сроки:</span>
                 {% if can_edit %}
                 <span class="pull-right">
-                    <span id="limit">{{ task.datetime_limit }}
-                        <a href="#" class="light"><i class="fa fa-pencil" id="limit-pencil"></i></a>
+                    <span id="datetime_limit">{{ task.datetime_limit }}
+                        <a href="#" class="light"><i class="fa fa-pencil" id="datetime_limit-pencil"></i></a>
                     </span>
-                    <span id="limit-edit" class="hidden">
-                        <input id="limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
+                    <span id="datetime_limit-edit" class="hidden">
+                        <input id="datetime_limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
                     </span>
                 </span>
                 {% else %}

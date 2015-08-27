@@ -1,5 +1,7 @@
 $(function() {
-    var fields = {'#desc': 'description', '#est-hours': 'hours_predict', '#num':'number_of_assignees', '#limit': 'datetime_limit'};
+    var fields = ['description', 'hours_predict', 'number_of_assignees', 'datetime_limit', 'event', 'sector'];
+    var select_fields = ['event', 'sector'];
+    var ajax_fields = ['description',  'hours_predict', 'number_of_assignees'];
 
     function transfer_class(attr, elem2, elem1){
         $(elem1).addClass(attr);
@@ -27,19 +29,28 @@ $(function() {
     }
 
     function post_task(dict){
-        var dat = {};
+        var reload = false
         for (key in dict)
-            dat[key] = dict[key];
-        if ('datetime_limit' in dat)
-            dat['datetime_limit'] = dat['datetime_limit'].replace('T', ' ');
-        data = dict_to_string(dat);
-        console.log(data)
+            if (($.inArray(key, ajax_fields)) == -1)
+                reload = true
+        if ('datetime_limit' in dict)
+            dict['datetime_limit'] = dict['datetime_limit'].replace('T', ' ');
+        data = dict_to_string(dict);
         $.ajax({
             type: 'POST',
             url: window.location.href,
             data: data,
-            success: function(data) {
-                window.location.reload();
+            success: function(response) {
+                if (reload)
+                    window.location.reload();
+                else{
+                    for (field in dict){
+                        if (($.inArray(field, ajax_fields)) != -1){
+                            if (($.inArray(field, select_fields)) == -1)
+                                $('#'+field+'-current').text($('#'+field+'-field').val())
+                        }
+                    }
+                }
             },
             error: function(request, status, error) {
                 console.log(error)
@@ -48,42 +59,23 @@ $(function() {
     };
 
 
-    $.each(fields, function (key, value) {
-	    $(key+'-pencil').click(function() {
-            transfer_class('hidden', key+'-edit', key);
-            $(key+'-field').focus();
+    $.each(fields, function (index, key) {
+        var field = '#'+key
+	    $(field+'-pencil').click(function() {
+            transfer_class('hidden', field+'-edit', field);
+            $(field+'-field').focus();
         });
 
-        $(key+'-field').blur(function() {
+        $(field+'-field').blur(function() {
+            transfer_class('hidden', field, field+'-edit');
             var dict = {}
-            dict[value] = $(key+'-field').val()
+            if (($.inArray(field, select_fields)) == -1)
+                dict[key] = $(field+'-field').val()
+            else
+                dict[key] = $(field+'-field option:selected').val()
             post_task(dict);
-            transfer_class('hidden', key, key+'-edit');
         });
 	});
-
-    // Events
-    $('#event-pencil').click(function() {
-	    transfer_class('hidden', '#event-edit', '#event');
-		$('#event-edit').focus();
-	})
-
-	$('#event-edit').blur(function() {
-	    post_task({'event': $('#event-edit option:selected').val()})
-		transfer_class('hidden', '#event', '#event-edit');
-	})
-    
-
-    // Sectors
-    $('#sector-pencil').click(function() {
-	    transfer_class('hidden', '#sector-edit', '#sector');
-		$('#sector-edit').focus();
-	})
-
-	$('#sector-edit').blur(function() {
-	    post_task({'sector': $('#sector-edit option:selected').val()})
-		transfer_class('hidden', '#sector', '#sector-edit');
-	})
 
     // Tags
 	$('#tags-pencil').click(function() {
@@ -143,8 +135,8 @@ $(function() {
 
 	$(document).ready(function() {
         if ($('.event-current')[0].id!='')
-            $('#event-edit option[value='+$('.event-current')[0].id+']').attr("selected",true);
+            $('#event-field option[value='+$('.event-current')[0].id+']').attr("selected",true);
         if ($('.sector-current')[0].id!='')
-            $('#sector-edit option[value='+$('.sector-current')[0].id+']').attr("selected",true);
+            $('#sector-field option[value='+$('.sector-current')[0].id+']').attr("selected",true);
     });
 });

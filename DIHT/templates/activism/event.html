@@ -48,12 +48,14 @@
                                 {% endif %}
                                 <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                             </span>
-                            <select class="pull-right selector hidden" id="sector-edit">
-                                <option class="selector-item" value="">Нет</option>
+                            <span class="pull-right hidden" id="sector-edit">
+                                <select class="selector" id="sector-field">
+                                    <option class="selector-item" value="">Нет</option>
                                 {% for sector in sectors %}
-                                <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
+                                    <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
                                 {% endfor %}
-                            </select>
+                                </select>
+                            </span>
                         {% else %}
                             <span class="pull-right">
                                 {% if event.sector %}
@@ -125,13 +127,13 @@
             </div>
         </div>
         <div class="section">
-            <h5 class="section-name">Описание {% if user == event.creator and event.status == 'open' %}<a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5>
+            <h5 class="section-name">Описание {% if user == event.creator and event.status == 'open' %}<a href="#" class="light"><i class="fa fa-pencil" id="description-pencil"></i></a>{% endif %} </h5>
             <hr class="just-a-line">
 
-            <span id="desc">{{ event.description }}</span>
+            <span id="description"><span id="description-current">{{ event.description }}</span></span>
             {% if user == event.creator and event.status == 'open' %}
-            <span class="hidden" id="desc-edit">
-                <textarea class="form-control" id="desc-field" rows="4">{{ event.description }}</textarea>
+            <span class="hidden" id="description-edit">
+                <textarea class="form-control" id="description-field" rows="4">{{ event.description }}</textarea>
             </span>
             {% endif %}
 
