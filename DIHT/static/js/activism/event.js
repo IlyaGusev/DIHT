@@ -20,19 +20,13 @@ $(function() {
     function get_ids(selector){
         var a = [];
         $(selector).each(function() {
-            a.push($(this).text());
+            a.push($(this)[0].id);
         });
         return a;
     }
 
     function post_event(dict){
         var dat = {};
-        $.each(fields, function (key, value) {
-            dat[value] = $(key+'-current').text();
-        });
-
-        dat['sector'] = $('#sector-current').text();
-
         for (key in dict)
             dat[key] = dict[key];
         data = dict_to_string(dat);
@@ -97,4 +91,8 @@ $(function() {
 		transfer_class('hidden', '#sector', '#sector-edit');
 	})
 
+    $(document).ready(function() {
+        if ($('.sector-current')[0].id!='')
+            $('#sector-edit option[value='+$('.sector-current')[0].id+']').attr("selected",true);
+    });
 });

@@ -37,10 +37,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
     template_name = 'activism/dashboard.html'
 
     def get_context_data(self, **kwargs):
+        user = self.request.user
         context = super(IndexView, self).get_context_data(**kwargs)
         context['labor'] = Task.objects.filter(status__in=['in_labor'])
         context['events'] = Event.objects.filter(status='open').order_by('date_held')[:5]
-        user = self.request.user
         context['bids'] = \
             sorted(chain(user.tasks_approve.all(),
                          user.task_set.filter(status__in=['open', 'in_labor']),
@@ -89,13 +89,13 @@ class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, UpdateVie
     raise_exception = True
 
     def get_context_data(self, **kwargs):
-        context = super(EventView, self).get_context_data(**kwargs)
         event = self.get_object()
         user = self.request.user
+        context = super(EventView, self).get_context_data(**kwargs)
         is_creator = (user == event.creator)
-        can_close = (event.tasks.all().exclude(status="closed").count() == 0)
+        task_done = (event.tasks.all().exclude(status="closed").count() == 0)
         context['users'] = User.objects.all()
-        context['can_close'] = (is_creator and can_close and event.status == 'open')
+        context['can_close'] = (is_creator and task_done and event.status == 'open')
         context['sectors'] = Sector.objects.all()
         return context
 
@@ -129,13 +129,13 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = TaskCreateForm
     raise_exception = True
 
+    def test_func(self, user):
+        return user.events.count() != 0 or Group.objects.get(name="Руководящая группа") in user.groups.all()
+
     def get_form_kwargs(self):
         kwargs = super(TaskCreateView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
-
-    def test_func(self, user):
-        return user.events.count() != 0 or Group.objects.get(name="Руководящая группа") in user.groups.all()
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
@@ -154,19 +154,6 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView)
     group_required = "Активисты"
     raise_exception = True
 
-    def form_valid(self, form):
-        task = self.get_object()
-        user = self.request.user
-        if Group.objects.get(name="Руководящая группа") not in user.groups.all():
-            if form.cleaned_data['event'] not in user.events.all():
-                return super(TaskView, self).form_invalid(form)
-        result = super(TaskView, self).form_valid(form)
-        if user in task.assignees.all() and user in task.candidates.all():
-            task.candidates.remove(user)
-        if user in task.assignees.all() and user in task.rejected.all():
-            task.rejected.remove(user)
-        return result
-
     def get_context_data(self, **kwargs):
         context = super(TaskView, self).get_context_data(**kwargs)
         user = self.request.user
@@ -180,6 +167,19 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView)
                               (context['task'].status == 'open' or context['task'].status == 'in_labor')
         context['through'] = context['task'].participants.all()
         return context
+
+    def form_valid(self, form):
+        task = self.get_object()
+        user = self.request.user
+        if Group.objects.get(name="Руководящая группа") not in user.groups.all():
+            if form.cleaned_data['event'] not in user.events.all():
+                return super(TaskView, self).form_invalid(form)
+        result = super(TaskView, self).form_valid(form)
+        if user in task.assignees.all() and user in task.candidates.all():
+            task.candidates.remove(user)
+        if user in task.assignees.all() and user in task.rejected.all():
+            task.rejected.remove(user)
+        return result
 
     def form_invalid(self, form):
         super(TaskView, self).form_invalid(form)

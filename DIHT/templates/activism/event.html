@@ -41,9 +41,10 @@
                         {% if user == event.creator  and event.status == 'open' %}
                             <span class="pull-right" id="sector">
                                 {% if event.sector %}
-                                    <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
+                                    <a href="{% url 'activism:sector' pk=event.sector.pk %}"
+                                       class="sector-current" id="{{event.sector.pk}}">{{ event.sector.name }}</a>
                                 {% else %}
-                                    <span>Нет</span>
+                                    <span class="sector-current" id="">Нет</span>
                                 {% endif %}
                                 <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                             </span>
@@ -56,9 +57,10 @@
                         {% else %}
                             <span class="pull-right">
                                 {% if event.sector %}
-                                    <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
+                                    <a href="{% url 'activism:sector' pk=event.sector.pk %}"
+                                       class="sector-current" id="{{event.sector.pk}}">{{ event.sector.name }}</a>
                                 {% else %}
-                                    <span>Нет</span>
+                                    <span class="sector-current" id="">Нет</span>
                                 {% endif %}
                             </span>
                         {% endif %}
@@ -70,7 +72,8 @@
                         <span class="param">Ответственные:</span>
                         {% for assignee in event.assignees.all %}
                             <span class="pull-right">
-                                <a href="{% url 'accounts:profile' pk=assignee.pk %}">{{ assignee.get_full_name }}</a>
+                                <a href="{% url 'accounts:profile' pk=assignee.pk %}"
+                                   class="assignee" id="{{assignee.pk}}">{{ assignee.get_full_name }}</a>
                             {% if user == event.creator  and event.status == 'open' %}
                                 <a href="#" class="red resign"> <i class="fa fa-user-times fa-lg"></i> </a>
                             {% endif %}
@@ -183,25 +186,6 @@
             {% endif %}
         </div>
     </div>
-    <!--div class = "col-md-4">
-    </div-->
 </div>
-
-{% if request.user == event.creator %}
-<div class="hidden currents">
-    {% if event.sector %}
-    <span id="sector-current">{{ event.sector.pk }}</span>
-    {% else %}
-    <span id="sector-current"></span>
-    {% endif %}
-    <span id="date_held-current">{{ event.date_held|date:'Y-m-d' }}</span>
-    <span id="desc-current">{{ event.description }}</span>
-    {% for assignee in event.assignees.all %}
-        <span class="assignee">{{ assignee.pk }}</span>
-    {% endfor %}
-</div>
-{% endif %}
-
-
 {% include 'modal.html' %}
 {% endblock %}

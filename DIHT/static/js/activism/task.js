@@ -21,34 +21,19 @@ $(function() {
     function get_ids(selector){
         var a = [];
         $(selector).each(function() {
-            a.push($(this).text());
+            a.push($(this)[0].id);
         });
         return a;
     }
 
     function post_task(dict){
         var dat = {};
-        $.each(fields, function (key, value) {
-            dat[value] = $(key+'-current').text();
-        });
-
-        dat['event'] = $('#event-current').text();
-        dat['sector'] = $('#sector-current').text();
-        dat['tags'] = $('#tags-current').text();
-        dat['assignees'] = get_ids('.assignee');
-        dat['candidates'] = get_ids('.candidate');
-        dat['rejected'] = get_ids('.rejected');
-
         for (key in dict)
             dat[key] = dict[key];
-        dat['datetime_limit'] = dat['datetime_limit'].replace('T', ' ');
-        var ass = ""
-        for (key in dat['assignees']){
-           ass += dat['assignees'][key]+','
-        }
-        dat['assignees'] = ass
-
+        if ('datetime_limit' in dat)
+            dat['datetime_limit'] = dat['datetime_limit'].replace('T', ' ');
         data = dict_to_string(dat);
+        console.log(data)
         $.ajax({
             type: 'POST',
             url: window.location.href,
@@ -157,9 +142,9 @@ $(function() {
 	})
 
 	$(document).ready(function() {
-        if ($('#event-current').text()!='')
-            $('#event-edit option[value='+$('#event-current').text()+']').attr("selected",true);
-        if ($('#sector-current').text()!='')
-            $('#sector-edit option[value='+$('#sector-current').text()+']').attr("selected",true);
+        if ($('.event-current')[0].id!='')
+            $('#event-edit option[value='+$('.event-current')[0].id+']').attr("selected",true);
+        if ($('.sector-current')[0].id!='')
+            $('#sector-edit option[value='+$('.sector-current')[0].id+']').attr("selected",true);
     });
 });
