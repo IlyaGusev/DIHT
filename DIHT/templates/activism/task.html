@@ -60,11 +60,11 @@
             <hr class="just-a-line">
             <div class = "row">
                 <div class = "col-md-6">
-
+                    
                     <p>
                     <span class="tsk-param">Мероприятие:</span>
                         {% if can_edit %}
-                            <span class="" id="event">
+                            <span class="pull-right" id="event">
                                 {% if task.event %}
                                     <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
                                 {% else %}
@@ -81,7 +81,7 @@
                                 {% endfor %}
                             </select>
                         {% else %}
-                            <span class="">
+                            <span class="pull-right">
                                 {% if task.event %}
                                     <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
                                 {% else %}
@@ -90,10 +90,11 @@
                             </span>
                         {% endif %}
                     </p>
+                    
                     <p>
                     <span class="tsk-param">Сектор:</span>
                         {% if can_edit %}
-                            <span class="" id="sector">
+                            <span class="pull-right" id="sector">
                                 {% if task.sector %}
                                     <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
                                 {% else %}
@@ -110,7 +111,7 @@
                                 {% endfor %}
                             </select>
                         {% else %}
-                            <span class="">
+                            <span class="pull-right">
                                 {% if task.sector %}
                                     <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
                                 {% else %}
@@ -122,24 +123,30 @@
                     <p>
                     <span class="tsk-param">Создатель:</span>
                         {% if user == task.creator %}
-                            <span class="">{% if task.creator.avatar.img %}
-                                {% thumbnail task.creator.avatar.img "20x20" crop="center" as pic %}
-                                <img src="{{ pic.url }}" class="avatar">
-                                {% endthumbnail %}
-                            {% endif %} {{ task.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
-                            {% else %}
-                            <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class = "">
-                            {% if task.creator.avatar.img %}
-                                {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
-                                <img src="{{ pic.url }}" class="avatar">
-                                {% endthumbnail %}
-                            {% endif %}
-                            {{ task.creator.get_full_name }}</a>
-                            {% endif %}
+                            <span class="pull-right">
+                                {% if task.creator.avatar.img %}
+                                    {% thumbnail task.creator.avatar.img "20x20" crop="center" as pic %}
+                                    <img src="{{ pic.url }}" class="avatar">
+                                    {% endthumbnail %}
+                                {% endif %} 
+                                {{ task.creator.get_full_name }} 
+                                <span class="grey">(Это вы)</span>
+                            </span>
+                        {% else %}
+                            <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class = "pull-right">
+                                {% if task.creator.avatar.img %}
+                                    {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
+                                    <img src="{{ pic.url }}" class="avatar">
+                                    {% endthumbnail %}
+                                {% endif %}
+                                {{ task.creator.get_full_name }}
+                            </a>
+                        {% endif %}
                     </p>
+                    
                     <p style="margin-bottom:15px">
                     <span class="tsk-param">Количество людей:</span>
-                        <span class="">
+                        <span class="pull-right">
                             {% if can_edit %}
                                 <span id="num">{{ task.number_of_assignees }} чел.
                                     <a href="#" class="light"><i class="fa fa-pencil" id="num-pencil"></i></a>
@@ -152,74 +159,104 @@
                             {% endif %}
                         </span>
                     </p>
-
-                {% if task.assignees.all.count == 0 %}
-                    <p><span style="white-space: nowrap"><span class="tsk-param">Нет исполнителей</span>
-                {% else %}
-                    <p><span style="white-space: nowrap"><span class="tsk-param">Исполнители:</span>
-                    {% for assignee in task.assignees.all %}
-                        
-                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">
-                                {% if assignee.avatar.img %}
-                                    {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
-                                    <img src="{{ pic.url }}" class="avatar">
-                                    {% endthumbnail %}
-                                {% endif %}
-                                {{ assignee.get_full_name }}</a>
+                    {% if task.assignees.all.count == 0 %}
+                        <span class="tsk-param">Нет исполнителей</span>
                         {% if can_edit %}
-                            <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"> <i class="fa fa-user-times fa-lg"></i> </a>
+                            <span class="pull-right">
+                                <span class="">
+                                    <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg"></i></a>
+                                </span>
+                                <span class="">
+                                    {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                </span>
+                            </span>
                         {% endif %}
-                        </span>
-                        </p><p><span style="white-space: nowrap">
-                        <span class="tsk-param"></span>
-                    {% endfor %}
+                    {% else %}
+                        <div style="display: inline-block; vertical-align: top;"><span class="tsk-param">Исполнители:</span></div>
+                        <div class="pull-right" align="right" style="display: inline-block">
+                            <table class="usual-letters" border="0">
+                                {% for assignee in task.assignees.all %}
+                                    <tr>
+                                        <td style="padding-right:5px;">
+                                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">
+                                                {% if assignee.avatar.img %}
+                                                    {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
+                                                    <img src="{{ pic.url }}" class="avatar">
+                                                    {% endthumbnail %}
+                                                {% endif %}
+                                            </a>
+                                        </td>
+                                        <td style="padding-right:5px;">
+                                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">                                
+                                                {{ assignee.get_full_name }}
+                                            </a>
+                                        </td>
+                                        {% if can_edit %}
+                                        <td align="right">
+                                        <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                {% if can_edit %}
+                                    <tr>
+                                        <td colspan = "2">
+                                                {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                        </td>
+                                        <td align = "right">
+                                                <a href="#" class="green" id="assign"><i class="fa fa-user-plus fa-lg"></i></a>
+                                            
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+                        </div>
                 {% endif %}
-                {% if can_edit %}
-                    <span class="">
-                        <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
-                    </span>
-                    <span class="">
-                        {{ form.assignees_autocomplete|add_class:"hidden" }}
-                    </span>
-                    
-                {% endif %}</span></p>
                 </div>
                 <div class = "col-md-6">
                     <p>
                     <span class="tsk-param">Статус:</span>
+                    <span class="">
                     {% if task.status == 'closed' %}
-                        <span class="label lbl label-success">
+                        <span class="label lbl label-success pull-right">
                     {% elif task.status == 'resolved' %}
-                        <span class="label lbl label-primary">
+                        <span class="label lbl label-primary pull-right">
                     {% elif task.status == 'in_progress' %}
-                        <span class="label lbl label-warning">
+                        <span class="label lbl label-warning pull-right">
                     {% elif task.status == 'open' %}
-                        <span class="label lbl label-default">
+                        <span class="label lbl label-default pull-right">
                     {% elif task.status == 'in_labor' %}
-                        <span class="label lbl label-danger ">
+                        <span class="label lbl label-danger pull-right">
                     {% elif task.status == 'volunteers' %}
-                        <span class="label lbl label-info">
+                        <span class="label lbl label-info pull-right">
                     {% endif %}
                             {{ task.get_status_display }}
                         </span>
+                    </span>
                     </p>
                     <p>
                     <span class="tsk-param">Особенности:</span>
+                    <span class= "pull-right">
                     {% if task.is_urgent %}
-                    <span class="priotity" style="color:red; font-family:'RobotoBold'">
+                    <span class="priotity red robotobold">
                         СРОЧНОЕ
                     </span>
                     {% endif %}
                     {% if task.is_hard %}
-                    <span class="priotity" style="color:red; font-family:'RobotoBold'">
+                    <span class="priotity red robotobold">
                         ТРУДНОЕ
                     </span>
+                    {% else %}
+                    <span class="priotity grey">
+                        Нет
+                    </span>
                     {% endif %}
+                    <span>
                     </p>
-                    <p style="white-space:nowrap; margin-bottom: 15px;">
+                    <p style="white-space:nowrap; margin-bottom: 35px;">
                     <span class="tsk-param">Сроки:</span>
                         {% if can_edit %}
-                        <span class="">
+                        <span class="pull-right">
                             <span id="limit" >{{ task.datetime_limit }}
                                 <a href="#" class="light" ><i class="fa fa-pencil" id="limit-pencil"></i></a>
                             </span>
@@ -232,29 +269,41 @@
                         {% endif %}
                     </p>
 
-                    {% if user == task.creator %}
+                    {% if can_edit %}
                         {% if task.candidates.all.count == 0 %}
-                            <span class="grey">Нет кандидатов</span>
+                            <span class="tsk-param">Нет кандидатов</span>
                         {% else %}
-                            <p><span style="white-space: nowrap"><span class="tsk-param">Кандидаты:</span>
-                            {% for candidate in task.candidates.all %}
-                            
-                                <a href="{% url 'accounts:profile' pk=assignee.pk %}" id="{{candidate.pk}}">
-                                {% if candidate.avatar.img %}
-                                    {% thumbnail candidate.avatar.img "22x22" crop="center" as pic %}
-                                    <img src="{{ pic.url }}" class="avatar">
-                                    {% endthumbnail %}
-                                {% endif %}
-                                {{ candidate.get_full_name }}</a>
-                                <a href="#" class="blue approve" title="Назначить на задачу"> <i class="fa fa-thumbs-o-up fa-lg"></i> </a>
-                                <a href="#" class="red reject" title="Отклонить заявку"> <i class="fa fa-thumbs-o-down fa-lg"></i> </a>
-                            </span></span></p><p><span style="white-space: nowrap">
-                                    <span class="tsk-param"> </span>
-                            {% endfor %}
-                            </p>
+                            <div style="display: inline-block; vertical-align: top;"><span class="tsk-param">Кандидаты:</span></div>
+                            <div class="pull-right" align="right" style="display: inline-block">
+                                <table class="usual-letters" border="0">
+                                {% for candidate in task.candidates.all %}
+                                    <tr>
+                                        <td style="padding-right:5px;">
+                                            <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}">
+                                                {% if candidate.avatar.img %}
+                                                    {% thumbnail candidate.avatar.img "22x22" crop="center" as pic %}
+                                                        <img src="{{ pic.url }}" class="avatar">
+                                                    {% endthumbnail %}
+                                                {% endif %}
+                                            </a>
+                                        </td>
+                                        <td style="padding-right:5px;">
+                                            <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}">
+                                                {{ candidate.get_full_name }}
+                                            </a>
+                                        </td>
+                                        <td style="padding-right:2px;">
+                                            <a href="#" class="blue approve" title="Назначить на задачу"> <i class="fa fa-thumbs-o-up fa-lg"></i> </a>
+                                        </td>
+                                        <td>
+                                            <a href="#" class="red reject" title="Отклонить заявку"> <i class="fa fa-thumbs-o-down fa-lg"></i> </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </table>
+                            </div>
                         {% endif %}
                     {% endif %}
-                    <br>
                 </div>
             </div>
         </div>

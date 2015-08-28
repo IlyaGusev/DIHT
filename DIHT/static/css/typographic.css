@@ -101,15 +101,13 @@ p {
 
 .param {
     display: inline-block;
-	color: #777777;
-    width: 50%;
+    color: #777777;
     /*font-size: 12px;*/
 }
 
 .tsk-param {
     display: inline-block;
-	color: #777777; 
-    width: 40%;
+    color: #777777;
     /*font-size: 12px;*/
 }
 
