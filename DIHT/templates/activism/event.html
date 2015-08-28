@@ -33,7 +33,7 @@
                             <p>
                             <div class="param">Сектор:</div>
                                 {% if user == event.creator  and event.status == 'open' %}
-                                    <span class="" id="sector">
+                                    <span class="pull-right" id="sector">
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
                                         {% else %}
@@ -48,7 +48,7 @@
                                         {% endfor %}
                                     </select>
                                 {% else %}
-                                    <span class="">
+                                    <span class="pull-right">
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
                                         {% else %}
@@ -60,85 +60,108 @@
                             <p>
                             <span class="param">Создатель:</span>
                             {% if user == event.creator %}
-                            <span class="">{% if event.creator.avatar.img %}
-                                {% thumbnail event.creator.avatar.img "20x20" crop="center" as pic %}
-                                <img src="{{ pic.url }}" class="avatar">
-                                {% endthumbnail %}
-                            {% endif %} {{ event.creator.get_full_name }} <span class="grey">(Это вы)</span></span>
+                                <span class="pull-right">
+                                {% if event.creator.avatar.img %}
+                                    {% thumbnail event.creator.avatar.img "20x20" crop="center" as pic %}
+                                        <img src="{{ pic.url }}" class="avatar">
+                                    {% endthumbnail %}
+                                {% endif %} 
+                                    {{ event.creator.get_full_name }} <span class="grey">(Это вы)</span>
+                                </span>
                             {% else %}
-                            <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "">
-                            {% if event.creator.avatar.img %}
-                                {% thumbnail event.creator.avatar.img "22x22" crop="center" as pic %}
-                                <img src="{{ pic.url }}" class="avatar">
-                                {% endthumbnail %}
-                            {% endif %}
-                            {{ event.creator.get_full_name }}</a>
+                                <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "pull-right">
+                                {% if event.creator.avatar.img %}
+                                    {% thumbnail event.creator.avatar.img "22x22" crop="center" as pic %}
+                                        <img src="{{ pic.url }}" class="avatar">
+                                    {% endthumbnail %}
+                                {% endif %}
+                                    {{ event.creator.get_full_name }}
+                                </a>
                             {% endif %}
                             </p>
                             
                             
                             {% if event.assignees.all.count == 0 %}
-                                <p><span style="white-space: nowrap"><span class="param">Нет ответственных</span>
+                                <span class="param">Нет ответственных</span>
+                                {% if user == event.creator  and event.status == 'open' %}
+                                    <span class="pull-right">
+                                        <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
+                                    </span>
+                                    <span class="pull-right">
+                                        {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                    </span>
+                                {% endif %}
                             {% else %}
-                                <p><span style="white-space: nowrap"><span class="param">Ответственные:</span>
-                                {% for assignee in event.assignees.all %}
-                                    <span class="">
-                                        <a href="{% url 'accounts:profile' pk=assignee.pk %}">
-                                        {% if assignee.avatar.img %}
-                                            {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
-                                            <img src="{{ pic.url }}" class="avatar">
-                                            {% endthumbnail %}
+                                <div style="display: inline-block; vertical-align: top;"><span class="param">Ответственные:</span></div>
+                                <div class="pull-right" align="right" style="display: inline-block">
+                                    <table class="usual-letters" border="0">
+                                        {% for assignee in event.assignees.all %}
+                                            <tr>
+                                                <td style="padding-right:5px;">
+                                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}">
+                                                        {% if assignee.avatar.img %}
+                                                            {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
+                                                            <img src="{{ pic.url }}" class="avatar">
+                                                            {% endthumbnail %}
+                                                        {% endif %}
+                                                    </a>
+                                                </td>
+                                                <td style="padding-right:5px;">
+                                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}">                                
+                                                        {{ assignee.get_full_name }}
+                                                    </a>
+                                                </td>
+                                                {% if user == event.creator  and event.status == 'open' %}
+                                                <td align="right">
+                                                <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
+                                                </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                        {% if user == event.creator  and event.status == 'open' %}
+                                            <tr>
+                                                <td colspan = "2">
+                                                        {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                                </td>
+                                                <td align = "right">
+                                                        <a href="#" class="green" id="assign"><i class="fa fa-user-plus fa-lg"></i></a>
+                                                    
+                                                </td>
+                                            </tr>
                                         {% endif %}
-                                        {{ assignee.get_full_name }}</a>
-                                    {% if user == event.creator  and event.status == 'open' %}
-                                        <a href="#" class="red resign"> <i class="fa fa-user-times fa-lg"></i> </a>
-                                    {% endif %}
-                                    </span></span></p><p><span style="white-space: nowrap">
-                                    <span class="param"> </span>
-                                {% endfor %}
-                                
+                                    </table>
+                                </div>
                             {% endif %}
-                            {% if user == event.creator  and event.status == 'open' %}
-                                <span class="">
-                                    <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
-                                </span>
-                                <span class="">
-                                    {{ form.assignees_autocomplete|add_class:"hidden" }}
-                                </span>
-                                
-                            {% endif %}</span></p>
-                            
-
                         </div>
                         <div class = "col-md-6">
                             <p>
                             <span class="param">Cтатус:</span>
                             {% if event.status == 'closed' %}
-                            <span class="label label-success">
+                            <span class="label label-success pull-right">
                             {% elif event.status == 'open' %}
-                            <span class="label label-danger">
+                            <span class="label label-danger pull-right">
                             {% endif %}
                             {{ event.get_status_display }}
                             </span>
                             </p>
                             <p>
                             <span class="param">Дата создания:</span>
-                            <span class = "">{{ event.date_created }}</span>
+                            <span class = "pull-right">{{ event.date_created }}</span>
                             </p>
                             <p>
                             <span class="param">Дата проведения:</span>
                             {% if user == event.creator and event.status == 'open' %}
                             
-                                <span id="date_held">
+                                <span id="date_held" class="pull-right">
                                     {{ event.date_held }}
                                     <a href="#" class="light"><i class="fa fa-pencil" id="date_held-pencil"></i></a>
                                 </span>
-                                <span id="date_held-edit" class="hidden">
+                                <span id="date_held-edit" class="hidden pull-right">
                                     <input id="date_held-field" type="date" value="{{event.date_held|date:'Y-m-d'}}">
                                 </span>
                             
                             {% else %}
-                            <span class="">{{ event.date_held }}</span>
+                            <span class="pull-right">{{ event.date_held }}</span>
                             {% endif %}
                             </p>
                         </div>
@@ -176,7 +199,7 @@
                                             {% thumbnail part.user.avatar.img "22x22" crop="center" as pic %}
                                             <img src="{{ pic.url }}" class="avatar">
                                             {% endthumbnail %}
-                                        {% endif %}{{ part.user.get_full_name }}</a><br>
+                                        {% endif %}<span style="padding-left:5px;">{{ part.user.get_full_name }}</span></a><br>
                                     {% endfor %}
                                 </td>
                                 <td>

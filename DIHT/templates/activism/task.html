@@ -62,7 +62,7 @@
                 <div class = "col-md-6">
                     
                     <p>
-                    <span class="tsk-param">Мероприятие:</span>
+                    <span class="param">Мероприятие:</span>
                         {% if can_edit %}
                             <span class="pull-right" id="event">
                                 {% if task.event %}
@@ -92,7 +92,7 @@
                     </p>
                     
                     <p>
-                    <span class="tsk-param">Сектор:</span>
+                    <span class="param">Сектор:</span>
                         {% if can_edit %}
                             <span class="pull-right" id="sector">
                                 {% if task.sector %}
@@ -121,7 +121,7 @@
                         {% endif %}
                     </p>
                     <p>
-                    <span class="tsk-param">Создатель:</span>
+                    <span class="param">Создатель:</span>
                         {% if user == task.creator %}
                             <span class="pull-right">
                                 {% if task.creator.avatar.img %}
@@ -145,7 +145,7 @@
                     </p>
                     
                     <p style="margin-bottom:15px">
-                    <span class="tsk-param">Количество людей:</span>
+                    <span class="param">Количество людей:</span>
                         <span class="pull-right">
                             {% if can_edit %}
                                 <span id="num">{{ task.number_of_assignees }} чел.
@@ -160,7 +160,7 @@
                         </span>
                     </p>
                     {% if task.assignees.all.count == 0 %}
-                        <span class="tsk-param">Нет исполнителей</span>
+                        <span class="param">Нет исполнителей</span>
                         {% if can_edit %}
                             <span class="pull-right">
                                 <span class="">
@@ -172,7 +172,7 @@
                             </span>
                         {% endif %}
                     {% else %}
-                        <div style="display: inline-block; vertical-align: top;"><span class="tsk-param">Исполнители:</span></div>
+                        <div style="display: inline-block; vertical-align: top;"><span class="param">Исполнители:</span></div>
                         <div class="pull-right" align="right" style="display: inline-block">
                             <table class="usual-letters" border="0">
                                 {% for assignee in task.assignees.all %}
@@ -215,7 +215,7 @@
                 </div>
                 <div class = "col-md-6">
                     <p>
-                    <span class="tsk-param">Статус:</span>
+                    <span class="param">Статус:</span>
                     <span class="">
                     {% if task.status == 'closed' %}
                         <span class="label lbl label-success pull-right">
@@ -235,7 +235,7 @@
                     </span>
                     </p>
                     <p>
-                    <span class="tsk-param">Особенности:</span>
+                    <span class="param">Особенности:</span>
                     <span class= "pull-right">
                     {% if task.is_urgent %}
                     <span class="priotity red robotobold">
@@ -254,7 +254,7 @@
                     <span>
                     </p>
                     <p style="white-space:nowrap; margin-bottom: 35px;">
-                    <span class="tsk-param">Сроки:</span>
+                    <span class="param">Сроки:</span>
                         {% if can_edit %}
                         <span class="pull-right">
                             <span id="limit" >{{ task.datetime_limit }}
@@ -271,9 +271,9 @@
 
                     {% if can_edit %}
                         {% if task.candidates.all.count == 0 %}
-                            <span class="tsk-param">Нет кандидатов</span>
+                            <span class="param">Нет кандидатов</span>
                         {% else %}
-                            <div style="display: inline-block; vertical-align: top;"><span class="tsk-param">Кандидаты:</span></div>
+                            <div style="display: inline-block; vertical-align: top;"><span class="param">Кандидаты:</span></div>
                             <div class="pull-right" align="right" style="display: inline-block">
                                 <table class="usual-letters" border="0">
                                 {% for candidate in task.candidates.all %}
@@ -326,7 +326,7 @@
             <h5 class="section-name">Волонтерские часы</h5>
             <hr class="just-a-line">
             {% if can_edit %}
-                <span class="tsk-param">Расчетные:</span>
+                <span class="param">Расчетные:</span>
                 <span class="pull-right">
                     <span id="est-hours">
                         {% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}
@@ -337,22 +337,22 @@
                     </span>
                 </span>
             {% else %}
-                <span class="tsk-param">Расчетные:</span>
+                <span class="param">Расчетные:</span>
                 <span class="pull-right">{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}</span>
                 <br>
             {% endif %}
             {% if task.hours_real  %}
-                <span class="tsk-param">Реальные:</span>
+                <span class="param">Реальные:</span>
                 <span class="pull-right">{% if task.hours_real %}{{ task.hours_real }} час.{% endif %}</span>
             {% endif %}
         </div>
         <div class="section">
             <h5 class="section-name">Даты</h5>
             <hr class="just-a-line">
-            <span class="tsk-param">Создано:</span> <span class="pull-right">{{ task.datetime_created }}</span> <br>
-            <span class="tsk-param">Последнее изменение:</span> <span class="pull-right">{{ task.datetime_last_modified }}</span> <br>
+            <span class="param">Создано:</span> <span class="pull-right">{{ task.datetime_created }}</span> <br>
+            <span class="param">Последнее изменение:</span> <span class="pull-right">{{ task.datetime_last_modified }}</span> <br>
             {% if task.datetime_closed %}
-            <span class="tsk-param">Закрыто:</span> <span class="pull-right">{{ task.datetime_closed }}</span>
+            <span class="param">Закрыто:</span> <span class="pull-right">{{ task.datetime_closed }}</span>
             {% endif %}
         </div>
     </div>
