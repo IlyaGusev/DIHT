@@ -60,249 +60,277 @@
             <hr class="just-a-line">
             <div class = "row">
                 <div class = "col-md-6">
-                    
-                    <p>
-                    <span class="param">Мероприятие:</span>
-                        {% if can_edit %}
-                            <span class="pull-right" id="event">
-                                {% if task.event %}
-                                    <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
-                                {% else %}
-                                    <span>Нет</span>
-                                {% endif %}
-                                <a href="#" class="light"><i class="fa fa-pencil" id="event-pencil"></i></a>
-                            </span>
-                            <select class=" selector hidden" id="event-edit">
-                                {% if user|has_group:'Руководящая группа' %}
-                                <option class="selector-item" value="">Нет</option>
-                                {% endif %}
-                                {% for event in events %}
-                                <option class="selector-item" value="{{ event.pk }}">{{ event.name }}</option>
-                                {% endfor %}
-                            </select>
-                        {% else %}
-                            <span class="pull-right">
-                                {% if task.event %}
-                                    <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
-                                {% else %}
-                                    <span>Нет</span>
-                                {% endif %}
-                            </span>
-                        {% endif %}
-                    </p>
-                    
-                    <p>
-                    <span class="param">Сектор:</span>
-                        {% if can_edit %}
-                            <span class="pull-right" id="sector">
-                                {% if task.sector %}
-                                    <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
-                                {% else %}
-                                    <span>Нет</span>
-                                {% endif %}
-                                <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
-                            </span>
-                            <select class="selector hidden" id="sector-edit">
-                                {% if user|has_group:'Руководящая группа' %}
-                                <option class="selector-item" value="">Нет</option>
-                                {% endif %}
-                                {% for sector in sectors %}
-                                <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
-                                {% endfor %}
-                            </select>
-                        {% else %}
-                            <span class="pull-right">
-                                {% if task.sector %}
-                                    <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
-                                {% else %}
-                                    <span>Нет</span>
-                                {% endif %}
-                            </span>
-                        {% endif %}
-                    </p>
-                    <p>
-                    <span class="param">Создатель:</span>
-                        {% if user == task.creator %}
-                            <span class="pull-right">
-                                {% if task.creator.avatar.img %}
-                                    {% thumbnail task.creator.avatar.img "20x20" crop="center" as pic %}
-                                    <img src="{{ pic.url }}" class="avatar">
-                                    {% endthumbnail %}
-                                {% endif %} 
-                                {{ task.creator.get_full_name }} 
-                                <span class="grey">(Это вы)</span>
-                            </span>
-                        {% else %}
-                            <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class = "pull-right">
-                                {% if task.creator.avatar.img %}
-                                    {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
-                                    <img src="{{ pic.url }}" class="avatar">
-                                    {% endthumbnail %}
-                                {% endif %}
-                                {{ task.creator.get_full_name }}
-                            </a>
-                        {% endif %}
-                    </p>
-                    
-                    <p style="margin-bottom:15px">
-                    <span class="param">Количество людей:</span>
-                        <span class="pull-right">
+                    <table class="usual-letters" border="0" style="width:100%; margin-bottom:15px;">
+                        <tr>
+                            <td>
+                                <span class="param">Мероприятие:</span>
+                            </td>
+                            <td class="ra">
                             {% if can_edit %}
-                                <span id="num">{{ task.number_of_assignees }} чел.
-                                    <a href="#" class="light"><i class="fa fa-pencil" id="num-pencil"></i></a>
+                                <span class="" id="event">
+                                    {% if task.event %}
+                                        <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
+                                    {% else %}
+                                        <span>Нет</span>
+                                    {% endif %}
+                                    <a href="#" class="light"><i class="fa fa-pencil" id="event-pencil"></i></a>
                                 </span>
-                                <span id="num-edit" class="hidden">
-                                    <input id="num-field" type="number" min="1" max="99" value="{{ task.number_of_assignees }}"> чел.
+                                <select class=" selector hidden" id="event-edit">
+                                    {% if user|has_group:'Руководящая группа' %}
+                                    <option class="selector-item" value="">Нет</option>
+                                    {% endif %}
+                                    {% for event in events %}
+                                    <option class="selector-item" value="{{ event.pk }}">{{ event.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <span class="">
+                                    {% if task.event %}
+                                        <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
+                                    {% else %}
+                                        <span>Нет</span>
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="param">Сектор:</span>
+                            </td>
+                            <td class="ra">
+                            {% if can_edit %}
+                                <span class="" id="sector">
+                                    {% if task.sector %}
+                                        <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
+                                    {% else %}
+                                        <span>Нет</span>
+                                    {% endif %}
+                                    <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
+                                </span>
+                                <select class="selector hidden" id="sector-edit">
+                                    {% if user|has_group:'Руководящая группа' %}
+                                    <option class="selector-item" value="">Нет</option>
+                                    {% endif %}
+                                    {% for sector in sectors %}
+                                    <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <span class="">
+                                    {% if task.sector %}
+                                        <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
+                                    {% else %}
+                                        <span>Нет</span>
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="param">Создатель:</span>
+                            </td>
+                            <td class="ra">
+                            {% if user == task.creator %}
+                                <span class="">
+                                    {% if task.creator.avatar.img %}
+                                        {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
+                                        <img src="{{ pic.url }}" class="avatar">
+                                        {% endthumbnail %}
+                                    {% endif %} 
+                                    {{ task.creator.get_full_name }} 
+                                    <span class="grey">(Это вы)</span>
                                 </span>
                             {% else %}
-                                <span>{{ task.number_of_assignees }} чел.</span>
+                                <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class = "">
+                                    {% if task.creator.avatar.img %}
+                                        {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
+                                        <img src="{{ pic.url }}" class="avatar">
+                                        {% endthumbnail %}
+                                    {% endif %}
+                                    {{ task.creator.get_full_name }}
+                                </a>
                             {% endif %}
-                        </span>
-                    </p>
-                    {% if task.assignees.all.count == 0 %}
-                        <span class="param">Нет исполнителей</span>
-                        {% if can_edit %}
-                            <span class="pull-right">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="param">Количество людей:</span>
+                            </td>
+                            <td class="ra">
                                 <span class="">
-                                    <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg"></i></a>
+                                    {% if can_edit %}
+                                        <span id="num">{{ task.number_of_assignees }} чел.
+                                            <a href="#" class="light"><i class="fa fa-pencil" id="num-pencil"></i></a>
+                                        </span>
+                                        <span id="num-edit" class="hidden">
+                                            <input id="num-field" type="number" min="1" max="99" value="{{ task.number_of_assignees }}"> чел.
+                                        </span>
+                                    {% else %}
+                                        <span>{{ task.number_of_assignees }} чел.</span>
+                                    {% endif %}
                                 </span>
-                                <span class="">
-                                    {{ form.assignees_autocomplete|add_class:"hidden" }}
-                                </span>
-                            </span>
-                        {% endif %}
-                    {% else %}
-                        <div style="display: inline-block; vertical-align: top;"><span class="param">Исполнители:</span></div>
-                        <div class="pull-right" align="right" style="display: inline-block">
-                            <table class="usual-letters" border="0">
-                                {% for assignee in task.assignees.all %}
-                                    <tr>
-                                        <td style="padding-right:5px;">
-                                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">
-                                                {% if assignee.avatar.img %}
-                                                    {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
-                                                    <img src="{{ pic.url }}" class="avatar">
-                                                    {% endthumbnail %}
-                                                {% endif %}
-                                            </a>
-                                        </td>
-                                        <td style="padding-right:5px;">
-                                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">                                
-                                                {{ assignee.get_full_name }}
-                                            </a>
-                                        </td>
-                                        {% if can_edit %}
-                                        <td align="right">
-                                        <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
-                                        </td>
-                                        {% endif %}
-                                    </tr>
-                                {% endfor %}
+                            </td>
+                        </tr>
+                        <tr height="10">
+                        </tr>
+                        <tr>
+                            {% if task.assignees.all.count == 0 %}
+                                <td valign="top"> <span class="param">Нет исполнителей</span> </td>
                                 {% if can_edit %}
-                                    <tr>
-                                        <td colspan = "2">
-                                                {{ form.assignees_autocomplete|add_class:"hidden" }}
-                                        </td>
-                                        <td align = "right">
-                                                <a href="#" class="green" id="assign"><i class="fa fa-user-plus fa-lg"></i></a>
-                                            
-                                        </td>
-                                    </tr>
+                                <td class="ra">
+                                    <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg"></i></a>
+                                    {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                </td>
                                 {% endif %}
-                            </table>
-                        </div>
-                {% endif %}
+                            {% else %}
+                                <td valign="top"><span class="param">Исполнители:</span></td>
+                                <td align="right">
+                                    <table class="usual-letters" border="0">
+                                        {% for assignee in task.assignees.all %}
+                                            <tr>
+                                                <td style="padding-right:5px;">
+                                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}">
+                                                        {% if assignee.avatar.img %}
+                                                            {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
+                                                            <img src="{{ pic.url }}" class="avatar">
+                                                            {% endthumbnail %}
+                                                        {% endif %}
+                                                    </a>
+                                                </td>
+                                                <td style="padding-right:5px;">
+                                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}">                                
+                                                        {{ assignee.get_full_name }}
+                                                    </a>
+                                                </td>
+                                                {% if can_edit %}
+                                                <td align="right">
+                                                <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
+                                                </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                        {% if can_edit %}
+                                            <tr style="height:20px">
+                                                <td colspan = "2">
+                                                        {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                                </td>
+                                                <td align = "right">
+                                                        <a href="#" class="green" id="assign"><i class="fa fa-user-plus fa-lg"></i></a>
+                                                    
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </table>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    </table>
                 </div>
                 <div class = "col-md-6">
-                    <p>
-                    <span class="param">Статус:</span>
-                    <span class="">
-                    {% if task.status == 'closed' %}
-                        <span class="label lbl label-success pull-right">
-                    {% elif task.status == 'resolved' %}
-                        <span class="label lbl label-primary pull-right">
-                    {% elif task.status == 'in_progress' %}
-                        <span class="label lbl label-warning pull-right">
-                    {% elif task.status == 'open' %}
-                        <span class="label lbl label-default pull-right">
-                    {% elif task.status == 'in_labor' %}
-                        <span class="label lbl label-danger pull-right">
-                    {% elif task.status == 'volunteers' %}
-                        <span class="label lbl label-info pull-right">
-                    {% endif %}
-                            {{ task.get_status_display }}
-                        </span>
-                    </span>
-                    </p>
-                    <p>
-                    <span class="param">Особенности:</span>
-                    <span class= "pull-right">
-                    {% if task.is_urgent %}
-                    <span class="priotity red robotobold">
-                        СРОЧНОЕ
-                    </span>
-                    {% elif task.is_hard %}
-                    <span class="priotity red robotobold">
-                        ТРУДНОЕ
-                    </span>
-                    {% else %}
-                    <span class="priotity grey">
-                        Нет
-                    </span>
-                    {% endif %}
-                    <span>
-                    </p>
-                    <p style="white-space:nowrap; margin-bottom: 35px;">
-                    <span class="param">Сроки:</span>
-                        {% if can_edit %}
-                        <span class="pull-right">
-                            <span id="limit" >{{ task.datetime_limit }}
-                                <a href="#" class="light" ><i class="fa fa-pencil" id="limit-pencil"></i></a>
-                            </span>
-                            <span id="limit-edit" class="hidden">
-                                <input id="limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
-                            </span>
-                        </span>
-                        {% else %}
-                        {{ task.datetime_limit }}
-                        {% endif %}
-                    </p>
-
-                    {% if can_edit %}
-                        {% if task.candidates.all.count == 0 %}
-                            <span class="param">Нет кандидатов</span>
-                        {% else %}
-                            <div style="display: inline-block; vertical-align: top;"><span class="param">Кандидаты:</span></div>
-                            <div class="pull-right" align="right" style="display: inline-block">
-                                <table class="usual-letters" border="0">
-                                {% for candidate in task.candidates.all %}
-                                    <tr>
-                                        <td style="padding-right:5px;">
-                                            <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}">
-                                                {% if candidate.avatar.img %}
-                                                    {% thumbnail candidate.avatar.img "22x22" crop="center" as pic %}
-                                                        <img src="{{ pic.url }}" class="avatar">
-                                                    {% endthumbnail %}
-                                                {% endif %}
-                                            </a>
-                                        </td>
-                                        <td style="padding-right:5px;">
-                                            <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}">
-                                                {{ candidate.get_full_name }}
-                                            </a>
-                                        </td>
-                                        <td style="padding-right:2px;">
-                                            <a href="#" class="blue approve" title="Назначить на задачу"> <i class="fa fa-thumbs-o-up fa-lg"></i> </a>
-                                        </td>
-                                        <td>
-                                            <a href="#" class="red reject" title="Отклонить заявку"> <i class="fa fa-thumbs-o-down fa-lg"></i> </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </table>
-                            </div>
-                        {% endif %}
-                    {% endif %}
+                    <table border="0" class="usual-letters" style="width:100%"> 
+                        <tr>
+                            <td>
+                                <span class="param">Статус:</span>
+                            </td>
+                            <td class="ra">
+                            {% if task.status == 'closed' %}
+                                <span class="label lbl label-success">
+                            {% elif task.status == 'resolved' %}
+                                <span class="label lbl label-primary">
+                            {% elif task.status == 'in_progress' %}
+                                <span class="label lbl label-warning">
+                            {% elif task.status == 'open' %}
+                                <span class="label lbl label-default">
+                            {% elif task.status == 'in_labor' %}
+                                <span class="label lbl label-danger">
+                            {% elif task.status == 'volunteers' %}
+                                <span class="label lbl label-info">
+                            {% endif %}
+                                    {{ task.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="param">Особенности:</span>
+                            </td>
+                            <td class="ra">
+                                {% if task.is_urgent %}
+                                <span class="priotity red robotobold">
+                                    СРОЧНОЕ
+                                </span>
+                                {% elif task.is_hard %}
+                                <span class="priotity red robotobold">
+                                    ТРУДНОЕ
+                                </span>
+                                {% else %}
+                                <span class="priotity grey">
+                                    Нет
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="param">Сроки:</span>
+                            </td>
+                            <td class="ra">
+                                {% if can_edit %}
+                                    <span id="limit" >{{ task.datetime_limit }}
+                                        <a href="#" class="light" ><i class="fa fa-pencil" id="limit-pencil"></i></a>
+                                    </span>
+                                    <span id="limit-edit" class="hidden">
+                                        <input id="limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
+                                    </span>
+                                {% else %}
+                                    {{ task.datetime_limit }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr height="30">
+                        </tr>
+                        <tr>
+                            {% if can_edit %}
+                                {% if task.candidates.all.count == 0 %}
+                                    <td colspan="2" valign="top">
+                                        <span class="param">Нет кандидатов</span>
+                                    </td>
+                                {% else %}
+                                    <td valign="top"><span class="param">Кандидаты:</span></td>
+                                    <td align="right">
+                                        <table class="usual-letters" border="0">
+                                        {% for candidate in task.candidates.all %}
+                                            <tr>
+                                                <td style="padding-right:5px;">
+                                                    <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}">
+                                                        {% if candidate.avatar.img %}
+                                                            {% thumbnail candidate.avatar.img "22x22" crop="center" as pic %}
+                                                                <img src="{{ pic.url }}" class="avatar">
+                                                            {% endthumbnail %}
+                                                        {% endif %}
+                                                    </a>
+                                                </td>
+                                                <td style="padding-right:5px;">
+                                                    <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}">
+                                                        {{ candidate.get_full_name }}
+                                                    </a>
+                                                </td>
+                                                <td style="padding-right:2px;">
+                                                    <a href="#" class="blue approve" title="Назначить на задачу"> <i class="fa fa-thumbs-o-up fa-lg"></i> </a>
+                                                </td>
+                                                <td>
+                                                    <a href="#" class="red reject" title="Отклонить заявку"> <i class="fa fa-thumbs-o-down fa-lg"></i> </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </table>
+                                    </td>
+                                {% endif %}
+                            {% endif %}
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>

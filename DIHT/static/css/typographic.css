@@ -78,6 +78,10 @@ p {
     margin-bottom: 2px;
 }
 
+td.ra {
+    text-align: right;
+}
+
 .value-accent {
 	font-family: RobotoBold;
 	font-size: 16;
