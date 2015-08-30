@@ -47,7 +47,7 @@
     {% elif user in task.assignees.all and task.status == 'in_progress' %}
         <div class = "row">
             <div class="col-md-12" style="padding-left:40px;">
-                <a class="btn btn-default action" id="resolved"
+                <a class="btn btn-default action" id="resolve"
                    href="{% url 'activism:task_action' pk=task.pk action='resolved'%}"><i class="fa fa-lg fa-check blue"></i> Готово</a>
             </div>
         </div>
@@ -67,22 +67,25 @@
                             </td>
                             <td class="ra">
                             {% if can_edit %}
-                                <span class="" id="event">
+                                <span id="event">
                                     {% if task.event %}
-                                        <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>
+                                    <a href="{% url 'activism:event' pk=task.event.pk %}"
+                                       id="{{task.event.pk}}" class="event-current">{{ task.event.name }}</a>
                                     {% else %}
-                                        <span>Нет</span>
+                                        <span id="" class="event-current">Нет</span>
                                     {% endif %}
                                     <a href="#" class="light"><i class="fa fa-pencil" id="event-pencil"></i></a>
                                 </span>
-                                <select class=" selector hidden" id="event-edit">
-                                    {% if user|has_group:'Руководящая группа' %}
-                                    <option class="selector-item" value="">Нет</option>
-                                    {% endif %}
-                                    {% for event in events %}
-                                    <option class="selector-item" value="{{ event.pk }}">{{ event.name }}</option>
-                                    {% endfor %}
-                                </select>
+                                <span class="hidden" id="event-edit">
+                                    <select class="selector" id="event-field">
+                                        {% if user|has_group:'Руководящая группа' %}
+                                        <option class="selector-item" value="">Нет</option>
+                                        {% endif %}
+                                        {% for event in events %}
+                                        <option class="selector-item" value="{{ event.pk }}">{{ event.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </span>
                             {% else %}
                                 <span class="">
                                     {% if task.event %}
@@ -100,22 +103,25 @@
                             </td>
                             <td class="ra">
                             {% if can_edit %}
-                                <span class="" id="sector">
-                                    {% if task.sector %}
-                                        <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
-                                    {% else %}
-                                        <span>Нет</span>
-                                    {% endif %}
+                                <span id="sector">
+                                {% if task.sector %}
+                                    <a href="{% url 'activism:sector' pk=task.sector.pk %}"
+                                       id="{{task.sector.pk}}" class="sector-current">{{ task.sector.name }}</a>
+                                {% else %}
+                                    <span id="" class="sector-current">Нет</span>
+                                {% endif %}
                                     <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                                 </span>
-                                <select class="selector hidden" id="sector-edit">
-                                    {% if user|has_group:'Руководящая группа' %}
-                                    <option class="selector-item" value="">Нет</option>
-                                    {% endif %}
-                                    {% for sector in sectors %}
-                                    <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
-                                    {% endfor %}
-                                </select>
+                                <span class="hidden" id="sector-edit">
+                                    <select class="selector" id="sector-field">
+                                        {% if user|has_group:'Руководящая группа' %}
+                                        <option class="selector-item" value="">Нет</option>
+                                        {% endif %}
+                                        {% for sector in sectors %}
+                                        <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </span>
                             {% else %}
                                 <span class="">
                                     {% if task.sector %}
@@ -154,25 +160,6 @@
                             {% endif %}
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                                <span class="param">Количество людей:</span>
-                            </td>
-                            <td class="ra">
-                                <span class="">
-                                    {% if can_edit %}
-                                        <span id="num">{{ task.number_of_assignees }} чел.
-                                            <a href="#" class="light"><i class="fa fa-pencil" id="num-pencil"></i></a>
-                                        </span>
-                                        <span id="num-edit" class="hidden">
-                                            <input id="num-field" type="number" min="1" max="99" value="{{ task.number_of_assignees }}"> чел.
-                                        </span>
-                                    {% else %}
-                                        <span>{{ task.number_of_assignees }} чел.</span>
-                                    {% endif %}
-                                </span>
-                            </td>
-                        </tr>
                         <tr height="10">
                         </tr>
                         <tr>
@@ -200,13 +187,13 @@
                                                     </a>
                                                 </td>
                                                 <td style="padding-right:5px;">
-                                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}">                                
+                                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}" id="{{assignee.pk}}" class="assignee">
                                                         {{ assignee.get_full_name }}
                                                     </a>
                                                 </td>
                                                 {% if can_edit %}
                                                 <td align="right">
-                                                <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
+                                                <a href="#" class="red resign" id="{{assignee.pk}}" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
                                                 </td>
                                                 {% endif %}
                                             </tr>
@@ -218,7 +205,6 @@
                                                 </td>
                                                 <td align = "right">
                                                         <a href="#" class="green" id="assign"><i class="fa fa-user-plus fa-lg"></i></a>
-                                                    
                                                 </td>
                                             </tr>
                                         {% endif %}
@@ -257,39 +243,50 @@
                                 <span class="param">Особенности:</span>
                             </td>
                             <td class="ra">
+                                <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
                                 {% if task.is_urgent %}
-                                <span class="priotity red robotobold">
-                                    СРОЧНОЕ
-                                </span>
-                                {% elif task.is_hard %}
-                                <span class="priotity red robotobold">
-                                    ТРУДНОЕ
-                                </span>
-                                {% else %}
-                                <span class="priotity grey">
-                                    Нет
-                                </span>
+                                    <span class="priotity red robotobold">
+                                    &nbspСРОЧНОЕ
+                                    </span>
                                 {% endif %}
+                                {% if task.is_hard %}
+                                    <span class="priotity red robotobold">
+                                    &nbspТРУДНОЕ
+                                    </span>
+                                {% endif %}
+                                {% if not task.is_urgent and not task.is_hard %}
+                                    <span class="priotity grey">
+                                        Нет
+                                    </span>
+                                {% endif %}
+                                {% if can_edit %}
+                                <a id='prop' href="{% url 'activism:task_action' pk=task.pk action='prop'%}" class="light action">
+                                    <i class="fa fa-pencil" id="prop-pencil"></i>
+                                </a>
+                                {% endif %}
+                                </span>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <span class="param">Сроки:</span>
+                                <span class="param">Количество людей:</span>
                             </td>
                             <td class="ra">
-                                {% if can_edit %}
-                                    <span id="limit" >{{ task.datetime_limit }}
-                                        <a href="#" class="light" ><i class="fa fa-pencil" id="limit-pencil"></i></a>
-                                    </span>
-                                    <span id="limit-edit" class="hidden">
-                                        <input id="limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
-                                    </span>
-                                {% else %}
-                                    {{ task.datetime_limit }}
-                                {% endif %}
+                                <span>
+                                    {% if can_edit %}
+                                        <span id="number_of_assignees"><span id="number_of_assignees-current">{{ task.number_of_assignees }}</span> чел.
+                                            <a href="#" class="light"><i class="fa fa-pencil" id="number_of_assignees-pencil"></i></a>
+                                        </span>
+                                        <span id="number_of_assignees-edit" class="hidden">
+                                            <input id="number_of_assignees-field" type="number" min="1" max="99" value="{{ task.number_of_assignees }}"> чел.
+                                        </span>
+                                    {% else %}
+                                        <span>{{ task.number_of_assignees }} чел.</span>
+                                    {% endif %}
+                                </span>
                             </td>
                         </tr>
-                        <tr height="30">
+                        <tr height="10">
                         </tr>
                         <tr>
                             {% if can_edit %}
@@ -304,7 +301,7 @@
                                         {% for candidate in task.candidates.all %}
                                             <tr>
                                                 <td style="padding-right:5px;">
-                                                    <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}">
+                                                    <a href="{% url 'accounts:profile' pk=candidate.pk %}">
                                                         {% if candidate.avatar.img %}
                                                             {% thumbnail candidate.avatar.img "22x22" crop="center" as pic %}
                                                                 <img src="{{ pic.url }}" class="avatar">
@@ -313,7 +310,7 @@
                                                     </a>
                                                 </td>
                                                 <td style="padding-right:5px;">
-                                                    <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}">
+                                                    <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}" class="candidate">
                                                         {{ candidate.get_full_name }}
                                                     </a>
                                                 </td>
@@ -336,17 +333,38 @@
         </div>
         <div class="section">
             <h5 class="section-name">Описание <a href="#" class="light">
-                {% if user == task.creator and task.status != 'closed' %}<i class="fa fa-pencil" id="desc-pencil"></i>{% endif %}
+                {% if user == task.creator and task.status != 'closed' %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
             </a></h5>
             <hr class="just-a-line">
-            <span id="desc">{{ task.description }}</span>
+            <span id="description"><span id="description-current">{{ task.description }}</span></span>
             {% if user == task.creator and task.status != 'closed' %}
-            <span class="hidden" id="desc-edit">
-                <textarea class="form-control" id="desc-field" rows="4">{{ task.description }}</textarea>
+            <span class="hidden" id="description-edit">
+                <textarea class="form-control" id="description-field" rows="4">{{ task.description }}</textarea>
             </span>
             {% endif %}
-
         </div>
+        <div class="section">
+            {% if can_edit %}
+            <span>
+                <span id="tags">
+                    {% for tag in task.tags.all %}
+                        &nbsp#{{ tag }}
+                    {% endfor %}
+                    <a href="#" class="light"><i class="fa fa-pencil" id="tags-pencil"></i></a>
+                </span>
+                <span id="tags-edit" class="hidden">
+                    {{ form.tags }}
+                </span>
+            </span>
+            {% else %}
+            <span class="pull-right">
+                {% for tag in task.tags.all %}
+                    &nbsp{{ tag }}
+                {% endfor %}
+            </span>
+            {% endif %}
+        </div>
+        <br>
     </div>
     <div class = "col-md-4">
         <div class="section">
@@ -355,12 +373,12 @@
             {% if can_edit %}
                 <span class="param">Расчетные:</span>
                 <span class="pull-right">
-                    <span id="est-hours">
-                        {% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}
-                        <a href="#" class="light"><i class="fa fa-pencil" id="est-hours-pencil"></i></a>
+                    <span id="hours_predict">
+                        <span id="hours_predict-current">{{ task.hours_predict|stringformat:".1f" }}</span> час.
+                        <a href="#" class="light"><i class="fa fa-pencil" id="hours_predict-pencil"></i></a>
                     </span>
-                    <span id="est-hours-edit" class="hidden">
-                        <input id="est-hours-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }}{% endif %}"> час.
+                    <span id="hours_predict-edit" class="hidden">
+                        <input id="hours_predict-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }}{% endif %}"> час.
                     </span>
                 </span>
             {% else %}
@@ -368,9 +386,12 @@
                 <span class="pull-right">{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}</span>
                 <br>
             {% endif %}
-            {% if task.hours_real  %}
+            {% if task.status == 'closed' or task.status == 'resolved' %}
                 <span class="param">Реальные:</span>
-                <span class="pull-right">{% if task.hours_real %}{{ task.hours_real }} час.{% endif %}</span>
+                {% for entity in through %}
+                    <span class="pull-right">{{entity.user.get_full_name}} - {{entity.hours}} час.</span>
+                    <br>
+                {% endfor %}
             {% endif %}
         </div>
         <div class="section">
@@ -378,6 +399,20 @@
             <hr class="just-a-line">
             <span class="param">Создано:</span> <span class="pull-right">{{ task.datetime_created }}</span> <br>
             <span class="param">Последнее изменение:</span> <span class="pull-right">{{ task.datetime_last_modified }}</span> <br>
+            <span class="param">Сроки:</span>
+                {% if can_edit %}
+                <span class="pull-right">
+                    <span id="datetime_limit">{{ task.datetime_limit }}
+                        <a href="#" class="light"><i class="fa fa-pencil" id="datetime_limit-pencil"></i></a>
+                    </span>
+                    <span id="datetime_limit-edit" class="hidden">
+                        <input id="datetime_limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
+                    </span>
+                </span>
+                {% else %}
+                <span class="pull-right">{{ task.datetime_limit }}</span>
+                {% endif %}
+            <br>
             {% if task.datetime_closed %}
             <span class="param">Закрыто:</span> <span class="pull-right">{{ task.datetime_closed }}</span>
             {% endif %}
@@ -387,32 +422,37 @@
 
 
 {% if request.user == task.creator %}
-<div class="hidden currents">
-    {% if task.event %}
-    <span id="event-current">{{ task.event.pk }}</span>
-    {% else %}
-    <span id="event-current"></span>
-    {% endif %}
-    {% if task.sector %}
-    <span id="sector-current">{{ task.sector.pk }}</span>
-    {% else %}
-    <span id="sector-current"></span>
-    {% endif %}
-    <span id="num-current">{{ task.number_of_assignees }}</span>
-    <span id="limit-current">{{ task.datetime_limit|date:'Y-m-d\TH:i' }}</span>
-    <span id="est-hours-current" >{{ task.hours_predict|stringformat:"f" }}</span>
-    <span id="desc-current">{{ task.description }}</span>
-    {% for assignee in task.assignees.all %}
-        <span class="assignee">{{ assignee.pk }}</span>
-    {% endfor %}
-    {% for candidate in task.candidates.all %}
-        <span class="candidate">{{candidate.pk}}</span>
-    {% endfor %}
+<div class="hidden">
     {% for rejecter in task.rejected.all %}
-        <span class="rejected">{{rejecter.pk}}</span>
+        <span class="rejected" id="{{rejecter.pk}}"></span>
     {% endfor %}
 </div>
 {% endif %}
+
+
+<div class="modal" id="prop-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="prop-form" action="{% url 'activism:task_action' pk=task.pk action='prop'%}" method="POST" autocomplete="off">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h3>Особенности</h3>
+                </div>
+                <div id="prop-modal-body" class="modal-body">
+                    <label for="id_is_urgent">Срочное задание: </label>
+                    <input id="id_is_urgent" name="is_urgent" type="checkbox">
+                    <br>
+                    <label for="id_is_urgent">Трудное задание: </label>
+                    <input id="id_is_hard" name="is_hard" type="checkbox">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Подтвердить</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <div class="modal" id="resolve-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -447,6 +487,11 @@
                     <h3>Введите количество часов</h3>
                 </div>
                 <div id="close-modal-body" class="modal-body">
+                    <label id="hours-prop">Модификаторы:
+                        <span id="urgent">{% if task.is_urgent %} Срочное (x1.5) {% endif %}<span>
+                        <span id="hard">{% if task.is_hard %} Трудное (x1.5) {% endif %}</span>
+                    </label>
+                    <br>
                     {% for entity in through %}
                     <label for="id_rh_{{entity.user.pk}}">{{entity.user.get_full_name}} (реальные): </label>
                     <input class="form-control real-hours" id="id_rh_{{entity.user.pk}}" min="0" step="any" type="number"

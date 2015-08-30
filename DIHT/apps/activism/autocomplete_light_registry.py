@@ -1,11 +1,13 @@
 import autocomplete_light
 from django.contrib.auth.models import User
 from django.utils.encoding import force_text
+from taggit.models import Tag
 
 
 class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
     model = User
     search_fields = ['^first_name', '^last_name']
+    choices = User.objects.filter(groups__name__in=['Активисты'])
     attrs = {
         'data-autcomplete-minimum-characters': 0,
         'placeholder': 'Имя или фамилия',
@@ -17,3 +19,4 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
 
 
 autocomplete_light.register(UserAutocomplete)
+autocomplete_light.register(Tag)

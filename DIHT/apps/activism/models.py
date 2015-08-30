@@ -61,7 +61,6 @@ class Task(Model):
         ('in_labor', 'На бирже'),
     )
 
-
     name = CharField("Название", max_length=50)
     creator = ForeignKey(User, verbose_name="Создатель", related_name="tasks_created")
     event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True, null=True)

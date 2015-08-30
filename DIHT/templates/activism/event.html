@@ -1,7 +1,6 @@
 ﻿{% extends "base.html" %}
 {% load static from staticfiles %}
-{% load thumbnail %}
-{% load add_class has_group %}
+{% load add_class has_group thumbnail %}
 {% block title %} Мероприятие {% endblock %}
 {% block main_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
@@ -10,7 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
 {% block content %}
         <div class="row well namezone">
-            <h3 class="nametext">{{ event.name }}</h3>
+            <h3 class="event-name nametext">{{ event.name }}</h3>
         </div>
         <div class = "row pagezone">
             {% if user == event.creator and event.status == 'open'%}
@@ -39,20 +38,23 @@
                                     {% if user == event.creator  and event.status == 'open' %}
                                         <span class="" id="sector">
                                         {% if event.sector %}
-                                            <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
+                                            <a href="{% url 'activism:sector' pk=event.sector.pk %}"
+                                               class="sector-current" id="{{event.sector.pk}}">{{ event.sector.name }}</a>
                                         {% else %}
-                                            <span>Нет</span>
+                                            <span class="sector-current" id="">Нет</span>
                                         {% endif %}
                                             <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                                         </span>
-                                        <select class="selector hidden" id="sector-edit">
-                                            <option class="selector-item" value="">Нет</option>
+                                        <span class="hidden" id="sector-edit">
+                                            <select class="selector" id="sector-field">
+                                                <option class="selector-item" value="">Нет</option>
                                             {% for sector in sectors %}
-                                            <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
+                                                <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
                                             {% endfor %}
-                                        </select>
+                                            </select>
+                                        </span>
                                     {% else %}
-                                        <span class="">
+                                        <span>
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
                                         {% else %}
@@ -115,7 +117,7 @@
                                                             </a>
                                                         </td>
                                                         <td style="padding-right:5px;">
-                                                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">                                
+                                                            <a href="{% url 'accounts:profile' pk=assignee.pk %}" id="{{assignee.pk}}" class="assignee">
                                                                 {{ assignee.get_full_name }}
                                                             </a>
                                                         </td>
@@ -127,13 +129,12 @@
                                                     </tr>
                                                 {% endfor %}
                                                 {% if user == event.creator  and event.status == 'open' %}
-                                                    <tr>
+                                                    <tr style="height:20px">
                                                         <td colspan = "2">
                                                                 {{ form.assignees_autocomplete|add_class:"hidden" }}
                                                         </td>
                                                         <td align = "right">
                                                                 <a href="#" class="green" id="assign"><i class="fa fa-user-plus fa-lg"></i></a>
-                                                            
                                                         </td>
                                                     </tr>
                                                 {% endif %}
@@ -144,7 +145,6 @@
                             </table>
                         </div>
                         <div class = "col-md-6">
-                            <p>
                             <span class="param">Cтатус:</span>
                             {% if event.status == 'closed' %}
                             <span class="label label-success pull-right">
@@ -153,41 +153,40 @@
                             {% endif %}
                             {{ event.get_status_display }}
                             </span>
-                            </p>
-                            <p>
+                            <br>
+
                             <span class="param">Дата создания:</span>
                             <span class = "pull-right">{{ event.date_created }}</span>
-                            </p>
-                            <p>
+                            <br>
                             <span class="param">Дата проведения:</span>
                             {% if user == event.creator and event.status == 'open' %}
-                            
-                                <span id="date_held" class="pull-right">
+                            <span class = "pull-right">
+                                <span id="date_held">
                                     {{ event.date_held }}
                                     <a href="#" class="light"><i class="fa fa-pencil" id="date_held-pencil"></i></a>
                                 </span>
-                                <span id="date_held-edit" class="hidden pull-right">
+                                <span id="date_held-edit" class="hidden">
                                     <input id="date_held-field" type="date" value="{{event.date_held|date:'Y-m-d'}}">
                                 </span>
-                            
+                            </span>
                             {% else %}
                             <span class="pull-right">{{ event.date_held }}</span>
                             {% endif %}
-                            </p>
+                            <br>
                         </div>
                     </div>
                 </div>
                 <div class="section">
-                    <h5 class="section-name">Описание {% if user == event.creator and event.status == 'open' %}<a href="#" class="light"><i class="fa fa-pencil" id="desc-pencil"></i></a>{% endif %} </h5> 
+                    <h5 class="section-name">Описание {% if user == event.creator and event.status == 'open' %}<a href="#" class="light"><i class="fa fa-pencil" id="description-pencil"></i></a>{% endif %} </h5>
                     <hr class="just-a-line">
-
-                    <span id="desc">{{ event.description }}</span>
+        
+                    <span id="description"><span id="description-current">{{ event.description }}</span></span>
                     {% if user == event.creator and event.status == 'open' %}
-                    <span class="hidden" id="desc-edit">
-                        <textarea class="form-control" id="desc-field" rows="4">{{ event.description }}</textarea>
+                    <span class="hidden" id="description-edit">
+                        <textarea class="form-control" id="description-field" rows="4">{{ event.description }}</textarea>
                     </span>
                     {% endif %}
-
+        
                 </div>
                 <div class = "section">
                     <h5 class="section-name">Задачи</h5>
@@ -247,22 +246,5 @@
             <!--div class = "col-md-4">
             </div-->
         </div>
-
-{% if request.user == event.creator %}
-<div class="hidden currents">
-    {% if event.sector %}
-    <span id="sector-current">{{ event.sector.pk }}</span>
-    {% else %}
-    <span id="sector-current"></span>
-    {% endif %}
-    <span id="date_held-current">{{ event.date_held|date:'Y-m-d' }}</span>
-    <span id="desc-current">{{ event.description }}</span>
-    {% for assignee in event.assignees.all %}
-        <span class="assignee">{{ assignee.pk }}</span>
-    {% endfor %}
-</div>
-{% endif %}
-
-
 {% include 'modal.html' %}
 {% endblock %}

@@ -1,10 +1,31 @@
 from autocomplete_light import ModelForm, ModelChoiceField
-from django.forms import HiddenInput, CharField
+from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
+from django.forms import HiddenInput, CharField, MultipleChoiceField
 from django.contrib.auth.models import Group, User
 from activism.models import Task, Event, AssigneeTask
-import autocomplete_light
+from django.shortcuts import get_object_or_404
 
-autocomplete_light.autodiscover()
+
+class OverwriteOnlyModelFormMixin(object):
+    '''
+    Delete POST keys that were not actually found in the POST dict
+    to prevent accidental overwriting of fields due to missing POST data.
+    '''
+    def __init__(self, *args, **kwargs):
+        super(OverwriteOnlyModelFormMixin, self).__init__(*args, **kwargs)
+        for key in self.fields.keys():
+            self.fields[key].required = False
+
+    def clean(self):
+        cleaned_data = super(OverwriteOnlyModelFormMixin, self).clean()
+        data = {}
+        for field in cleaned_data.keys():
+            if field in self.data:
+                data[field] = cleaned_data[field]
+        obj = get_object_or_404(self._meta.model, pk=self.instance.pk)
+        model_data = obj.__dict__
+        model_data.update(data)
+        return model_data
 
 
 class TaskCreateForm(ModelForm):
@@ -21,32 +42,28 @@ class TaskCreateForm(ModelForm):
         fields = ('event', 'sector', 'name', 'number_of_assignees', 'hours_predict')
 
 
-class TaskForm(ModelForm):
+class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
+    assignees = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)], required=False)
     assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
-    assignees = CharField(required=False)
+    tags = TaggitField(widget=TaggitWidget('TagAutocomplete'), required=False)
 
     class Meta:
         model = Task
         fields = ('hours_predict', 'description', 'datetime_limit',
                   'candidates', 'number_of_assignees',
-                  'event', 'rejected', 'sector')
-        widgets = {
-            'assignees': HiddenInput(),
-        }
-
-    def clean_assignees(self):
-        return self.data['assignees'].split(',')[:-1]
+                  'event', 'rejected', 'sector', 'tags')
 
     def save(self, commit=True):
-        for pk in self.cleaned_data['assignees']:
-            AssigneeTask.objects.get_or_create(task=self.instance, user=User.objects.get(pk=pk))
-        AssigneeTask.objects.filter(task=self.instance)\
-                            .exclude(user__pk__in=self.cleaned_data['assignees'])\
-                            .delete()
+        if self.cleaned_data.get('assignees') is not None:
+            for pk in self.cleaned_data['assignees']:
+                AssigneeTask.objects.get_or_create(task=self.instance, user=User.objects.get(pk=pk))
+            AssigneeTask.objects.filter(task=self.instance)\
+                                .exclude(user__pk__in=self.cleaned_data['assignees'])\
+                                .delete()
         return super(TaskForm, self).save(commit)
 
 
-class EventForm(ModelForm):
+class EventForm(OverwriteOnlyModelFormMixin, ModelForm):
     assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
 
     class Meta:

@@ -1,5 +1,7 @@
 $(function() {
-    var fields = {'#desc': 'description', '#est-hours': 'hours_predict', '#num':'number_of_assignees', '#limit': 'datetime_limit'};
+    var fields = ['description', 'hours_predict', 'number_of_assignees', 'datetime_limit', 'event', 'sector'];
+    var select_fields = ['event', 'sector'];
+    var ajax_fields = ['description',  'hours_predict', 'number_of_assignees'];
 
     function transfer_class(attr, elem2, elem1){
         $(elem1).addClass(attr);
@@ -21,40 +23,34 @@ $(function() {
     function get_ids(selector){
         var a = [];
         $(selector).each(function() {
-            a.push($(this).text());
+            a.push($(this)[0].id);
         });
         return a;
     }
 
     function post_task(dict){
-        var dat = {};
-        $.each(fields, function (key, value) {
-            dat[value] = $(key+'-current').text();
-        });
-
-        dat['event'] = $('#event-current').text();
-        dat['sector'] = $('#sector-current').text();
-        dat['assignees'] = get_ids('.assignee');
-        dat['candidates'] = get_ids('.candidate');
-        dat['rejected'] = get_ids('.rejected');
-
+        var reload = false
         for (key in dict)
-            dat[key] = dict[key];
-        dat['datetime_limit'] = dat['datetime_limit'].replace('T', ' ');
-        var ass = ""
-        for (key in dat['assignees']){
-           ass += dat['assignees'][key]+','
-        }
-        dat['assignees'] = ass
-
-        data = dict_to_string(dat);
-        console.log(data)
+            if (($.inArray(key, ajax_fields)) == -1)
+                reload = true
+        if ('datetime_limit' in dict)
+            dict['datetime_limit'] = dict['datetime_limit'].replace('T', ' ');
+        data = dict_to_string(dict);
         $.ajax({
             type: 'POST',
             url: window.location.href,
             data: data,
-            success: function(data) {
-                window.location.reload();
+            success: function(response) {
+                if (reload)
+                    window.location.reload();
+                else{
+                    for (field in dict){
+                        if (($.inArray(field, ajax_fields)) != -1){
+                            if (($.inArray(field, select_fields)) == -1)
+                                $('#'+field+'-current').text($('#'+field+'-field').val())
+                        }
+                    }
+                }
             },
             error: function(request, status, error) {
                 console.log(error)
@@ -62,41 +58,34 @@ $(function() {
         });
     };
 
-    $.each(fields, function (key, value) {
-	    $(key+'-pencil').click(function() {
-            transfer_class('hidden', key+'-edit', key);
-            $(key+'-field').focus();
+
+    $.each(fields, function (index, key) {
+        var field = '#'+key
+	    $(field+'-pencil').click(function() {
+            transfer_class('hidden', field+'-edit', field);
+            $(field+'-field').focus();
         });
 
-        $(key+'-field').blur(function() {
+        $(field+'-field').blur(function() {
+            transfer_class('hidden', field, field+'-edit');
             var dict = {}
-            dict[value] = $(key+'-field').val()
+            if (($.inArray(field, select_fields)) == -1)
+                dict[key] = $(field+'-field').val()
+            else
+                dict[key] = $(field+'-field option:selected').val()
             post_task(dict);
-            transfer_class('hidden', key, key+'-edit');
         });
 	});
 
-    // Events
-    $('#event-pencil').click(function() {
-	    transfer_class('hidden', '#event-edit', '#event');
-		$('#event-edit').focus();
+    // Tags
+	$('#tags-pencil').click(function() {
+	    transfer_class('hidden', '#tags-edit', '#tags');
+		$('#id_tags').focus();
 	})
 
-	$('#event-edit').blur(function() {
-	    post_task({'event': $('#event-edit option:selected').val()})
-		transfer_class('hidden', '#event', '#event-edit');
-	})
-    
-
-    // Sectors
-    $('#sector-pencil').click(function() {
-	    transfer_class('hidden', '#sector-edit', '#sector');
-		$('#sector-edit').focus();
-	})
-
-	$('#sector-edit').blur(function() {
-	    post_task({'sector': $('#sector-edit option:selected').val()})
-		transfer_class('hidden', '#sector', '#sector-edit');
+    $('#id_tags').blur(function() {
+	    post_task({'tags': $('#id_tags').val()})
+		transfer_class('hidden', '#tags', '#tags-edit');
 	})
 
 
@@ -116,7 +105,7 @@ $(function() {
 
     // Resign
 	$('.resign').click(function() {
-		resign_id = $(this).prev()[0].id;
+		resign_id = $(this)[0].id;
 		var assignees = get_ids('.assignee');
         assignees.splice($.inArray(resign_id, assignees), 1);
         post_task({'assignees': assignees});
@@ -143,4 +132,11 @@ $(function() {
 		rejected.push(reject_id);
         post_task({'candidates': candidates, 'rejected': rejected});
 	})
+
+	$(document).ready(function() {
+        if ($('.event-current')[0].id!='')
+            $('#event-field option[value='+$('.event-current')[0].id+']').attr("selected",true);
+        if ($('.sector-current')[0].id!='')
+            $('#sector-field option[value='+$('.sector-current')[0].id+']').attr("selected",true);
+    });
 });

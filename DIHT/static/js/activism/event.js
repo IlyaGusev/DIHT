@@ -1,5 +1,7 @@
 $(function() {
-    var fields = {'#desc': 'description', '#date_held': 'date_held'};
+    var fields = ['description', 'date_held', 'sector'];
+    var select_fields = ['sector'];
+    var ajax_fields = ['description'];
     function transfer_class(attr, elem2, elem1){
         $(elem1).addClass(attr);
 		$(elem2).removeClass(attr);
@@ -20,28 +22,32 @@ $(function() {
     function get_ids(selector){
         var a = [];
         $(selector).each(function() {
-            a.push($(this).text());
+            a.push($(this)[0].id);
         });
         return a;
     }
 
     function post_event(dict){
-        var dat = {};
-        $.each(fields, function (key, value) {
-            dat[value] = $(key+'-current').text();
-        });
-
-        dat['sector'] = $('#sector-current').text();
-
+        var reload = false
         for (key in dict)
-            dat[key] = dict[key];
-        data = dict_to_string(dat);
+            if (($.inArray(key, ajax_fields)) == -1)
+                reload = true
+        data = dict_to_string(dict);
         $.ajax({
             type: 'POST',
             url: window.location.href,
             data: data,
             success: function(data) {
-                window.location.reload();
+                if (reload)
+                    window.location.reload();
+                else{
+                    for (field in dict){
+                        if (($.inArray(field, ajax_fields)) != -1){
+                            if (($.inArray(field, select_fields)) == -1)
+                                $('#'+field+'-current').text($('#'+field+'-field').val())
+                        }
+                    }
+                }
             },
             error: function(request, status, error) {
                 console.log(error)
@@ -49,17 +55,21 @@ $(function() {
         });
     };
 
-	$.each(fields, function (key, value) {
-	    $(key+'-pencil').click(function() {
-            transfer_class('hidden', key+'-edit', key);
-            $(key+'-field').focus();
+	$.each(fields, function (index, key) {
+        var field = '#'+key
+	    $(field+'-pencil').click(function() {
+            transfer_class('hidden', field+'-edit', field);
+            $(field+'-field').focus();
         });
 
-        $(key+'-field').blur(function() {
+        $(field+'-field').blur(function() {
+            transfer_class('hidden', field, field+'-edit');
             var dict = {}
-            dict[value] = $(key+'-field').val()
+            if (($.inArray(field, select_fields)) == -1)
+                dict[key] = $(field+'-field').val()
+            else
+                dict[key] = $(field+'-field option:selected').val()
             post_event(dict);
-            transfer_class('hidden', key, key+'-edit');
         });
 	});
 
@@ -86,15 +96,8 @@ $(function() {
         post_event({'assignees': assignees});
 	})
 
-	// Sectors
-    $('#sector-pencil').click(function() {
-	    transfer_class('hidden', '#sector-edit', '#sector');
-		$('#sector-edit').focus();
-	})
-
-	$('#sector-edit').blur(function() {
-	    post_event({'sector': $('#sector-edit option:selected').val()})
-		transfer_class('hidden', '#sector', '#sector-edit');
-	})
-
+    $(document).ready(function() {
+        if ($('.sector-current')[0].id!='')
+            $('#sector-field option[value='+$('.sector-current')[0].id+']').attr("selected",true);
+    });
 });

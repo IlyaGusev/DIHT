@@ -60,21 +60,14 @@ $(function() {
             })
 	    }
 	    else{
-	        if (btn[0].id=='resolved'){
-	            $('#resolve-modal').on('submit', '.resolve-form', function(ev) {
+	        var id = btn[0].id
+	        if (id=='resolve' || id=='prop' || id=='close'){
+	            $('#'+id+'-modal').on('submit', '.'+id+'-form', function(ev) {
 	                ev.preventDefault();
                     post_action(btn_href, $(this).serialize());
                     return false;
                 })
-	            $('#resolve-modal').modal('show');
-	        }
-	        else if (btn[0].id=='close'){
-	            $('#close-modal').on('submit', '.close-form', function(ev) {
-	                ev.preventDefault();
-                    post_action(btn_href, $(this).serialize());
-                    return false;
-                })
-	            $('#close-modal').modal('show');
+	            $('#'+id+'-modal').modal('show');
 	        }
 	        else
 	            post_action(btn_href)
@@ -84,11 +77,14 @@ $(function() {
 	$('#close-modal').on('shown.bs.modal', function () {
         $(this).find('.real-hours').each(function() {
             var inp = $(this)
-            inp.next().find('.final-hours').text(inp.val())
-            inp.next().next().val(inp.val())
+            var coef = 1
+            if ($('#urgent').text()!='' || $('#hard').text()!='')
+                coef = 1.5
+            inp.next().find('.final-hours').text(inp.val()*coef)
+            inp.next().next().val(inp.val()*coef)
             $('#close-modal').on('change', '.real-hours', function(ev){
-                inp.next().find('.final-hours').text(inp.val())
-                inp.next().next().val(inp.val())
+                inp.next().find('.final-hours').text(inp.val()*coef)
+                inp.next().next().val(inp.val()*coef)
             })
         });
     });
