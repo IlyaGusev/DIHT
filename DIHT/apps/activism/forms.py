@@ -43,7 +43,8 @@ class TaskCreateForm(ModelForm):
 
 
 class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
-    assignees = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)], required=False)
+    assignees = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+                                            [('None', 'None'), ], required=False)
     assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
     tags = TaggitField(widget=TaggitWidget('TagAutocomplete'), required=False)
 
@@ -52,6 +53,11 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
         fields = ('hours_predict', 'description', 'datetime_limit',
                   'candidates', 'number_of_assignees',
                   'event', 'rejected', 'sector', 'tags')
+
+    def clean_assignees(self):
+        if self.data['assignees'] == 'None':
+            return []
+        return self.cleaned_data['assignees']
 
     def save(self, commit=True):
         if self.cleaned_data.get('assignees') is not None:
@@ -64,8 +70,15 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
 
 
 class EventForm(OverwriteOnlyModelFormMixin, ModelForm):
+    assignees = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+                                            [('None', 'None'), ], required=False)
     assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
 
     class Meta:
         model = Event
-        fields = ('description', 'assignees', 'date_held', 'sector')
+        fields = ('description', 'date_held', 'sector', 'assignees')
+
+    def clean_assignees(self):
+        if self.data['assignees'] == 'None':
+            return []
+        return self.cleaned_data['assignees']

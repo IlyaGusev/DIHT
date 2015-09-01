@@ -1,5 +1,5 @@
 from django.views.generic.edit import FormView, UpdateView
-from django.views.generic import DetailView, View
+from django.views.generic import DetailView, View, TemplateView
 from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse_lazy
 from django.db import transaction
@@ -120,3 +120,12 @@ class AvatarUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self, user):
         return self.get_object().user.id == user.id
+
+
+class SignUpOkView(TemplateView):
+    template_name = 'accounts/signup_ok.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SignUpOkView, self).get_context_data(**kwargs)
+        context['charge'] = Group.objects.get(name=u'Ответственные за работу с пользователями').user_set.all()
+        return context

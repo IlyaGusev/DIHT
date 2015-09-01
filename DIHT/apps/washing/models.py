@@ -78,7 +78,7 @@ class NonWorkingDay(Model):
 
 class BlackListRecord(Model):
     user = OneToOneField(User, verbose_name="Юзер", related_name="black_list_record")
-    is_blocked = BooleanField("Заблокирован в стиралке")
+    is_blocked = BooleanField("Заблокирован в стиралке", default=False)
 
     class Meta:
         verbose_name = "Запись в чёрном списке"

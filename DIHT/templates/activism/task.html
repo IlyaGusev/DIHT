@@ -3,7 +3,7 @@
 {% load add_class has_group %}
 {% load thumbnail %}
 {% block title %} Задача {% endblock %}
-{% block main_active %} class = "active" {% endblock %}
+{% block activism_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
     <script src="{% static 'js/activism.js' %}"></script>
     <script src="{% static 'js/activism/task.js' %}"></script>
@@ -149,7 +149,7 @@
                                     <span class="grey">(Это вы)</span>
                                 </span>
                             {% else %}
-                                <a href="{% url 'accounts:profile' pk=task.creator.pk %}" class = "">
+                                <a href="{% url 'accounts:profile' pk=task.creator.profile.pk %}" class = "">
                                     {% if task.creator.avatar.img %}
                                         {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
                                         <img src="{{ pic.url }}" class="avatar">
@@ -178,7 +178,7 @@
                                         {% for assignee in task.assignees.all %}
                                             <tr>
                                                 <td style="padding-right:5px;">
-                                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}">
+                                                    <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}">
                                                         {% if assignee.avatar.img %}
                                                             {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
                                                             <img src="{{ pic.url }}" class="avatar">
@@ -187,7 +187,7 @@
                                                     </a>
                                                 </td>
                                                 <td style="padding-right:5px;">
-                                                    <a href="{% url 'accounts:profile' pk=assignee.pk %}" id="{{assignee.pk}}" class="assignee">
+                                                    <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}" id="{{assignee.pk}}" class="assignee">
                                                         {{ assignee.get_full_name }}
                                                     </a>
                                                 </td>
@@ -301,7 +301,7 @@
                                         {% for candidate in task.candidates.all %}
                                             <tr>
                                                 <td style="padding-right:5px;">
-                                                    <a href="{% url 'accounts:profile' pk=candidate.pk %}">
+                                                    <a href="{% url 'accounts:profile' pk=candidate.profile.pk %}">
                                                         {% if candidate.avatar.img %}
                                                             {% thumbnail candidate.avatar.img "22x22" crop="center" as pic %}
                                                                 <img src="{{ pic.url }}" class="avatar">
@@ -310,7 +310,7 @@
                                                     </a>
                                                 </td>
                                                 <td style="padding-right:5px;">
-                                                    <a href="{% url 'accounts:profile' pk=candidate.pk %}" id="{{candidate.pk}}" class="candidate">
+                                                    <a href="{% url 'accounts:profile' pk=candidate.profile.pk %}" id="{{candidate.pk}}" class="candidate">
                                                         {{ candidate.get_full_name }}
                                                     </a>
                                                 </td>

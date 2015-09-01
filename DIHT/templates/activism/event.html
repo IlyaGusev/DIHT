@@ -2,7 +2,7 @@
 {% load static from staticfiles %}
 {% load add_class has_group thumbnail %}
 {% block title %} Мероприятие {% endblock %}
-{% block main_active %} class = "active" {% endblock %}
+{% block activism_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
     <script src="{% static 'js/activism.js' %}"></script>
     <script src="{% static 'js/activism/event.js' %}"></script>
@@ -79,7 +79,7 @@
                                             {{ event.creator.get_full_name }} <span class="grey">(Это вы)</span>
                                         </span>
                                     {% else %}
-                                        <a href="{% url 'accounts:profile' pk=event.creator.pk %}" class = "">
+                                        <a href="{% url 'accounts:profile' pk=event.creator.profile.pk %}" class = "">
                                         {% if event.creator.avatar.img %}
                                             {% thumbnail event.creator.avatar.img "22x22" crop="center" as pic %}
                                                 <img src="{{ pic.url }}" class="avatar">
@@ -108,7 +108,7 @@
                                                 {% for assignee in event.assignees.all %}
                                                     <tr>
                                                         <td style="padding-right:5px;">
-                                                            <a href="{% url 'accounts:profile' pk=assignee.pk %}">
+                                                            <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}">
                                                                 {% if assignee.avatar.img %}
                                                                     {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
                                                                     <img src="{{ pic.url }}" class="avatar">
@@ -117,13 +117,13 @@
                                                             </a>
                                                         </td>
                                                         <td style="padding-right:5px;">
-                                                            <a href="{% url 'accounts:profile' pk=assignee.pk %}" id="{{assignee.pk}}" class="assignee">
+                                                            <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}" id="{{assignee.pk}}" class="assignee">
                                                                 {{ assignee.get_full_name }}
                                                             </a>
                                                         </td>
                                                         {% if user == event.creator  and event.status == 'open' %}
                                                         <td align="right">
-                                                        <a href="#" class="red resign" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
+                                                        <a href="#" class="red resign" id="{{assignee.pk}}" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
                                                         </td>
                                                         {% endif %}
                                                     </tr>
@@ -203,7 +203,7 @@
                                 <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
                                 <td>{{ task.name }}</td>
                                 <td> {% for part in task.participants.all %}
-                                    <a href="{% url 'accounts:profile' pk=part.user.pk %}">
+                                    <a href="{% url 'accounts:profile' pk=part.user.profile.pk %}">
                                     {% if part.user.avatar.img %}
                                             {% thumbnail part.user.avatar.img "22x22" crop="center" as pic %}
                                             <img src="{{ pic.url }}" class="avatar">

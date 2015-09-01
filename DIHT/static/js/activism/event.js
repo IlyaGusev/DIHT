@@ -12,12 +12,17 @@ $(function() {
         for (var key in dat)
             if (!Array.isArray(dat[key]))
                 st+='&'+key+'='+dat[key];
-            else
-                for (var elem in dat[key])
-                    st+='&'+key+'='+dat[key][elem];
+            else{
+                if (dat[key].length == 0)
+                    st+='&'+key+"=None";
+                else
+                    for (var elem in dat[key])
+                        st+='&'+key+'='+dat[key][elem];
+            }
         st = st.substr(1);
         return st;
     };
+
 
     function get_ids(selector){
         var a = [];
@@ -90,7 +95,7 @@ $(function() {
 
     // Resign
 	$('.resign').click(function() {
-		resign_id = $(this).prev()[0].id;
+		resign_id = $(this)[0].id;
 		var assignees = get_ids('.assignee');
         assignees.splice($.inArray(resign_id, assignees), 1);
         post_event({'assignees': assignees});

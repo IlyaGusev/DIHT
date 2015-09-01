@@ -13,9 +13,13 @@ $(function() {
         for (var key in dat)
             if (!Array.isArray(dat[key]))
                 st+='&'+key+'='+dat[key];
-            else
-                for (var elem in dat[key])
-                    st+='&'+key+'='+dat[key][elem];
+            else{
+                if (dat[key].length == 0)
+                    st+='&'+key+"=None";
+                else
+                    for (var elem in dat[key])
+                        st+='&'+key+'='+dat[key][elem];
+            }
         st = st.substr(1);
         return st;
     };
@@ -29,6 +33,7 @@ $(function() {
     }
 
     function post_task(dict){
+
         var reload = false
         for (key in dict)
             if (($.inArray(key, ajax_fields)) == -1)
@@ -36,6 +41,7 @@ $(function() {
         if ('datetime_limit' in dict)
             dict['datetime_limit'] = dict['datetime_limit'].replace('T', ' ');
         data = dict_to_string(dict);
+        console.log(data)
         $.ajax({
             type: 'POST',
             url: window.location.href,
