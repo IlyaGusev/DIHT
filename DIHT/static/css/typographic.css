@@ -32,12 +32,36 @@ a.blue:hover {
 	color: #777777;
 }
 
+a.grey:hover {
+    color:#555555;
+}
+
+
+.bgrey {
+	color: #333;
+}
+
+a.bgrey:hover {
+    color:#111;
+}
+
 .light {
 	color: #cccccc;
 }
 
 a.light:hover {
 	color: #aaaaaa;
+}
+
+.btn-diht {
+    color: #fff;
+    background-color: #f58120;
+    border-color: #d97010;
+}
+
+.btn-diht:hover {
+    background-color: #d97010;
+    color: #fff;
 }
 
 /* Font Using */
