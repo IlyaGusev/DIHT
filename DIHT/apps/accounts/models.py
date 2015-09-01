@@ -14,7 +14,7 @@ class Profile(Model):
     money = IntegerField("Количество денег", blank=True, null=True, default=0)
     mobile = CharField("Мобильный телефон", max_length=30, blank=True)
     middle_name = CharField("Отчество", max_length=30, blank=True)
-    sign = CharField("Подпись", max_length=255, blank=True, default='')
+    sign = CharField("Подпись", max_length=255, blank=True, null=True, default='')
 
     def __str__(self):
         return 'Профиль пользвателя: %s' % self.user.username

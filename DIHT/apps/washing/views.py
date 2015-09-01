@@ -94,7 +94,7 @@ class CreateRecordView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     raise_exception = True
 
     def test_func(self, user):
-        return not user.black_list_record.is_blocked
+        return (not hasattr(user, 'black_list_record')) or (not user.black_list_record.is_blocked)
 
     @method_decorator(transaction.atomic)
     def post(self, request, *args, **kwargs):

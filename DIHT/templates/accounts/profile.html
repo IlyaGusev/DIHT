@@ -35,7 +35,7 @@
             <br>
             {% if profile.user|has_group:'Активисты' %}<span id="level" class="grey">Уровень 2</span>
             <br>{% endif %}
-            {% if profile.sign != '' %}
+            {% if profile.sign and profile.sign != '' %}
                 {{ profile.sign }}
             {% elif profile.user|has_group:'Руководящая группа' %}
                 Руководящая группа
