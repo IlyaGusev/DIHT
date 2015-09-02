@@ -55,9 +55,11 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
                   'event', 'rejected', 'sector', 'tags')
 
     def clean_assignees(self):
-        if self.data['assignees'] == 'None':
-            return []
-        return self.cleaned_data['assignees']
+        if self.data.get('assignees') is not None:
+            if self.data['assignees'] == 'None':
+                return []
+            return self.cleaned_data['assignees']
+        return None
 
     def save(self, commit=True):
         if self.cleaned_data.get('assignees') is not None:
@@ -79,6 +81,8 @@ class EventForm(OverwriteOnlyModelFormMixin, ModelForm):
         fields = ('description', 'date_held', 'sector', 'assignees')
 
     def clean_assignees(self):
-        if self.data['assignees'] == 'None':
-            return []
-        return self.cleaned_data['assignees']
+        if self.data.get('assignees') is not None:
+            if self.data['assignees'] == 'None':
+                return []
+            return self.cleaned_data['assignees']
+        return None
