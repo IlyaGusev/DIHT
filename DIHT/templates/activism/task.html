@@ -245,12 +245,12 @@
                             <td class="ra">
                                 <span class="priotity pull-right" style="color:red; font-family:'RobotoBold'">
                                 {% if task.is_urgent %}
-                                    <span class="priotity red robotobold">
+                                    <span class="priotity red robotobold" id="urgent">
                                     &nbspСРОЧНОЕ
                                     </span>
                                 {% endif %}
                                 {% if task.is_hard %}
-                                    <span class="priotity red robotobold">
+                                    <span class="priotity red robotobold" id="hard">
                                     &nbspТРУДНОЕ
                                     </span>
                                 {% endif %}
@@ -488,8 +488,8 @@
                 </div>
                 <div id="close-modal-body" class="modal-body">
                     <label id="hours-prop">Модификаторы:
-                        <span id="urgent">{% if task.is_urgent %} Срочное (x1.5) {% endif %}<span>
-                        <span id="hard">{% if task.is_hard %} Трудное (x1.5) {% endif %}</span>
+                        <span>{% if task.is_urgent %} Срочное (x1.5) {% endif %}<span>
+                        <span>{% if task.is_hard %} Трудное (x1.5) {% endif %}</span>
                     </label>
                     <br>
                     {% for entity in through %}

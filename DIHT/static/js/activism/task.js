@@ -33,7 +33,6 @@ $(function() {
     }
 
     function post_task(dict){
-
         var reload = false
         for (key in dict)
             if (($.inArray(key, ajax_fields)) == -1)
@@ -144,5 +143,16 @@ $(function() {
             $('#event-field option[value='+$('.event-current')[0].id+']').attr("selected",true);
         if ($('.sector-current')[0].id!='')
             $('#sector-field option[value='+$('.sector-current')[0].id+']').attr("selected",true);
+    });
+
+    $('#prop-modal').on('shown.bs.modal', function () {
+        if ($('#hard').length)
+            $(this).find('#id_is_hard').prop('checked', true);
+        else
+            $(this).find('#id_is_hard').prop('checked', false);
+        if ($('#urgent').length)
+            $(this).find('#id_is_urgent').prop('checked', true);
+        else
+            $(this).find('#id_is_urgent').prop('checked', false);
     });
 });

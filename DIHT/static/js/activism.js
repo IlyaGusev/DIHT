@@ -78,7 +78,7 @@ $(function() {
         $(this).find('.real-hours').each(function() {
             var inp = $(this)
             var coef = 1
-            if ($('#urgent').text()!='' || $('#hard').text()!='')
+            if ($('#urgent').length || $('#hard').length)
                 coef = 1.5
             inp.next().find('.final-hours').text(inp.val()*coef)
             inp.next().next().val(inp.val()*coef)

@@ -7,7 +7,7 @@
 {% block custom_scripts %}<script src="{% static 'js/profile.js' %}"></script>{% endblock %}
 {% block content %}
 <div class=" row well namezone">
-    <h3 class="profile-name nametext"> Профиль: <span class="grey">{{ profile.user.username }} </span> </h3>
+    <h3 class="profile-name nametext"> Профиль: <span class="grey">{{ profile.user.get_full_name }} </span> </h3>
 </div>
 
 <div class="row" style="margin-top: 20px;">

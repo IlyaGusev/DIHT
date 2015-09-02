@@ -39,9 +39,9 @@
                                         <span class="" id="sector">
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}"
-                                               class="sector-current" id="{{event.sector.pk}}">{{ event.sector.name }}</a>
+                                               class="sector-current sector-name" id="{{event.sector.pk}}">{{ event.sector.name }}</a>
                                         {% else %}
-                                            <span class="sector-current" id="">Нет</span>
+                                            <span class="sector-current sector-name" id="">Нет</span>
                                         {% endif %}
                                             <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                                         </span>
@@ -58,7 +58,7 @@
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
                                         {% else %}
-                                            <span>Нет</span>
+                                            <span class="sector-name">Нет</span>
                                         {% endif %}
                                         </span>
                                     {% endif %}
@@ -193,15 +193,13 @@
                     <div class="table-responsive">
                         <table class = "table usual-letters">
                             <tr>
-                                <th>Номер</th>
                                 <th>Задача</th>
                                 <th>Исполнитель(-и)</th>
                                 <th>Статус</th>
                             </tr>
                             {% for task in event.tasks.all %}
                             <tr>
-                                <td><a href="{% url 'activism:task' pk=task.pk %}">#{{ task.id }}</a></td>
-                                <td>{{ task.name }}</td>
+                                <td><a href="{% url 'activism:task' pk=task.pk %}">{{ task.name }}</a></td>
                                 <td> {% for part in task.participants.all %}
                                     <a href="{% url 'accounts:profile' pk=part.user.profile.pk %}">
                                     {% if part.user.avatar.img %}
