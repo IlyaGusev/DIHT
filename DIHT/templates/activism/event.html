@@ -116,7 +116,7 @@
                                                                 {% endif %}
                                                             </a>
                                                         </td>
-                                                        <td style="padding-right:5px;">
+                                                        <td {% if user == event.creator  and event.status == 'open' %} style="padding-right:5px;" {% endif %}>
                                                             <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}" id="{{assignee.pk}}" class="assignee">
                                                                 {{ assignee.get_full_name }}
                                                             </a>
