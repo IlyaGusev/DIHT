@@ -1,5 +1,5 @@
 from django.views.generic.edit import FormView, UpdateView
-from django.views.generic import DetailView, View, TemplateView
+from django.views.generic import DetailView, View, TemplateView, ListView
 from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse_lazy
 from django.db import transaction
@@ -186,11 +186,15 @@ class RemoveMoneyView(MoneyView):
     template_name = 'accounts/remove_money.html'
 
     def form_valid(self, form):
-        MoneyOperation.objects.create(user=self.get_object().user,
-                                      amount=-form.cleaned_data['amount'],
-                                      timestamp=timezone.now(),
-                                      description="Снятие",
-                                      moderator=self.request.user)
+        if self.get_object().money >= form.cleaned_data['amount']:
+            MoneyOperation.objects.create(user=self.get_object().user,
+                                          amount=-form.cleaned_data['amount'],
+                                          timestamp=timezone.now(),
+                                          description="Снятие",
+                                          moderator=self.request.user)
+        else:
+            form.add_error('amount', "Недостаточно денег на счету")
+            return super(RemoveMoneyView, self).form_invalid(form)
         return JsonResponse({'url': reverse('accounts:profile',
                                             kwargs={'pk': self.get_object().pk})},
                             status=200)
@@ -206,3 +210,15 @@ class ActivateView(SingleObjectMixin, LoginRequiredMixin, GroupRequiredMixin, Vi
         user.is_active = not user.is_active
         user.save()
         return HttpResponseRedirect(reverse('accounts:profile', kwargs={'pk': self.get_object().profile.pk}))
+
+
+class MoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, ListView):
+    model = MoneyOperation
+    group_required = 'Ответственные за финансы'
+    context_object_name = 'operations'
+    template_name = "accounts/money_history.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(MoneyHistoryView, self).get_context_data(**kwargs)
+        context['operations'] = MoneyOperation.objects.all().order_by('timestamp').reverse()
+        return context

@@ -153,7 +153,7 @@ class FindForm(Form):
 
 
 class MoneyForm(ModelForm):
-    amount = IntegerField(min_value=0, max_value=10000)
+    amount = IntegerField(min_value=0, max_value=10000, label="Количество")
 
     class Meta:
         model = Profile

@@ -81,6 +81,9 @@
                                 {% if user|has_group:'Ответственные за работу с пользователями' or user|has_group:'Ответственные за финансы' %}
                                 <li><a href="{% url 'accounts:find' %}" data-target="#form-modal"><i class="fa fa-search"></i> Поиск пользователя</a></li>
                                 {% endif %}
+                                {% if user|has_group:'Ответственные за финансы' %}
+                                <li><a href="{% url 'accounts:money_history' %}" data-target="#form-modal"><i class="fa fa-book"></i> История операций </a></li>
+                                {% endif %}
                                 <li class="divider"></li>
                                 <li><a href="{% url 'accounts:logout' %}"><i class="fa fa-sign-out"></i> Выйти</a><li>
                             </ul>
