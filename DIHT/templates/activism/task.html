@@ -186,7 +186,7 @@
                                                         {% endif %}
                                                     </a>
                                                 </td>
-                                                <td style="padding-right:5px;">
+                                                <td {% if can_edit %} style="padding-right:5px;" {% endif %}>
                                                     <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}" id="{{assignee.pk}}" class="assignee">
                                                         {{ assignee.get_full_name }}
                                                     </a>
@@ -357,10 +357,12 @@
                 </span>
             </span>
             {% else %}
-            <span class="pull-right">
-                {% for tag in task.tags.all %}
-                    &nbsp{{ tag }}
-                {% endfor %}
+            <span>
+                <span id="tags">
+                    {% for tag in task.tags.all %}
+                        &nbsp#{{ tag }}
+                    {% endfor %}
+                </span>
             </span>
             {% endif %}
         </div>
