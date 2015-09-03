@@ -271,7 +271,8 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
 class SectorView(LoginRequiredMixin, DetailView):
     model = Sector
     template_name = "activism/sector.html"
-    
+
+
 class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     model = Task
     template_name = 'activism/closed.html'

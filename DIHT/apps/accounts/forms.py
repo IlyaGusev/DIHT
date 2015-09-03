@@ -1,7 +1,8 @@
 import re
-from django.forms import ValidationError, ModelForm, Form, CharField, PasswordInput, TextInput, TypedChoiceField
+from django.forms import ValidationError, ModelForm, Form, CharField, PasswordInput, TextInput, TypedChoiceField, IntegerField
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
+import autocomplete_light
 from accounts.models import Profile
 
 
@@ -146,3 +147,14 @@ class ResetPasswordForm(Form):
             raise ValidationError(u'Некорректный логин')
         return self.cleaned_data['username']
 
+
+class FindForm(Form):
+    user = autocomplete_light.ModelChoiceField('ProfileAutocomplete', label="Пользователь")
+
+
+class MoneyForm(ModelForm):
+    amount = IntegerField(min_value=0, max_value=10000)
+
+    class Meta:
+        model = Profile
+        fields = []

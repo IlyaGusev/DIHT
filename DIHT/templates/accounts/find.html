@@ -1,0 +1,14 @@
+{% load add_class %}
+<form class="find-form" action="{% url 'accounts:find' %}" method="POST" autocomplete="off">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3>Поиск пользователя</h3>
+    </div>
+    <div class="modal-body">
+        {% include 'form.html' %}
+    </div>
+    <div class="modal-footer">
+       <a href="#" class="btn btn-danger" data-dismiss="modal">Отмена</a>
+       <button class="btn btn-primary" id="modal-submit" type="submit">Поиск</button>
+    </div>
+</form>

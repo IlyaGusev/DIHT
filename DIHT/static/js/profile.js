@@ -6,7 +6,7 @@ $(function() {
             form.find('#id_'+k).after('<ul class="errorlist"><li>' + errors[k] + '</li></ul>');
     }
 
-    $('#form-modal').on('submit', '.profile-form', function (ev) {
+    $('#form-modal').on('submit', '.profile-form,.add-money-form,.remove-money-form', function (ev) {
         ev.preventDefault();
         var form = $(this);
         $.ajax({

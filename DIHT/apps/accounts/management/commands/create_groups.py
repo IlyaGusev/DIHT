@@ -15,16 +15,8 @@ class Command(BaseCommand):
                   ('Руководящая группа', []),
                   ('Ответственные за волонтёров', []),
                   ('Ответственные за стиралку', washing_perms),
-                  ('Ответственные за работу с пользователями', [Permission.objects.get(codename='add_profile'),
-                                                                Permission.objects.get(codename='change_profile'),
-                                                                Permission.objects.get(codename='delete_profile'),
-                                                                Permission.objects.get(codename='add_user'),
-                                                                Permission.objects.get(codename='change_user'),
-                                                                Permission.objects.get(codename='delete_user'),
-                                                                Permission.objects.get(codename='change_group')]),
-                  ('Ответственные за финансы', [Permission.objects.get(codename='add_moneyoperation'),
-                                                Permission.objects.get(codename='change_moneyoperation'),
-                                                Permission.objects.get(codename='delete_moneyoperation')]),
+                  ('Ответственные за работу с пользователями', []),
+                  ('Ответственные за финансы', []),
                   ]
 
 

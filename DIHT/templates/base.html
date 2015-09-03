@@ -1,4 +1,5 @@
 {% load static from staticfiles %}
+{% load has_group %}
 <html>
 <head>
     <title>Сайт общежития №2 (ФИВТ) - {% block title %} {% endblock %}</title>
@@ -73,9 +74,12 @@
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'accounts:profile' pk=user.pk %}"><i class="fa fa-cogs"></i> Личный кабинет</a><li>
+                                <li><a href="{% url 'accounts:profile' pk=user.profile.pk %}"><i class="fa fa-cogs"></i> Личный кабинет</a><li>
                                 {% if user.is_staff %}
                                 <li><a href="/admin/"><i class="fa fa-wrench"></i> Панель управления</a></li>
+                                {% endif %}
+                                {% if user|has_group:'Ответственные за работу с пользователями' or user|has_group:'Ответственные за финансы' %}
+                                <li><a href="{% url 'accounts:find' %}" data-target="#form-modal"><i class="fa fa-search"></i> Поиск пользователя</a></li>
                                 {% endif %}
                                 <li class="divider"></li>
                                 <li><a href="{% url 'accounts:logout' %}"><i class="fa fa-sign-out"></i> Выйти</a><li>
@@ -100,5 +104,6 @@
             <div class="text-muted credit text-center"><a href="{% url 'main:feedback' %}">Обратная связь</a></div>
         </div>
     </div>
+    {% include "modal.html" %}
 </body>
 </html>

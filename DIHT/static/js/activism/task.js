@@ -40,7 +40,6 @@ $(function() {
         if ('datetime_limit' in dict)
             dict['datetime_limit'] = dict['datetime_limit'].replace('T', ' ');
         data = dict_to_string(dict);
-        console.log(data)
         $.ajax({
             type: 'POST',
             url: window.location.href,
@@ -119,7 +118,7 @@ $(function() {
 
 	// Approve
 	$('.approve').click(function() {
-		approve_id = $(this).prev()[0].id;
+		approve_id = $(this)[0].id;
 		var candidates = get_ids('.candidate');
 		candidates.splice($.inArray(approve_id, candidates), 1);
 		var assignees = get_ids('.assignee');
@@ -130,7 +129,7 @@ $(function() {
 
     // Reject
 	$('.reject').click(function() {
-		reject_id = $(this).prev().prev()[0].id;
+		reject_id = $(this)[0].id;
 		var candidates = get_ids('.candidate');
 		candidates.splice($.inArray(reject_id, candidates), 1);
 		var rejected = get_ids('.rejected');

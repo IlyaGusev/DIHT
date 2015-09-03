@@ -45,6 +45,8 @@ class TaskCreateForm(ModelForm):
 class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
     assignees = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
                                             [('None', 'None'), ], required=False)
+    candidates = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+                                             [('None', 'None'), ], required=False)
     assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
     tags = TaggitField(widget=TaggitWidget('TagAutocomplete'), required=False)
 
@@ -59,6 +61,13 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
             if self.data['assignees'] == 'None':
                 return []
             return self.cleaned_data['assignees']
+        return None
+
+    def clean_candidates(self):
+        if self.data.get('candidates') is not None:
+            if self.data['candidates'] == 'None':
+                return []
+            return self.cleaned_data['candidates']
         return None
 
     def save(self, commit=True):

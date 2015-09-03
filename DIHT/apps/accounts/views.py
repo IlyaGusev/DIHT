@@ -4,12 +4,15 @@ from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse_lazy
 from django.db import transaction
 from django.core.mail import EmailMessage
-from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm
-from accounts.models import Profile, Avatar
-from washing.models import BlackListRecord
+from django.core.urlresolvers import reverse
 from django.http import JsonResponse
-from braces.views import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic.detail import SingleObjectMixin
+from django.http import HttpResponseRedirect
+from braces.views import LoginRequiredMixin, UserPassesTestMixin, GroupRequiredMixin
 from django.utils import timezone
+from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, MoneyForm
+from accounts.models import Profile, Avatar, MoneyOperation
+from washing.models import BlackListRecord
 
 import logging
 logger = logging.getLogger('DIHT.custom')
@@ -80,21 +83,21 @@ class CheckUniqueView(View):
 
 class ProfileView(LoginRequiredMixin, DetailView):
     template_name = 'accounts/profile.html'
-    model = User
-    context_object_name = 'profile_user'
+    model = Profile
 
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
-        user = self.get_object()
+        user = self.get_object().user
         context['records'] = user.records.filter(datetime_to__gte=timezone.now()).order_by('-datetime_to').reverse()
-        context['profile'] = Profile.objects.get(user__id=user.id)
         context['task_hours'] = user.participated.filter(task__status__in=['closed', 'resolved'])
         if context['profile'].group_number != '':
             grade = int(str(timezone.now().date().year)[-1])-int(str(context['profile'].group_number)[0])
             if timezone.now().date().month >= 8:
-                context['grade'] = grade+1
+                grade += 1
+            if grade > 6 or grade < 0:
+                context['grade'] = 'Выпускник/Аспирант'
             else:
-                context['grade'] = grade
+                context['grade'] = str(grade)+' курс'
         return context
 
 
@@ -138,3 +141,68 @@ class ChargeView(TemplateView):
         context = super(ChargeView, self).get_context_data(**kwargs)
         context['charge'] = Group.objects.get(name=u'Ответственные за работу с пользователями').user_set.all()
         return context
+
+
+class FindView(LoginRequiredMixin, GroupRequiredMixin, FormView):
+    template_name = 'accounts/find.html'
+    form_class = FindForm
+    group_required = ['Ответственные за работу с пользователями', 'Ответственные за финансы']
+    raise_exception = True
+
+    def form_valid(self, form):
+        return JsonResponse({'url': reverse('accounts:profile',
+                                            kwargs={'pk': form.cleaned_data['user'].profile.pk})},
+                            status=200)
+
+    def form_invalid(self, form):
+        return JsonResponse(form.errors, status=400)
+
+
+class MoneyView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
+    model = Profile
+    form_class = MoneyForm
+    group_required = 'Ответственные за финансы'
+    raise_exception = True
+
+    def form_invalid(self, form):
+        return JsonResponse(form.errors, status=400)
+
+
+class AddMoneyView(MoneyView):
+    template_name = 'accounts/add_money.html'
+
+    def form_valid(self, form):
+        MoneyOperation.objects.create(user=self.get_object().user,
+                                      amount=form.cleaned_data['amount'],
+                                      timestamp=timezone.now(),
+                                      description="Пополнение",
+                                      moderator=self.request.user)
+        return JsonResponse({'url': reverse('accounts:profile',
+                                            kwargs={'pk': self.get_object().pk})},
+                            status=200)
+
+
+class RemoveMoneyView(MoneyView):
+    template_name = 'accounts/remove_money.html'
+
+    def form_valid(self, form):
+        MoneyOperation.objects.create(user=self.get_object().user,
+                                      amount=-form.cleaned_data['amount'],
+                                      timestamp=timezone.now(),
+                                      description="Снятие",
+                                      moderator=self.request.user)
+        return JsonResponse({'url': reverse('accounts:profile',
+                                            kwargs={'pk': self.get_object().pk})},
+                            status=200)
+
+
+class ActivateView(SingleObjectMixin, LoginRequiredMixin, GroupRequiredMixin, View):
+    model = User
+    group_required = 'Ответственные за работу с пользователями'
+    raise_exception = True
+
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        user.is_active = not user.is_active
+        user.save()
+        return HttpResponseRedirect(reverse('accounts:profile', kwargs={'pk': self.get_object().profile.pk}))
