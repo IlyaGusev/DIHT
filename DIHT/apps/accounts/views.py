@@ -129,3 +129,12 @@ class SignUpOkView(TemplateView):
         context = super(SignUpOkView, self).get_context_data(**kwargs)
         context['charge'] = Group.objects.get(name=u'Ответственные за работу с пользователями').user_set.all()
         return context
+
+
+class ChargeView(TemplateView):
+    template_name = 'accounts/charge.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ChargeView, self).get_context_data(**kwargs)
+        context['charge'] = Group.objects.get(name=u'Ответственные за работу с пользователями').user_set.all()
+        return context
