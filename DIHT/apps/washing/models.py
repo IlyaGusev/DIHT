@@ -45,6 +45,7 @@ class WashingMachineRecord(Model):
     money_operation = OneToOneField(MoneyOperation, related_name='washing_record', verbose_name="Денежная операция")
 
     class Meta:
+        ordering = ["datetime_from"]
         verbose_name = "Запись стиралки"
         verbose_name_plural = "Записи стиралки"
 
