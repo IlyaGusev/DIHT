@@ -6,9 +6,9 @@
 <center>
     <div class="page-header"><h2 style="text-align: center;">Регистрация</h2></div>
     <div class="alert alert-success">
-        Для завершения регистрации свяжитесь с ответственными за пользователей:
+        <p>Для завершения регистрации свяжитесь с ответственными за пользователей:</p>
         {% for user in charge %}
-            <p class="text-center">{{user.get_full_name}}, {{user.profile.mobile}}, {{user.email}}</p>
+            <p class="text-center">{{user.get_full_name}}, {{user.profile.mobile}}, {{user.email}}, {{user.profile.hostel}} общежитие, {{user.profile.room_number}} комната</p>
         {% endfor %}
     </div>
 </center>
