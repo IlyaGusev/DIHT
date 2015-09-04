@@ -105,13 +105,13 @@
                 <div>
                 <span class="grey" style="vertical-align:bottom;">Добавить соц. сеть:</span>
                 <span style="right:inherit;">
-                    <a href="{% url 'accounts:social:begin' 'facebook' %}">
+                    <a href="{% url 'accounts:social:begin' 'vk-oauth2' %}?next={{ request.path }}">
                         <span class="fa-stack" color="#3b579d">
                             <i class="fa fa-square fa-stack-2x"></i>
                             <i class="fa fa-vk fa-stack-1x fa-inverse"></i>
                         </span>
                     </a>
-                    <a href="{% url 'accounts:social:begin' 'vk-oauth2' %}">
+                    <a href="{% url 'accounts:social:begin' 'facebook' %}?next={{ request.path }}">
                         <span class="fa-stack" color="#537599">
                             <i class="fa fa-square fa-stack-2x"></i>
                             <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
