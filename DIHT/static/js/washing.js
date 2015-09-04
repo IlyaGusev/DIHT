@@ -61,7 +61,7 @@ $(function() {
         $("#form-modal").find(".modal-content").load($(this).attr("href"), function() {
             machine_name = $("#machine_"+id[0]).text()
             $(this).find("#create-record-body").html("<h4>Оплатить "+machine_name+" на "+id[1]+" с "+id[2]+" до "+id[3]+"</h4>")
-            $(this).find("#create-record-submit").html("Оплатить ("+id[4]+' <img style="margin-top:-3px;" src="/static/img/fivt_coin_tiny_w.png">)')
+            $(this).find("#create-record-submit").html("Оплатить ("+id[4]+' <img style="margin-top:-3px;" src="/static/img/icons/fivt_coin_tiny_w.png">)')
             $(this).find("#cancel-record-body").html("<h4>Отказаться от записи на "+id[1]+" с "+id[2]+" до "+id[3]+"</h4>")
         });
         $("#form-modal").modal('show');
