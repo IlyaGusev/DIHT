@@ -4,6 +4,7 @@ from django.db.models import \
     DateField, BooleanField, OneToOneField,\
     Model, CharField, ManyToManyField
 from accounts.models import MoneyOperation
+from django.db import transaction
 
 
 class Parameters(Model):
@@ -48,6 +49,11 @@ class WashingMachineRecord(Model):
         ordering = ["datetime_from"]
         verbose_name = "Запись стиралки"
         verbose_name_plural = "Записи стиралки"
+
+    @transaction.atomic
+    def cancel(self):
+        self.money_operation.cancel()
+        self.delete()
 
     def __str__(self):
         return str(self.machine)+'; '+str(self.user.last_name) + '; ' + str(self.datetime_from)
