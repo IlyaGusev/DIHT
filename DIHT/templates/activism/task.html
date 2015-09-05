@@ -37,12 +37,14 @@
                    href="{% url 'activism:task_action' pk=task.pk action='in_progress'%}" id="in_progress">
                     <i class="fa fa-bolt fa-lg yellow"></i> Начать
                 </a>
+            {% endif %}
+            {% if task.status == 'open' or task.status == 'in_labor' or user.is_superuser or is_charge %}
                 <a class="btn btn-default confirm action" id="delete"
                    href="{% url 'activism:task_action' pk=task.pk action='delete'%}">
                     <i class="fa fa-lg fa-trash-o red"></i> Удалить
                 </a>
-            {% endif %}
             </div>
+            {% endif %}
         </div>
     {% elif user in task.assignees.all and task.status == 'in_progress' %}
         <div class = "row">
@@ -78,7 +80,7 @@
                                 </span>
                                 <span class="hidden" id="event-edit">
                                     <select class="selector" id="event-field">
-                                        {% if user|has_group:'Руководящая группа' or user.is_superuser %}
+                                        {% if is_main or user.is_superuser or is_charge %}
                                         <option class="selector-item" value="">Нет</option>
                                         {% endif %}
                                         {% for event in events %}
@@ -114,7 +116,7 @@
                                 </span>
                                 <span class="hidden" id="sector-edit">
                                     <select class="selector" id="sector-field">
-                                        {% if user|has_group:'Руководящая группа' %}
+                                        {% if is_main or user.is_superuser or is_charge %}
                                         <option class="selector-item" value="">Нет</option>
                                         {% endif %}
                                         {% for sector in sectors %}
@@ -333,11 +335,11 @@
         </div>
         <div class="section">
             <h5 class="section-name">Описание <a href="#" class="light">
-                {% if can_edit_always %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
+                {% if can_edit_always or can_edit %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
             </a></h5>
             <hr class="just-a-line">
             <span id="description"><span id="description-current">{{ task.description }}</span></span>
-            {% if can_edit_always %}
+            {% if can_edit_always or can_edit %}
             <span class="hidden" id="description-edit">
                 <textarea class="form-control" id="description-field" rows="4">{{ task.description }}</textarea>
             </span>
