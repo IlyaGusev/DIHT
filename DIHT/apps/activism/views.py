@@ -18,7 +18,7 @@ logger = logging.getLogger('DIHT.custom')
 
 class CreatorMixin(SingleObjectMixin):
     def post(self, request, *args, **kwargs):
-        if request.user == self.get_object().creator:
+        if request.user == self.get_object().creator or request.user.is_superuser:
             return super(CreatorMixin, self).post(request, args, kwargs)
         else:
             raise PermissionDenied
@@ -95,7 +95,8 @@ class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, UpdateVie
         is_creator = (user == event.creator)
         task_done = (event.tasks.all().exclude(status="closed").count() == 0)
         context['users'] = User.objects.all()
-        context['can_close'] = (is_creator and task_done and event.status == 'open')
+        context['can_close'] = ((is_creator or user.is_superuser) and task_done and event.status == 'open')
+        context['can_edit'] = ((is_creator or user.is_superuser) and event.status == 'open')
         context['sectors'] = Sector.objects.all()
         return context
 
@@ -115,7 +116,7 @@ class EventActionView(SingleObjectMixin, GroupRequiredMixin, LoginRequiredMixin,
         user = request.user
         is_creator = (user == event.creator)
         can_close = (event.tasks.exclude(status="closed").count() == 0)
-        if is_creator and can_close and action == "close" and event.status == 'open':
+        if (is_creator or user.is_superuser) and can_close and action == "close" and event.status == 'open':
             event.status = 'closed'
             event.save()
             return HttpResponseRedirect(reverse('activism:index'))
@@ -130,7 +131,7 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     raise_exception = True
 
     def test_func(self, user):
-        return user.events.count() != 0 or Group.objects.get(name="Руководящая группа") in user.groups.all()
+        return user.events.count() != 0 or Group.objects.get(name="Руководящая группа") in user.groups.all() or user.is_superuser
 
     def get_form_kwargs(self):
         kwargs = super(TaskCreateView, self).get_form_kwargs()
@@ -157,21 +158,23 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView)
     def get_context_data(self, **kwargs):
         context = super(TaskView, self).get_context_data(**kwargs)
         user = self.request.user
-        if Group.objects.get(name="Руководящая группа") not in user.groups.all():
+        task = context['task']
+        if Group.objects.get(name="Руководящая группа") not in user.groups.all() and not user.is_superuser:
             context['events'] = user.events.all()
         else:
             context['events'] = Event.objects.all()
         context['sectors'] = Sector.objects.all()
         context['users'] = User.objects.all()
-        context['can_edit'] = (user == context['task'].creator) and \
-                              (context['task'].status == 'open' or context['task'].status == 'in_labor')
-        context['through'] = context['task'].participants.all()
+        context['can_edit'] = (user == task.creator or user.is_superuser) and \
+                              (task.status == 'open' or task.status == 'in_labor')
+        context['can_edit_always'] = ((user == task.creator or user.is_superuser) and task.status != 'closed')
+        context['through'] = task.participants.all()
         return context
 
     def form_valid(self, form):
         task = self.get_object()
         user = self.request.user
-        if Group.objects.get(name="Руководящая группа") not in user.groups.all():
+        if Group.objects.get(name="Руководящая группа") not in user.groups.all() and not user.is_superuser:
             if form.cleaned_data['event'] not in user.events.all():
                 return super(TaskView, self).form_invalid(form)
         result = super(TaskView, self).form_valid(form)
@@ -195,7 +198,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         task = self.get_object()
         action = kwargs['action']
         user = request.user
-        is_creator = (user == task.creator)
+        is_creator = (user == task.creator or user.is_superuser)
         is_assignee = (user in task.assignees.all())
         is_enough = (task.assignees.all().count() >= task.number_of_assignees)
         can_edit = task.status == 'in_labor' or task.status == 'open'
@@ -258,6 +261,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                     if task.status != 'in_labor':
                         if task.candidates.count() != 0:
                             task.rejected.add(*task.candidates.all())
+
                             task.candidates.clear()
                     return JsonResponse({'url': reverse('activism:task', kwargs={'pk': task.pk})}, status=200)
                 else:

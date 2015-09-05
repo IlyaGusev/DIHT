@@ -49,7 +49,7 @@
             <tbody>
                 {% for day, intervals in schedule.items %}
                 <tr>
-                    {% if user in charge_washing %}
+                    {% if user in charge_washing or user.is_superuser %}
                     <th scope="row"
                         style="cursor: pointer;"
                         colspan="{{ machines|length|add:'1' }}"

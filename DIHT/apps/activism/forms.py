@@ -31,7 +31,7 @@ class OverwriteOnlyModelFormMixin(object):
 class TaskCreateForm(ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(TaskCreateForm, self).__init__(*args, **kwargs)
-        if not Group.objects.get(name="Руководящая группа") in user.groups.all():
+        if not Group.objects.get(name="Руководящая группа") in user.groups.all() and not user.is_superuser:
             self.fields['event'].queryset = user.events.filter(status='open')
             self.fields['event'].empty_label = None
         else:

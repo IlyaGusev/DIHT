@@ -12,7 +12,7 @@
             <h3 class="event-name nametext">{{ event.name }}</h3>
         </div>
         <div class = "row pagezone">
-            {% if user == event.creator and event.status == 'open'%}
+            {% if can_edit%}
             <div class = "row">
                 <div class="col-md-12" style="padding-left:40px;">
                 {% if can_close %}
@@ -35,7 +35,7 @@
                                         <span class="param">Сектор:</span>
                                     </td>
                                     <td class="ra">
-                                    {% if user == event.creator  and event.status == 'open' %}
+                                    {% if can_edit %}
                                         <span class="" id="sector">
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}"
@@ -95,7 +95,7 @@
                                 <tr>
                                     {% if event.assignees.all.count == 0 %}
                                         <td><span class="param">Нет ответственных</span>
-                                        {% if user == event.creator  and event.status == 'open' %}
+                                        {% if can_edit %}
                                         <td class="ra">
                                             <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
                                             {{ form.assignees_autocomplete|add_class:"hidden" }}
@@ -116,19 +116,19 @@
                                                                 {% endif %}
                                                             </a>
                                                         </td>
-                                                        <td {% if user == event.creator  and event.status == 'open' %} style="padding-right:5px;" {% endif %}>
+                                                        <td {% if can_edit %} style="padding-right:5px;" {% endif %}>
                                                             <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}" id="{{assignee.pk}}" class="assignee">
                                                                 {{ assignee.get_full_name }}
                                                             </a>
                                                         </td>
-                                                        {% if user == event.creator  and event.status == 'open' %}
+                                                        {% if can_edit %}
                                                         <td align="right">
                                                         <a href="#" class="red resign" id="{{assignee.pk}}" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
                                                         </td>
                                                         {% endif %}
                                                     </tr>
                                                 {% endfor %}
-                                                {% if user == event.creator  and event.status == 'open' %}
+                                                {% if can_edit %}
                                                     <tr style="height:20px">
                                                         <td colspan = "2">
                                                                 {{ form.assignees_autocomplete|add_class:"hidden" }}
@@ -159,7 +159,7 @@
                             <span class = "pull-right">{{ event.date_created }}</span>
                             <br>
                             <span class="param">Дата проведения:</span>
-                            {% if user == event.creator and event.status == 'open' %}
+                            {% if can_edit %}
                             <span class = "pull-right">
                                 <span id="date_held">
                                     {{ event.date_held }}
@@ -177,11 +177,11 @@
                     </div>
                 </div>
                 <div class="section">
-                    <h5 class="section-name">Описание {% if user == event.creator and event.status == 'open' %}<a href="#" class="light"><i class="fa fa-pencil" id="description-pencil"></i></a>{% endif %} </h5>
+                    <h5 class="section-name">Описание {% if can_edit%}<a href="#" class="light"><i class="fa fa-pencil" id="description-pencil"></i></a>{% endif %} </h5>
                     <hr class="just-a-line">
         
                     <span id="description"><span id="description-current">{{ event.description }}</span></span>
-                    {% if user == event.creator and event.status == 'open' %}
+                    {% if can_edit  %}
                     <span class="hidden" id="description-edit">
                         <textarea class="form-control" id="description-field" rows="4">{{ event.description }}</textarea>
                     </span>
@@ -231,7 +231,7 @@
                             {% endfor %}
                         </table>
                     </div>
-                    {% if user == event.creator and event.status == 'open' %}
+                    {% if can_edit %}
                     <center><a href="{% url 'activism:create_task' %}"
                                class="btn btn-default robotobold"
                                data-target="#form-modal">

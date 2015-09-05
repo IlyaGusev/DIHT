@@ -40,7 +40,7 @@
                 </div>
             </div>
             
-            {% if user|has_group:'Ответственные за волонтёров' %}
+            {% if user|has_group:'Ответственные за волонтёров' or user.is_superuser %}
             <div class="panel panel-default dash-pan">
                 <div class="panel-heading"><i class="fa fa-calendar fa-fw" style="margin-right:5px;"></i>&nbsp;Последние действия 
                 <span class="pull-right">
@@ -193,7 +193,7 @@
                     </div>
                 </div>
                 {% endfor %}
-                {% if request.user|has_group:'Руководящая группа' or user.events.all.count > 0 %}
+                {% if request.user|has_group:'Руководящая группа' or user.events.all.count > 0 or user.is_superuser %}
                 <center>
                     <a href="{% url 'activism:create_task' %}" 
                        class="btn btn-default robotobold"

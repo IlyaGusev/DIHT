@@ -30,7 +30,7 @@
         {% endfor %}
 	</div>
     
-    {% if request.user|has_group:"Руководящая группа" %}
+    {% if request.user|has_group:"Руководящая группа" or request.user.is_superuser %}
     
     <center><a class="btn btn-default robotobold"
                href="{% url 'activism:create_event'%}"

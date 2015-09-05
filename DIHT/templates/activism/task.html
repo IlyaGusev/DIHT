@@ -15,7 +15,7 @@
 </div>
 <div class = "row pagezone">
     {% comment %} <!-- Управление статусом задачи -->{% endcomment %}
-    {% if user == task.creator %}
+    {% if user == task.creator or user.is_superuser %}
         <div class = "row">
             <div class="col-md-12" style="padding-left:40px;">
             {% if task.status == 'open' %}
@@ -78,7 +78,7 @@
                                 </span>
                                 <span class="hidden" id="event-edit">
                                     <select class="selector" id="event-field">
-                                        {% if user|has_group:'Руководящая группа' %}
+                                        {% if user|has_group:'Руководящая группа' or user.is_superuser %}
                                         <option class="selector-item" value="">Нет</option>
                                         {% endif %}
                                         {% for event in events %}
@@ -333,11 +333,11 @@
         </div>
         <div class="section">
             <h5 class="section-name">Описание <a href="#" class="light">
-                {% if user == task.creator and task.status != 'closed' %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
+                {% if can_edit_always %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
             </a></h5>
             <hr class="just-a-line">
             <span id="description"><span id="description-current">{{ task.description }}</span></span>
-            {% if user == task.creator and task.status != 'closed' %}
+            {% if can_edit_always %}
             <span class="hidden" id="description-edit">
                 <textarea class="form-control" id="description-field" rows="4">{{ task.description }}</textarea>
             </span>
@@ -423,7 +423,7 @@
 </div>
 
 
-{% if request.user == task.creator %}
+{% if can_edit %}
 <div class="hidden">
     {% for rejecter in task.rejected.all %}
         <span class="rejected" id="{{rejecter.pk}}"></span>
@@ -431,7 +431,7 @@
 </div>
 {% endif %}
 
-
+{% if can_edit %}
 <div class="modal" id="prop-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -455,6 +455,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <div class="modal" id="resolve-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
