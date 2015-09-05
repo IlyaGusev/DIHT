@@ -8,23 +8,31 @@
 {% endblock %}
 {% block content %}
     <style>
-        .status0{/*blocked (grey)*/
+        td.status0{/*blocked (grey)*/
             background-color:#B4B4B4;
+            height: 40px;
+            width: 100px;
         }
         td.status1{/*free (green)*/
             background-color: #59B259;
             {% if user.is_authenticated and not user.black_list_record.is_blocked %}
                 cursor: pointer;
             {% endif %}
+            height: 40px;
+            width: 100px;
         }
         td.status2{/*bought (red)*/
             background-color:#D14741;
+            height: 40px;
+            width: 100px;
         }
         td.status3{/*your (blue)*/
             background-color:#44AAC8;
             {% if user.is_authenticated %}
                 cursor: pointer;
             {% endif %}
+            height: 40px;
+            width: 100px;
         }
     </style>
     <div class="col-md-10 col-md-offset-1 page-header">
@@ -40,7 +48,7 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th width="150" class="text-center">Время</th>
+                    {%comment%}<th width="150" class="text-center">Время</th>{%endcomment%}
                     {% for machine in machines %}
                         <th class="text-center" id="machine_{{ machine.pk }}" price=" {{ machine.parameters.all }}">{{machine.name}}</th>
                     {% endfor %}
@@ -52,7 +60,7 @@
                     {% if user in charge_washing or user.is_superuser %}
                     <th scope="row"
                         style="cursor: pointer;"
-                        colspan="{{ machines|length|add:'1' }}"
+                        colspan="{{ machines|length }}"
                         class="text-center btn-open-modal"
                         href="{% url 'washing:block_day' %}"
                         id="{{day| date:'d.m.Y'}}"
@@ -69,25 +77,29 @@
                 </tr>
                 {% for interval, records in intervals.items %}
                 <tr>
-                    <th scope="row" width="150" class="text-center">{{ interval.0|time:"H:i" }}-{{ interval.1|time:"H:i" }}</th>
-                    {% for machine, status in records.items %}
-                    {% if status.0 == 'OK' %}
+                    {%comment%}<th scope="row" width="150" class="text-center">{{ interval.0|time:"H:i" }}-{{ interval.1|time:"H:i" }}</th>{%endcomment%}
+                    {% for machine, record in records.items %}
+                    {% if record.0 == 'OK' %}
                         {% if user.is_authenticated and not user.black_list_record.is_blocked%}
                         <td class="status1 btn-open-modal"
                             href="{% url 'washing:create_record'%}"
-                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
+                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}"></td>
                         {% else %}
                         <td class="status1"></td>
                         {% endif %}
-                    {% elif status.0 == 'BUSY' %}
-                    <td class="status2"> </td>
-                    {% elif status.0 == 'DISABLE' %}
+                    {% elif record.0 == 'BUSY' %}
+                    <td class="status2">
+                        {% if user in charge_washing or user.is_superuser or record.3 %}
+                        <center><a class="bgrey" href="{% url 'accounts:profile' pk=record.2.profile.pk%}">{{ record.2.get_full_name }}</a></center>
+                        {% endif %}
+                    </td>
+                    {% elif record.0 == 'DISABLE' %}
                     <td class="status0"></td>
-                    {% elif status.0 == 'YOURS' %}
+                    {% elif record.0 == 'YOURS' %}
                         {% if user.is_authenticated and day != current %}
                         <td class="status3 btn-open-modal"
                             href="{% url 'washing:cancel_record'%}"
-                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ status.1 }}"></td>
+                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}"></td>
                         {% else %}
                         <td class="status3"></td>
                         {% endif %}

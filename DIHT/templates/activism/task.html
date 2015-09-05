@@ -391,7 +391,7 @@
             {% if task.status == 'closed' or task.status == 'resolved' %}
                 <span class="param">Реальные:</span>
                 {% for entity in through %}
-                    <span class="pull-right">{{entity.user.get_full_name}} - {{entity.hours}} час.</span>
+                    <span class="pull-right">{{entity.user.get_full_name}} : {{entity.hours}} час.</span>
                     <br>
                 {% endfor %}
             {% endif %}

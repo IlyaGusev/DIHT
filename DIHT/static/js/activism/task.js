@@ -138,10 +138,12 @@ $(function() {
 	})
 
 	$(document).ready(function() {
-        if ($('.event-current')[0].id!='')
-            $('#event-field option[value='+$('.event-current')[0].id+']').attr("selected",true);
-        if ($('.sector-current')[0].id!='')
-            $('#sector-field option[value='+$('.sector-current')[0].id+']').attr("selected",true);
+	    if ($('.event-current').length)
+            if ($('.event-current')[0].id!='')
+                $('#event-field option[value='+$('.event-current')[0].id+']').attr("selected",true);
+        if ($('.sector-current').length)
+            if ($('.sector-current')[0].id!='')
+                $('#sector-field option[value='+$('.sector-current')[0].id+']').attr("selected",true);
     });
 
     $('#prop-modal').on('shown.bs.modal', function () {

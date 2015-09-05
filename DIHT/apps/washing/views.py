@@ -37,6 +37,7 @@ class IndexView(TemplateView):
         context['current'] = day
         for i in range(7):
             schedule[day] = collections.OrderedDict()
+            can_show = False
             for machine in machines:
                 machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
                 if machine_params.exists():
@@ -55,22 +56,29 @@ class IndexView(TemplateView):
                         d = dt.datetime.combine(day, dt.time(start_hour, start_minute, 0))
 
                         status = 'OK'
+                        user = self.request.user
                         if machine.regular_non_working_days.filter(day_of_week=day.weekday()).exists():
                             status = 'DISABLE'
                         if machine.non_working_days.filter(date=day).exists():
                             status = 'DISABLE'
                         if machine.records.filter(datetime_from=d).exists():
                             if machine.records.get(datetime_from=d).user == self.request.user:
+                                can_show = True
                                 status = "YOURS"
                             else:
                                 status = "BUSY"
+                            user = machine.records.get(datetime_from=d).user
 
                         interval = (dt.time(start_hour, start_minute, 0),
                                     dt.time(end_hour, end_minute, 0))
                         if schedule[day].get(interval) is None:
                             schedule[day][interval] = collections.OrderedDict()
-                        schedule[day][interval][machine] = (status, params.price)
+                        schedule[day][interval][machine] = [status, params.price, user, False]
                         start += delta
+            if can_show:
+                for machine in machines:
+                    for interval in schedule[day].values():
+                        interval[machine][3] = True
 
             day += dt.timedelta(days=1)
         context['week'] = week
@@ -111,7 +119,7 @@ class CreateRecordView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                                                 datetime_to=record['datetime_to'],
                                                 money_operation=operation)
         else:
-            return JsonResponse({"no_money": "Нет денег для оплаты"}, status=400)
+            return JsonResponse({"no_money": "Нет денег для оплаты, пополните у ответственных за стиралку/финансы"}, status=400)
         return super(CreateRecordView, self).get(request, *args, **kwargs)
 
 

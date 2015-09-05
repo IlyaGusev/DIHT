@@ -62,6 +62,9 @@
             <a href="{% url 'accounts:add_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-plus green"></i></a>
             <a href="{% url 'accounts:remove_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-minus red"></i></a>
         </span>
+        <span class="param">
+            <a href="{% url 'accounts:history_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-book blue"></i></a>
+        </span>
         {% endif %}
         {% if user|has_group:'Ответственные за работу с пользователями' or user.is_superuser %}
             {% if profile.user.is_active %}

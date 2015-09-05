@@ -222,3 +222,15 @@ class MoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, ListView):
         context = super(MoneyHistoryView, self).get_context_data(**kwargs)
         context['operations'] = MoneyOperation.objects.all().order_by('timestamp').reverse()
         return context
+
+
+class UserMoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
+    model = Profile
+    group_required = 'Ответственные за финансы'
+    context_object_name = 'profile'
+    template_name = "accounts/money_history.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(UserMoneyHistoryView, self).get_context_data(**kwargs)
+        context['operations'] = self.get_object().user.operations.all().order_by('timestamp').reverse()
+        return context

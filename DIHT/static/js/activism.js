@@ -80,11 +80,12 @@ $(function() {
             var coef = 1
             if ($('#urgent').length || $('#hard').length)
                 coef = 1.5
-            inp.next().find('.final-hours').text(inp.val()*coef)
-            inp.next().next().val(inp.val()*coef)
+            var final = Number((inp.val()*coef).toFixed(2))
+            inp.next().find('.final-hours').text(final);
+            inp.next().next().val(final)
             $('#close-modal').on('change', '.real-hours', function(ev){
-                inp.next().find('.final-hours').text(inp.val()*coef)
-                inp.next().next().val(inp.val()*coef)
+                inp.next().find('.final-hours').text(final)
+                inp.next().next().val(final)
             })
         });
     });
