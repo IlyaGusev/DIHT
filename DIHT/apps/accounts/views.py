@@ -10,6 +10,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django.http import HttpResponseRedirect
 from braces.views import LoginRequiredMixin, UserPassesTestMixin, GroupRequiredMixin
 from django.utils import timezone
+from itertools import chain
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, MoneyForm
 from accounts.models import Profile, Avatar, MoneyOperation
 from washing.models import BlackListRecord
@@ -232,5 +233,8 @@ class UserMoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(UserMoneyHistoryView, self).get_context_data(**kwargs)
-        context['operations'] = self.get_object().user.operations.all().order_by('timestamp').reverse()
+        context['operations'] = \
+            sorted(chain(self.get_object().user.operations.exclude(moderator=self.get_object().user.pk),
+                         self.get_object().user.moderated_operations.all()),
+                   key=lambda instance: instance.timestamp, reverse=True)
         return context
