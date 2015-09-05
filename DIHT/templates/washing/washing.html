@@ -10,30 +10,37 @@
     <style>
         td.status0{/*blocked (grey)*/
             background-color:#B4B4B4;
-            height: 40px;
-            width: 100px;
         }
         td.status1{/*free (green)*/
             background-color: #59B259;
             {% if user.is_authenticated and not user.black_list_record.is_blocked %}
                 cursor: pointer;
             {% endif %}
-            height: 40px;
-            width: 100px;
         }
         td.status2{/*bought (red)*/
             background-color:#D14741;
-            height: 40px;
-            width: 100px;
         }
         td.status3{/*your (blue)*/
             background-color:#44AAC8;
             {% if user.is_authenticated %}
                 cursor: pointer;
             {% endif %}
+        }
+        td {
             height: 40px;
             width: 100px;
         }
+        @media (max-width: 768px) {
+            td{
+                font-size:12px;
+                height: 30px;
+            }
+            th{
+                font-size:13px;
+            }
+        }
+}
+
     </style>
     <div class="col-md-10 col-md-offset-1 page-header">
         <h3>Стиралка</h3>
@@ -45,6 +52,7 @@
     </div>
     {% endif %}
     <div class="row">
+        <div class="table-responsive">
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -110,6 +118,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     </div>
 
     <center><a href="#" data-toggle="modal" data-target="#responsible-modal">Ответственные за стиралку</a></center><br>
