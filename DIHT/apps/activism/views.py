@@ -178,7 +178,7 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, UpdateView)
             context['events'] = Event.objects.all()
         context['sectors'] = Sector.objects.all()
         context['users'] = User.objects.all()
-        context['can_edit'] = (is_creator and task.status == 'open' or task.status == 'in_labor') or \
+        context['can_edit'] = (is_creator and (task.status == 'open' or task.status == 'in_labor')) or \
                               is_charge or user.is_superuser
         context['can_edit_always'] = ((is_creator or user.is_superuser) and task.status != 'closed')
         context['through'] = task.participants.all()
