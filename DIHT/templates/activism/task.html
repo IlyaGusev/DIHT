@@ -15,7 +15,7 @@
 </div>
 <div class = "row pagezone">
     {% comment %} <!-- Управление статусом задачи -->{% endcomment %}
-    {% if user == task.creator or user.is_superuser %}
+    {% if can_manage %}
         <div class = "row">
             <div class="col-md-12" style="padding-left:40px;">
             {% if task.status == 'open' %}

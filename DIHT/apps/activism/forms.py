@@ -32,8 +32,8 @@ class TaskCreateForm(ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(TaskCreateForm, self).__init__(*args, **kwargs)
         is_charge = (Group.objects.get(name="Ответственные за волонтёров") in user.groups.all())
-        if not Group.objects.get(name="Руководящая группа") in user.groups.all() and \
-                not user.is_superuser and not is_charge:
+        is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
+        if not (is_main or user.is_superuser or is_charge):
             self.fields['event'].queryset = user.events.filter(status='open')
             self.fields['event'].empty_label = None
         else:

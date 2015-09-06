@@ -102,7 +102,8 @@ $(function() {
 	})
 
     $(document).ready(function() {
-        if ($('.sector-current')[0].id!='')
-            $('#sector-field option[value='+$('.sector-current')[0].id+']').attr("selected",true);
+        if ($('.sector-current').length)
+            if ($('.sector-current')[0].id!='')
+                $('#sector-field option[value='+$('.sector-current')[0].id+']').attr("selected",true);
     });
 });

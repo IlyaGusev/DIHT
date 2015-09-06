@@ -39,7 +39,8 @@
                     <a class="pull-right" href="{% url 'activism:events' %}">Все <i class="fa fa-chevron-right"></i></a>
                 </div>
             </div>
-            
+
+            {% comment %}
             {% if is_charge or user.is_superuser %}
             <div class="panel panel-default dash-pan">
                 <div class="panel-heading"><i class="fa fa-calendar fa-fw" style="margin-right:5px;"></i>&nbsp;Последние действия 
@@ -56,6 +57,7 @@
                 </div>
             </div>
             {% endif %}
+            {% endcomment %}
             {% if bids|length > 0 %}
             <div class="panel panel-default dash-pan">
                 <div class="panel-heading"><i class="fa fa-hand-paper-o fa-fw" style="margin-right:5px;"></i>&nbsp;Мои заявки 

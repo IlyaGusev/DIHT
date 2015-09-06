@@ -69,7 +69,7 @@
                                         <span class="param">Создатель:</span>
                                     </td>
                                     <td class="ra">
-                                    {% if user == event.creator %}
+                                    {% if is_creator %}
                                         <span class="">
                                         {% if event.creator.avatar.img %}
                                             {% thumbnail event.creator.avatar.img "22x22" crop="center" as pic %}
@@ -231,7 +231,7 @@
                             {% endfor %}
                         </table>
                     </div>
-                    {% if can_edit %}
+                    {% if can_edit or can_create_tasks %}
                     <center><a href="{% url 'activism:create_task' %}"
                                class="btn btn-default robotobold"
                                data-target="#form-modal">
@@ -241,7 +241,5 @@
                     {% endif %}
                 </div>
             </div>
-            <!--div class = "col-md-4">
-            </div-->
         </div>
 {% endblock %}

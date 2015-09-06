@@ -30,7 +30,7 @@
         {% endfor %}
 	</div>
     
-    {% if is_main or request.user.is_superuser or is_charge %}
+    {% if can_all or is_main %}
     
     <center><a class="btn btn-default robotobold"
                href="{% url 'activism:create_event'%}"
