@@ -45,8 +45,8 @@ class TaskCreateForm(ModelForm):
 
 
 class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
-    assignees = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
-                                            [('None', 'None'), ], required=False)
+    assignees_pk = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+                                               [('None', 'None'), ], required=False)
     candidates = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
                                              [('None', 'None'), ], required=False)
     assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
@@ -58,11 +58,11 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
                   'candidates', 'number_of_assignees',
                   'event', 'rejected', 'sector', 'tags')
 
-    def clean_assignees(self):
-        if self.data.get('assignees') is not None:
-            if self.data['assignees'] == 'None':
+    def clean_assignees_pk(self):
+        if self.data.get('assignees_pk') is not None:
+            if self.data['assignees_pk'] == 'None':
                 return []
-            return self.cleaned_data['assignees']
+            return self.cleaned_data['assignees_pk']
         return None
 
     def clean_candidates(self):
@@ -73,11 +73,11 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
         return None
 
     def save(self, commit=True):
-        if self.cleaned_data.get('assignees') is not None:
-            for pk in self.cleaned_data['assignees']:
+        if self.cleaned_data.get('assignees_pk') is not None:
+            for pk in self.cleaned_data['assignees_pk']:
                 AssigneeTask.objects.get_or_create(task=self.instance, user=User.objects.get(pk=pk))
             AssigneeTask.objects.filter(task=self.instance)\
-                                .exclude(user__pk__in=self.cleaned_data['assignees'])\
+                                .exclude(user__pk__in=self.cleaned_data['assignees_pk'])\
                                 .delete()
         return super(TaskForm, self).save(commit)
 

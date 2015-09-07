@@ -102,7 +102,7 @@ $(function() {
 	$('#id_assignees_autocomplete-autocomplete').blur(function() {
 	    var assignees = get_ids('.assignee');
         assignees.push($("#id_assignees_autocomplete option:selected" ).val())
-        post_task({'assignees': assignees});
+        post_task({'assignees_pk': assignees});
         transfer_class('hidden', '#assign', '#id_assignees_autocomplete-autocomplete');
 	})
 
@@ -112,7 +112,7 @@ $(function() {
 		resign_id = $(this)[0].id;
 		var assignees = get_ids('.assignee');
         assignees.splice($.inArray(resign_id, assignees), 1);
-        post_task({'assignees': assignees});
+        post_task({'assignees_pk': assignees});
 	})
 
 
@@ -123,7 +123,7 @@ $(function() {
 		candidates.splice($.inArray(approve_id, candidates), 1);
 		var assignees = get_ids('.assignee');
 		assignees.push(approve_id);
-        post_task({'candidates': candidates, 'assignees': assignees});
+        post_task({'candidates': candidates, 'assignees_pk': assignees});
 	})
 
 
