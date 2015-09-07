@@ -147,7 +147,7 @@
                             <td><a href="{% url 'activism:task' pk=through.task.pk %}">#{{ through.task.id }}</a></td>
                             <td>{{ through.task.name }}</td>
                             {% if through.hours %}
-                            <td>{{ through.hours|stringformat:'.1f' }} ВЧ
+                            <td>{{ through.hours|stringformat:'.1f' }} ЧРА
                                 {% if through.approved %}
                                     <i class="fa fa-check green"></i>
                                 {% else %}
@@ -155,7 +155,7 @@
                                 {% endif %}
                             </td>
                             {% else %}
-                            <td>Без ВЧ</td>
+                            <td>Без ЧРА</td>
                             {% endif %}
                         </tr>
                     {% endfor %}
