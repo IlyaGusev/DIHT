@@ -374,52 +374,98 @@
         <div class="section">
             <h5 class="section-name">Часы работы активиста</h5>
             <hr class="just-a-line">
+            <table border="0" class="usual-letters" style="width:100%"> 
+                
             {% if can_edit %}
-                <span class="param">Расчетные:</span>
-                <span class="pull-right">
-                    <span id="hours_predict">
-                        <span id="hours_predict-current">{{ task.hours_predict|stringformat:".1f" }}</span> час.
-                        <a href="#" class="light"><i class="fa fa-pencil" id="hours_predict-pencil"></i></a>
-                    </span>
-                    <span id="hours_predict-edit" class="hidden">
-                        <input id="hours_predict-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }}{% endif %}"> час.
-                    </span>
-                </span>
+                <tr>
+                    <td>
+                        <span class="param">Расчетные:</span>
+                    </td>
+                    <td class="ra">
+                        <span id="hours_predict">
+                            <span id="hours_predict-current">{{ task.hours_predict|stringformat:".1f" }}</span> час.
+                            <a href="#" class="light"><i class="fa fa-pencil" id="hours_predict-pencil"></i></a>
+                        </span>
+                        <span id="hours_predict-edit" class="hidden">
+                            <input id="hours_predict-field" type="number" min = "1" max="99" value="{% if task.hours_predict %}{{ task.hours_predict|stringformat:'.1f' }}{% endif %}"> час.
+                        </span>
+                    <td>    
+                </tr>
             {% else %}
-                <span class="param">Расчетные:</span>
-                <span class="pull-right">{% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}</span>
-                <br>
+                <tr>
+                    <td>
+                        <span class="param">Расчетные:</span>
+                    </td>
+                    <td class="ra">
+                        {% if task.hours_predict %}{{ task.hours_predict|stringformat:".1f" }} час.{% endif %}
+                    </td>
+                </tr>
             {% endif %}
             {% if task.status == 'closed' or task.status == 'resolved' %}
-                <span class="param">Реальные:</span>
-                {% for entity in through %}
-                    <span class="pull-right">{{entity.user.get_full_name}} : {{entity.hours}} час.</span>
-                    <br>
-                {% endfor %}
+                <tr>
+                    <td>
+                        <span class="param">Реальные:</span>
+                    </td>
+                    <!-- td class="ra">
+                        <table border="0" class="usual-letters">
+                        {% for entity in through %}
+                            <tr>
+                                <td class="ra">{{entity.user.get_full_name}} : {{entity.hours}} час.</td>
+                            </tr>
+                        {% endfor %}
+                        </table>
+                    </td-->
+                </tr>
             {% endif %}
+            </table>
         </div>
         <div class="section">
             <h5 class="section-name">Даты</h5>
             <hr class="just-a-line">
-            <span class="param">Создано:</span> <span class="pull-right">{{ task.datetime_created }}</span> <br>
-            <span class="param">Последнее изменение:</span> <span class="pull-right">{{ task.datetime_last_modified }}</span> <br>
-            <span class="param">Сроки:</span>
-                {% if can_edit %}
-                <span class="pull-right">
-                    <span id="datetime_limit">{{ task.datetime_limit }}
+            <table border="0" class="usual-letters" style="width:100%"> 
+                <tr>
+                    <td>
+                        <span class="param">Создано:</span>
+                    </td>    
+                    <td class="ra">
+                        {{ task.datetime_created }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="param">Последнее изменение:</span>
+                    </td>
+                    <td class="ra">
+                        {{ task.datetime_last_modified }}
+                    </td>
+                </tr>
+                <tr>
+                    <td >
+                        <span class="param">Сроки:</span>
+                    </td>
+                    {% if can_edit %}
+                    <td class="ra">
+                        <span id="datetime_limit">{{ task.datetime_limit }}
                         <a href="#" class="light"><i class="fa fa-pencil" id="datetime_limit-pencil"></i></a>
-                    </span>
-                    <span id="datetime_limit-edit" class="hidden">
-                        <input id="datetime_limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
-                    </span>
-                </span>
-                {% else %}
-                <span class="pull-right">{{ task.datetime_limit }}</span>
+                        </span>
+                    </td>
+                    {% else %}
+                    <td class="ra">
+                        <span class="pull-right">{{ task.datetime_limit }}</span>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% if task.datetime_closed %}
+                <tr>
+                    <td>
+                        <span class="param">Закрыто:</span>
+                    </td>
+                    <td class="ra">
+                        {{ task.datetime_closed }}
+                    </td>
+                </tr>
                 {% endif %}
-            <br>
-            {% if task.datetime_closed %}
-            <span class="param">Закрыто:</span> <span class="pull-right">{{ task.datetime_closed }}</span>
-            {% endif %}
+            </table>
         </div>
     </div>
 </div>
