@@ -68,9 +68,9 @@
         {% endif %}
         {% if user|has_group:'Ответственные за работу с пользователями' or user.is_superuser %}
             {% if profile.user.is_active %}
-            <span class="pull-right"> <a href="{% url 'accounts:activate' pk=profile.user.pk %}" class="btn btn-danger"> Заблокировать </a></span>
+            <span class="pull-right"> <a href="{% url 'accounts:activate' pk=profile.user.pk %}" class="btn btn-default red"> Заблокировать </a></span>
             {% else %}
-            <span class="pull-right"> <a href="{% url 'accounts:activate' pk=profile.user.pk %}" class="btn btn-success"> Активировать </a></span>
+            <span class="pull-right"> <a href="{% url 'accounts:activate' pk=profile.user.pk %}" class="btn btn-default green"> Активировать </a></span>
             {% endif %}
         {% endif %}
     </div>
@@ -104,6 +104,9 @@
                 <span class="param">Общежитие:</span>  <span class="pull-right">{{ profile.hostel }}</span><br>
                 <span class="param">Комната:</span>  <span class="pull-right">{{ profile.room_number }}</span><br>
                 <span class="param">Телефон:</span> <span class="pull-right"> {{ profile.mobile }}</span> <br>
+                {% if vk %}
+                <span class="param">VK:</span> <span class="pull-right"> <a href="http://vk.com/id{{ vk }}">{{ vk }} </a></span> <br>
+                {% endif %}
                 {% if profile.user == request.user %}
                 <div>
                 <span class="grey" style="vertical-align:bottom;">Добавить соц. сеть:</span>

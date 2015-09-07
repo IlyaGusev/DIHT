@@ -91,6 +91,8 @@ class ProfileView(LoginRequiredMixin, DetailView):
         user = self.get_object().user
         context['records'] = user.records.filter(datetime_to__gte=timezone.now()).order_by('-datetime_to').reverse()
         context['task_hours'] = user.participated.filter(task__status__in=['closed', 'resolved'])
+        if user.social_auth.filter(provider='vk-oauth2').exists():
+            context['vk'] = user.social_auth.get(provider='vk-oauth2').uid
         if context['profile'].group_number != '':
             grade = int(str(timezone.now().date().year)[-1])-int(str(context['profile'].group_number)[0])
             if timezone.now().date().month >= 8:
