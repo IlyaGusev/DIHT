@@ -1,0 +1,30 @@
+﻿{% load static from staticfiles %}
+<html>
+<head>
+    <title>Сайт общежития №2 (ФИВТ) - 403 (Forbidden) </title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.css' %}">
+	<link rel="stylesheet" href="{% static 'lib/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="shortcut icon" href="{% static 'img/favicon/favicon.ico' %}" type="image/x-icon">
+	<link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+    <link rel="stylesheet" href="{% static 'css/typographic.css' %}">
+</head>
+<body>
+    <div class="container jumbotron" style="margin-top: 30px">
+        <div class="row">
+            <div class="col-md-5"><center>
+                <span style="font-size:100px;">403</span><br>
+                <span style="font-size:20px;">Forbidden</span>
+            </center></div>
+            <div class="col-md-7">
+                <p style="font-size:20px; padding-top:20px;">К сожалению, у тебя не хватает прав для того, чтобы просматривать эту страницу. Но не расстраивайся! Принимай участие в жизни студсовета ФИВТ, и возможно, когда-нибудь ты сможешь её увидеть <i class="fa fa-smile-o"></i></p> 
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px; font-size:20px;"><center>
+            <a href="{% url 'main:home' %}">На главную</a>
+        </center></div>
+    </div>
+</body>
+</html>

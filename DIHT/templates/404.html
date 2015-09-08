@@ -1,0 +1,35 @@
+﻿{% load static from staticfiles %}
+<html>
+<head>
+    <title>Сайт общежития №2 (ФИВТ) - 404 (Not Found)</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.css' %}">
+	<link rel="stylesheet" href="{% static 'lib/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="shortcut icon" href="{% static 'img/favicon/favicon.ico' %}" type="image/x-icon">
+	<link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+    <link rel="stylesheet" href="{% static 'css/typographic.css' %}">
+</head>
+<body>
+    <div class="container jumbotron" style="margin-top: 30px">
+        <div class="row">
+            <div class="col-md-5"><center>
+                <span style="font-size:100px;">404</span><br>
+                <span style="font-size:20px;">Not Found</span>
+            </center></div>
+            <div class="col-md-7">
+                <p style="font-size:20px; padding-top:20px;">Кажется, такой страницы не существует. А вот нечего вбивать в адресную строку всякую ерунду!
+                <i class="fa fa-frown-o"></i>
+                </p> 
+                <small>
+                    (Но если ты ничего не вбивал, а перешел сюда, пользуясь ссылками, об этом стоит сообщить <a href="{% url 'main:feedback' %}">администраторам</a>)
+                </small>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px; font-size:20px;"><center>
+            <a href="{% url 'main:home' %}">На главную</a>
+        </center></div>
+    </div>
+</body>
+</html>
