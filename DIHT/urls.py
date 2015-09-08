@@ -18,6 +18,15 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
 
+handler400 = 'DIHT.views.custom_400'
+handler403 = 'DIHT.views.custom_403'
+handler404 = 'DIHT.views.custom_404'
+handler405 = 'DIHT.views.custom_405'
+handler500 = 'DIHT.views.custom_500'
+handler501 = 'DIHT.views.custom_501'
+handler502 = 'DIHT.views.custom_502'
+handler503 = 'DIHT.views.custom_503'
+
 urlpatterns = [
     url(r'^', include('main.urls', namespace='main')),
     url(r'^accounts/', include('accounts.urls', namespace='accounts')),
