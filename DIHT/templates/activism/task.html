@@ -448,6 +448,9 @@
                         <span id="datetime_limit">{{ task.datetime_limit }}
                         <a href="#" class="light"><i class="fa fa-pencil" id="datetime_limit-pencil"></i></a>
                         </span>
+                        <span id="datetime_limit-edit" class="hidden">
+                            <input id="datetime_limit-field" type="datetime-local" value="{{task.datetime_limit|date:'Y-m-d\TH:i'}}">
+                        </span>
                     </td>
                     {% else %}
                     <td class="ra">

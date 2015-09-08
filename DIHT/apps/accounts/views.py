@@ -133,7 +133,8 @@ class SignUpOkView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SignUpOkView, self).get_context_data(**kwargs)
-        context['charge'] = Group.objects.get(name='Ответственные за работу с пользователями').user_set.all()
+        if Group.objects.filter(name='Ответственные за работу с пользователями').exists():
+            context['charge'] = Group.objects.get(name='Ответственные за работу с пользователями').user_set.all()
         return context
 
 
