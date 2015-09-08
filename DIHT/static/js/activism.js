@@ -84,6 +84,7 @@ $(function() {
             inp.next().find('.final-hours').text(final);
             inp.next().next().val(final)
             $('#close-modal').on('change', '.real-hours', function(ev){
+                final = Number((inp.val()*coef).toFixed(2))
                 inp.next().find('.final-hours').text(final)
                 inp.next().next().val(final)
             })
