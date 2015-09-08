@@ -12,16 +12,16 @@
     <h3 class="nametext">{{sector.name}}</h3>
 </div>
 <div class = "row pagezone">
-    <div class="col-md-5 hidden-sm hidden-xs">
+    <div class="col-md-4 hidden-sm hidden-xs">
         <img src="{% static 'img/3.jpg' %}" class="img-responsive"></img>
     </div>
-    <div class="col-md-7">
-        <p style="margin-bottom:10px;"><span class="robotobold" style="margin-right:10px;">Руководитель:</span>
+    <div class="col-md-8">
+        <p style="margin-bottom:10px;"><span class="robotobold big-letters" style="margin-right:10px;">Руководитель:</span>
         <a href="{% url 'accounts:profile' pk=sector.main.profile.pk %}">{% if sector.main.avatar.img %}
-            {% thumbnail sector.main.avatar.img "22x22" crop="center" as pic %}
+            {% thumbnail sector.main.avatar.img "35x35" crop="center" as pic %}
             <img src="{{ pic.url }}" class="avatar">
             {% endthumbnail %}
-        {% endif %}{{ sector.main.get_full_name }}</a></p>
+        {% endif %}<span class="big-letters" style="margin-left:5px;">{{ sector.main.get_full_name }}</span></a></p>
         {{ sector.description }}
     </div>
     <div class="col-md-offset-2 col-md-8" style="margin-top: 20px;">
