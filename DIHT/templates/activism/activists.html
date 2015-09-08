@@ -1,0 +1,34 @@
+﻿{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load has_group %}
+{% load thumbnail %}
+{% block title %} Активисты {% endblock %}
+{% block activism_active %} class = "active" {% endblock %}
+{% block custom_scripts %}
+    <script src="{% static 'js/activism.js' %}"></script>
+	<link rel="stylesheet" href="{% static 'css/activism.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="row well namezone">
+    <h3 class="task-name nametext"> Активисты </h3>
+</div>
+<div class = "row pagezone">
+    <table>
+    {% for user in users %}
+        <tr>
+            <td style = "padding: 1px 10px;">
+                {% if user.avatar.img %}
+                    {% thumbnail user.avatar.img "25x25" crop="center" as pic %}
+                    <a href = "{% url 'accounts:profile' pk=user.profile.pk %}"><img src="{{ pic.url }}" class="avatar"></a>
+                    {% endthumbnail %}
+                {% endif %}
+            </td>
+            <td>
+                <a href = "{% url 'accounts:profile' pk=user.profile.pk %}">{{user.last_name}} {{user.first_name}} {{user.profile.middle_name}}</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from activism.views import EventView, TaskView, IndexView, TaskCreateView, \
     EventsView, EventCreateView, TaskActionView, EventActionView, UnlockView, \
-    SectorView, ClosedTasksView
+    SectorView, ClosedTasksView, ActivistsView
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^tasks/(?P<pk>[0-9]*)/(?P<action>[0-9_a-z]+)$', TaskActionView.as_view(), name='task_action'),
     url(r'^tasks/create/$', TaskCreateView.as_view(), name='create_task'),
     url(r'^tasks/closed/$', ClosedTasksView.as_view(), name='closed'),
+    url(r'^activists/$', ActivistsView.as_view(), name='activists'),
 ]

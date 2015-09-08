@@ -313,3 +313,18 @@ class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
         context = super(ClosedTasksView, self).get_context_data(**kwargs)
         context['tasks'] = context['tasks'].filter(status__in=['closed']).order_by('-datetime_last_modified')
         return context
+
+
+class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
+    model = User
+    template_name = 'activism/activists.html'
+    group_required = "Активисты"
+    raise_exception = True
+    context_object_name = 'users'
+    
+    def get_context_data(self, **kwargs):
+        context = super(ActivistsView, self).get_context_data(**kwargs)
+        print (context['users'])
+        activists = [user for user in list(context['users'].all()) if Group.objects.get(name='Активисты') in user.groups.all()]
+        context['users'] = sorted(activists, key=lambda user: user.last_name)
+        return context
