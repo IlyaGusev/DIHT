@@ -7,20 +7,12 @@ $(function() {
 		$(elem2).removeClass(attr);
     };
 
-    function dict_to_string(dat){
-        st = '';
+    function dict_remove_empty(dat){
         for (var key in dat)
-            if (!Array.isArray(dat[key]))
-                st+='&'+key+'='+dat[key];
-            else{
+            if (Array.isArray(dat[key]))
                 if (dat[key].length == 0)
-                    st+='&'+key+"=None";
-                else
-                    for (var elem in dat[key])
-                        st+='&'+key+'='+dat[key][elem];
-            }
-        st = st.substr(1);
-        return st;
+                    dat[key] = 'None'
+        return dat;
     };
 
 
@@ -37,11 +29,11 @@ $(function() {
         for (key in dict)
             if (($.inArray(key, ajax_fields)) == -1)
                 reload = true
-        data = dict_to_string(dict);
+        dict = dict_remove_empty(dict);
         $.ajax({
             type: 'POST',
             url: window.location.href,
-            data: data,
+            data: dict,
             success: function(data) {
                 if (reload)
                     window.location.reload();
