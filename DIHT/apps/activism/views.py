@@ -305,7 +305,7 @@ class SectorView(LoginRequiredMixin, DetailView):
 class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     model = Task
     template_name = 'activism/closed.html'
-    group_required = "Активисты"
+    group_required = "Ответственные за волонтёров"
     raise_exception = True
     context_object_name = 'tasks'
     
