@@ -18,7 +18,7 @@
                 <a href="{{MEDIA_URL}}{{profile.user.avatar.img.url}}"><img src="{{ pic.url }}"></a>
                 {% endthumbnail %}
             {% else %}
-            <img class="round avatar" src="/static/img/standart_avatar.png">
+            <img width="128" height="128" src="/static/img/standart_avatar.png">
             {% endif %}
             {% if profile.user == request.user %}
             <label class="btn btn-default btn-sm hidden-sm hidden-xs" style="margin-top: 5px;">
