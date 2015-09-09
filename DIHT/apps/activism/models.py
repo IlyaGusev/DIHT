@@ -108,21 +108,21 @@ class AssigneeTask(Model):
         return str(self.user)+" in "+str(self.task)
 
 
-# class Points(Model):
-#     user = ForeignKey(User, null=False, blank=False, related_name='operations', verbose_name="Юзер")
-#     amount = FloatField("Количество", null=False, default=0)
-#     timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)
-#     description = CharField("Описание", max_length=150, null=True, blank=True)
-#     moderator = ForeignKey(User, related_name='moderated_operations',
-#                            null=True, blank=True, verbose_name="Ответственный")
-#
-#     def save(self, *args, **kwargs):
-#         if self.pk is None:
-#             super(Points, self).save(*args, **kwargs)
-#
-#     class Meta:
-#         verbose_name = "Операция очков роста"
-#         verbose_name_plural = "Операции очков роста"
-#
-#     def __str__(self):
-#         return str(self.timestamp)+': '+str(self.user.last_name)+'; '+str(self.amount)
+class PointOperation(Model):
+    user = ForeignKey(User, null=False, blank=False, related_name='point_operations', verbose_name="Юзер")
+    amount = FloatField("Количество", null=False, default=0)
+    timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)
+    description = CharField("Описание", max_length=150, null=True, blank=True)
+    moderator = ForeignKey(User, related_name='moderated_point_operations',
+                           null=True, blank=True, verbose_name="Ответственный")
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            super(PointOperation, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Операция очков роста"
+        verbose_name_plural = "Операции очков роста"
+
+    def __str__(self):
+        return str(self.timestamp)+': '+str(self.user.last_name)+'; '+str(self.amount)
