@@ -33,7 +33,7 @@
             <hr class="just-a-line">
             <span id="fullname" class="robotomedium">{{ profile.user.last_name }} {{ profile.user.first_name }} {{ profile.middle_name }}</span>
             <br>
-            {% if profile.user|has_group:'Активисты' %}<span id="level" class="grey">Уровень 2</span>
+            {% if profile.user|has_group:'Активисты' %}<span id="level" class="grey"></span>
             <br>{% endif %}
             {% if profile.sign and profile.sign != '' %}
                 {{ profile.sign }}
