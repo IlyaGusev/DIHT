@@ -4,16 +4,21 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import \
     PositiveSmallIntegerField, ForeignKey, DateTimeField, \
     DateField, BooleanField, OneToOneField, FloatField, \
-    Model, CharField, ManyToManyField, TextField
+    Model, CharField, ManyToManyField, TextField, ImageField
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase
 from django.core.urlresolvers import reverse
 
 
+def upload_to_sector(instance, filename):
+    return 'sectors/%s/%s' % (instance.name, filename)
+
+    
 class Sector(Model):
     name = CharField("Название", max_length=50)
     description = TextField("Описание", blank=True)
     main = ForeignKey(User, verbose_name="Руководитель", blank=True, null=True)
+    photo = ImageField (max_length=1024, blank=True, upload_to=upload_to_sector)
 
     class Meta:
         verbose_name = "Сектор"
