@@ -15,7 +15,7 @@
 pip3 install -r <path-to-requirements.txt>
 ```
 
-* Dev-сервер:
+* Dev-сервер (всё выполняется в папке с manage.py):
 
 ```
 #!bash
