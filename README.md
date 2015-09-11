@@ -19,6 +19,7 @@ pip3 install -r <path-to-requirements.txt>
 
 ```
 #!bash
+mkdir db
 python3 manage.py migrate
 python3 manage.py thumbnail cleanup
 python3 manage.py create_groups
