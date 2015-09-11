@@ -256,8 +256,8 @@ class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, DefaultCo
         event = self.get_object()
         user = self.request.user
         tasks_ok = (event.tasks.all().exclude(status="closed").count() == 0)
-        context['can_close'] = ((context['is_creator'] and tasks_ok) or context['can_all']) and event.status == 'open'
-        context['can_edit'] = ((context['is_creator'] and event.status == 'open') or context['can_all'])
+        context['can_close'] = (context['is_creator'] or context['can_all']) and event.status == 'open' and tasks_ok
+        context['can_edit'] = (context['is_creator'] or context['can_all']) and event.status == 'open'
         context['can_create_tasks'] = user in event.assignees.all()
         return context
 

@@ -34,7 +34,9 @@
             </div>
             <div class="panel-body" id="sector-events">
                 {% for event in sector.events.all %}
-                    <a class="" href="{% url 'activism:event' pk=event.pk %}">{{ event.name }}</a><br>
+                    {% if event.status == 'open' %}
+                        <a class="" href="{% url 'activism:event' pk=event.pk %}">{{ event.name }}</a><br>
+                    {% endif %}
                 {% endfor %}
             </div>
         </div>
