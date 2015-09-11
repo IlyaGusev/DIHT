@@ -13,15 +13,19 @@
 </div>
 <div class = "row pagezone">
     <div class="col-md-4 hidden-sm hidden-xs">
+        {% if sector.photo %}
         <img src="{{MEDIA_URL}}{{sector.photo.url}}" class="img-responsive"></img>
+        {% endif %}
     </div>
     <div class="col-md-8">
         <p style="margin-bottom:10px;"><span class="robotobold big-letters" style="margin-right:10px;">Руководитель:</span>
-        <a href="{% url 'accounts:profile' pk=sector.main.profile.pk %}">{% if sector.main.avatar.img %}
+        <a href="{% url 'accounts:profile' pk=sector.main.profile.pk %}">
+        {% if sector.main.avatar.img %}
             {% thumbnail sector.main.avatar.img "35x35" crop="center" as pic %}
             <img src="{{ pic.url }}" class="avatar">
             {% endthumbnail %}
-        {% endif %}<span class="big-letters" style="margin-left:5px;">{{ sector.main.get_full_name }}</span></a></p>
+        {% endif %}
+            <span class="big-letters" style="margin-left:5px;">{{ sector.main.get_full_name }}</span></a></p>
         {{ sector.description }}
     </div>
     <div class="col-md-offset-2 col-md-8" style="margin-top: 20px;">
