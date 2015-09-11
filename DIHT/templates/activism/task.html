@@ -17,7 +17,7 @@
     {% comment %} <!-- Управление статусом задачи -->{% endcomment %}
     {% if can_manage %}
         <div class = "row">
-            <div class="col-md-12" style="padding-left:40px;">
+            <div class="col-md-12" style="padding-left:40px; padding-right:40px;">
             {% if task.status == 'open' %}
                 <a class="btn btn-default action" id="in_labor"
                    href="{% url 'activism:task_action' pk=task.pk action='in_labor'%}"><i class="fa fa-users"></i> На биржу </a>
@@ -43,8 +43,11 @@
                    href="{% url 'activism:task_action' pk=task.pk action='delete'%}">
                     <i class="fa fa-lg fa-trash-o red"></i> Удалить
                 </a>
-            </div>
             {% endif %}
+            {% if task.event %}
+                 <a class="btn btn-default pull-right" href="{% url 'activism:event' pk=task.event.pk %}"><i class="fa fa-lg fa-arrows blue"></i> К мероприятию</a>
+            {% endif %}
+            </div>
         </div>
     {% elif user in task.assignees.all and task.status == 'in_progress' %}
         <div class = "row">
