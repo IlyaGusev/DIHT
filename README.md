@@ -44,6 +44,14 @@ python3 manage.py test
 * В deploy ветку нельзя пушить. Совсем. Только pull requests, только хардкор! Пилишь всё в своей отдельной ветке и потом делаешь pull request. На него делают review и, возможно, пускают в deploy.
 * Issue tracker: https://bitbucket.org/phoenix120/2ka/issues
 * Тесты нужны. Серьёзно. Лучше пиши их сразу.
+* Что тебе нужно сделать, чтобы поменять структуру базы на deploy-сервере:
+
+```
+#!python
+
+python3 manage.py makemigrations <app_name>
+```
+
 
 ### У кого можно спрашивать по поводу этой фигни? ###
 
