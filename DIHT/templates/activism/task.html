@@ -45,10 +45,14 @@
                 </a>
             {% endif %}
             {% if task.event %}
-                 <a class="btn btn-default pull-right" href="{% url 'activism:event' pk=task.event.pk %}"><i class="fa fa-lg fa-arrows blue"></i> К мероприятию</a>
+                 <a class="btn btn-default pull-right" href="{% url 'activism:event' pk=task.event.pk %}" style="margin-left:3px;">
+                     <i class="fa fa-lg fa-arrows blue"></i> К мероприятию
+                 </a>
             {% endif %}
             {% if task.status == 'in_labor' and user not in task.candidates.all and user not in task.assignees.all and user not in task.rejected.all %}
-                <a class="btn btn-default pull-right action" href="{% url 'activism:task_action' pk=task.pk action='do' %}"><i class="fa fa-lg fa-user green"></i> Хочу выполнить!</a>
+                <a class="btn btn-default pull-right action" href="{% url 'activism:task_action' pk=task.pk action='do' %}">
+                    <i class="fa fa-lg fa-user green"></i> Хочу выполнить!
+                </a>
             </div>
             {% endif %}
         </div>

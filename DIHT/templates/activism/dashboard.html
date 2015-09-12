@@ -60,24 +60,28 @@
             {% endcomment %}
             {% if bids|length > 0 %}
             <div class="panel panel-default dash-pan">
-                <div class="panel-heading"><i class="fa fa-hand-paper-o fa-fw" style="margin-right:5px;"></i>&nbsp;Мои заявки 
+                <div class="panel-heading"><i class="fa fa-hand-paper-o fa-fw" style="margin-right:5px;"></i>&nbsp;Мои заявки
                 <span class="pull-right">
                     <a class="grey" role="button" data-toggle="collapse" href="#dash-bids" aria-expanded="true" aria-controls="dash-bids">
                         <i style="margin-top: 5px;" class="drop-controller fa fa-lg fa-caret-down"></i>
                     </a>
-                </span></div>
+                </span>
+                </div>
                 <div class="panel-body collapse in" id="dash-bids">
+                    <table class="usual-letters" border="0" style="width:100%;">
                     {% for task in bids %}
-                        <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
+                        <tr>
+                        <td style="padding-top:8px;"><a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a></td>
                         {% if user in task.candidates.all %}
-                        <span class="label lbl label-default pull-right">В ожидании</span>
+                        <td class="ra"> <span class="label lbl label-default">В ожидании</span></td>
                         {% elif user in task.rejected.all %}
-                        <span class="label lbl label-danger pull-right">Отклонено</span>
+                        <td class="ra"> <span class="label lbl label-danger">Отклонено</span></td>
                         {% elif user in task.assignees.all %}
-                        <span class="label lbl label-success pull-right">Одобрено</span>
+                        <td class="ra"> <span class="label lbl label-success">Одобрено</span></td>
                         {% endif %}
-                        <br>
+                        </tr>
                     {% endfor %}
+                    </table>
                 </div>
             </div>
             {% endif %}
@@ -150,21 +154,29 @@
                 <div class="panel panel-default">
                 {% endif %}
                     <div class="panel-heading labor-pan" role="tab" id="heading{{task.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{task.pk}}" aria-expanded="false" aria-controls="body{{task.pk}}">
-                        {% if task.sector.name == 'Проектный сектор' %}
-                        <div class="sector-label purple"><i class='fa fa-lg fa-circle'></i></div>
-                        {% elif task.sector.name == 'Информационный сектор' %}
-                        <div class="sector-label blue"><i class='fa fa-lg fa-circle'></i></div>
-                        {% elif task.sector.name == 'Хозяйственный сектор' %}
-                        <div class="sector-label yellow"><i class='fa fa-lg fa-circle'></i></div>
-                        {% elif task.sector.name == 'Кураторский сектор' %}
-                        <div class="sector-label green"><i class='fa fa-lg fa-circle'></i></div>
-                        {% elif task.sector.name == 'Отдел по работе с абитуриентами' %}
-                        <div class="sector-label red"><i class='fa fa-lg fa-circle'></i></div>
-                        {% else %}
-                        <div class="sector-label grey"><i class='fa fa-lg fa-circle'></i></div>
-                        {% endif %}
-                        <span class="big-letters">&nbsp;{{ task.name }}</span>
-                        <span class="pull-right grey">{% if task.event %}{{task.event}}{% else %}Без мероприятия{% endif %}</span>
+                        <table class="usual-letters" border="0" width="100%">
+                            <tbody>
+                            <tr>
+                                <td valign="middle" width="20">
+                                    {% if task.sector.name == 'Проектный сектор' %}
+                                    <span class="sector-label purple"><i class='fa fa-lg fa-circle'></i></span>
+                                    {% elif task.sector.name == 'Информационный сектор' %}
+                                    <span class="sector-label blue"><i class='fa fa-lg fa-circle'></i></span>
+                                    {% elif task.sector.name == 'Хозяйственный сектор' %}
+                                    <span class="sector-label yellow"><i class='fa fa-lg fa-circle'></i></span>
+                                    {% elif task.sector.name == 'Кураторский сектор' %}
+                                    <span class="sector-label green"><i class='fa fa-lg fa-circle'></i></span>
+                                    {% elif task.sector.name == 'Отдел по работе с абитуриентами' %}
+                                    <span class="sector-label red"><i class='fa fa-lg fa-circle'></i></span>
+                                    {% else %}
+                                    <span class="sector-label grey"><i class='fa fa-lg fa-circle'></i></span>
+                                    {% endif %}
+                                </td>
+                                <td align="left"><span class="bigger-letters">{{ task.name }}</span></td>
+                                <td class="ra"><span class="grey">{% if task.event %}{{task.event}}{% else %}Без мероприятия{% endif %}</span></td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div id="body{{task.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{task.id}}">
                         <div class="panel-body">

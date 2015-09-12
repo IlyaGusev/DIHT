@@ -4,26 +4,26 @@
     <h3>История операций</h3>
 </div>
 <div class="modal-body">
-
-        <table class="table table-responsive">
-            <tr>
-                <th>Пользователь</th>
-                <th>Деньги</th>
-                <th>Дата</th>
-                <th>Ответственный</th>
-                <th class="hidden-sm hidden-xs">Описание</th>
-            </tr>
-            {% for operation in operations %}
-            <tr>
-                <td>{{operation.user.get_full_name}}</td>
-                <td>{{operation.amount}}</td>
-                <td>{{operation.timestamp|date:'d.m.Y H:i'}}</td>
-                <td>{{operation.moderator.get_full_name}}</td>
-                <td class="hidden-sm hidden-xs">{{operation.description}}</td>
-            </tr>
-            {% endfor %}
-        </table>
-
+        <div class="table-responsive">
+            <table class="table">
+                <tr>
+                    <th>Пользователь</th>
+                    <th>Деньги</th>
+                    <th>Дата</th>
+                    <th>Ответственный</th>
+                    <th>Описание</th>
+                </tr>
+                {% for operation in operations %}
+                <tr>
+                    <td>{{operation.user.get_full_name}}</td>
+                    <td>{{operation.amount}}</td>
+                    <td>{{operation.timestamp|date:'d.m.Y H:i'}}</td>
+                    <td>{{operation.moderator.get_full_name}}</td>
+                    <td>{{operation.description}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
 </div>
 <div class="modal-footer">
    <a href="#" class="btn btn-danger" data-dismiss="modal">Вернуться</a>
