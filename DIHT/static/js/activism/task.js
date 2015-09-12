@@ -32,6 +32,7 @@ $(function() {
         if ('datetime_limit' in dict)
             dict['datetime_limit'] = dict['datetime_limit'].replace('T', ' ');
         dict = dict_remove_empty(dict);
+        console.log(dict['description'])
         $.ajax({
             type: 'POST',
             url: window.location.href,
@@ -42,8 +43,11 @@ $(function() {
                 else{
                     for (field in dict){
                         if (($.inArray(field, ajax_fields)) != -1){
-                            if (($.inArray(field, select_fields)) == -1)
-                                $('#'+field+'-current').text($('#'+field+'-field').val())
+                            if (($.inArray(field, select_fields)) == -1){
+                                var elem = $('#'+field+'-current')
+                                elem.text($('#'+field+'-field').val())
+                                elem.html(elem.html().replace(/\r\n|\r|\n/g,'<br>'))
+                            }
                         }
                     }
                 }

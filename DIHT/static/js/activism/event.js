@@ -40,8 +40,11 @@ $(function() {
                 else{
                     for (field in dict){
                         if (($.inArray(field, ajax_fields)) != -1){
-                            if (($.inArray(field, select_fields)) == -1)
-                                $('#'+field+'-current').text($('#'+field+'-field').val())
+                            if (($.inArray(field, select_fields)) == -1){
+                                var elem = $('#'+field+'-current')
+                                elem.text($('#'+field+'-field').val())
+                                elem.html(elem.html().replace(/\r\n|\r|\n/g,'<br>'))
+                            }
                         }
                     }
                 }

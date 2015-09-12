@@ -180,7 +180,7 @@
                     <h5 class="section-name">Описание {% if can_edit%}<a href="#" class="light"><i class="fa fa-pencil" id="description-pencil"></i></a>{% endif %} </h5>
                     <hr class="just-a-line">
         
-                    <span id="description"><span id="description-current">{{ event.description }}</span></span>
+                    <span id="description"><span id="description-current">{{ event.description|linebreaksbr }}</span></span>
                     {% if can_edit  %}
                     <span class="hidden" id="description-edit">
                         <textarea class="form-control" id="description-field" rows="4">{{ event.description }}</textarea>

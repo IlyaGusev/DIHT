@@ -348,7 +348,7 @@
                 {% if can_edit_always or can_edit %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
             </a></h5>
             <hr class="just-a-line">
-            <span id="description"><span id="description-current">{{ task.description }}</span></span>
+            <span id="description"><span id="description-current">{{ task.description|linebreaksbr }}</span></span>
             {% if can_edit_always or can_edit %}
             <span class="hidden" id="description-edit">
                 <textarea class="form-control" id="description-field" rows="4">{{ task.description }}</textarea>
