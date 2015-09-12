@@ -189,7 +189,7 @@
                         <div class="panel-body">
                             {% if task.event %}
                             <a href="{% url 'activism:event' pk=task.event.pk %}">{{ task.event.name }}</a>/{% endif %}<a href="{% url 'activism:task' pk=task.pk %}">{{ task.name }}</a> <br>
-                            {{ task.description }} <br>
+                            {{ task.description|linebreaksbr }} <br>
                             {% for tag in task.tags.all %}
                             <a href="#">#{{tag}}</a>
                             {% endfor %}
