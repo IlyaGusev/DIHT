@@ -15,9 +15,9 @@
 </div>
 <div class = "row pagezone">
     {% comment %} <!-- Управление статусом задачи -->{% endcomment %}
-    {% if can_manage %}
         <div class = "row">
-            <div class="col-md-12" style="padding-left:40px; padding-right:40px;">
+            <div class="col-md-12" style="padding-left:40px;">
+    {% if can_manage %}
             {% if task.status == 'open' %}
                 <a class="btn btn-default action" id="in_labor"
                    href="{% url 'activism:task_action' pk=task.pk action='in_labor'%}"><i class="fa fa-users"></i> На биржу </a>
@@ -44,6 +44,11 @@
                     <i class="fa fa-lg fa-trash-o red"></i> Удалить
                 </a>
             {% endif %}
+    {% elif user in task.assignees.all and task.status == 'in_progress' %}
+                <a class="btn btn-default action" id="resolve"
+                   href="{% url 'activism:task_action' pk=task.pk action='resolved'%}"><i class="fa fa-lg fa-check blue"></i> Готово
+                </a>
+    {% endif %}
             {% if task.event %}
                  <a class="btn btn-default pull-right" href="{% url 'activism:event' pk=task.event.pk %}" style="margin-left:3px;">
                      <i class="fa fa-lg fa-arrows blue"></i> К мероприятию
@@ -53,17 +58,9 @@
                 <a class="btn btn-default pull-right action" href="{% url 'activism:task_action' pk=task.pk action='do' %}">
                     <i class="fa fa-lg fa-user green"></i> Хочу выполнить!
                 </a>
-            </div>
             {% endif %}
         </div>
-    {% elif user in task.assignees.all and task.status == 'in_progress' %}
-        <div class = "row">
-            <div class="col-md-12" style="padding-left:40px;">
-                <a class="btn btn-default action" id="resolve"
-                   href="{% url 'activism:task_action' pk=task.pk action='resolved'%}"><i class="fa fa-lg fa-check blue"></i> Готово</a>
-            </div>
-        </div>
-    {% endif %}
+    </div>
 
     {% comment %} <!-- Управление задачей -->{% endcomment %}
     <div class = "col-md-8">

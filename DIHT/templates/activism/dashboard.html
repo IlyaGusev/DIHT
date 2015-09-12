@@ -95,17 +95,20 @@
                 </span>
                 </div>
                 <div class="panel-body collapse in" id="dash-assigned">
+                    <table class="usual-letters" border="0" style="width:100%;">
                     {% for task in tasks_current %}
-                        <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
+                        <tr>
+                        <td style="padding-top:8px;"><a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a></td>
                         {% if task.status == 'resolved' %}
-                            <span class="label lbl label-primary pull-right">
+                            <td class="ra"> <span class="label lbl label-primary">
                         {% elif task.status == 'in_progress' %}
-                            <span class="label lbl label-warning pull-right">
+                            <td class="ra"> <span class="label lbl label-warning">
                         {% endif %}
                                 {{ task.get_status_display }}
-                            </span>
-                        <br>
+                            </span></td>
+                        </tr>
                     {% endfor %}
+                    </table>
                 </div>
             </div>
             {% endif %}
@@ -120,24 +123,28 @@
                 </span>
                 </div>
                 <div class="panel-body collapse in" id="dash-created">
+                    <table class="usual-letters" border="0" style="width:100%;">
                     {% for task in tasks_created %}
-                        <a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a>
+                        <tr>
+                        <td style="padding-top:8px;"><a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a></td>
                         {% if task.status == 'closed' %}
-                            <span class="label lbl pull-right label-success">
+                            <td class="ra"><span class="label lbl label-success">
                         {% elif task.status == 'resolved' %}
-                            <span class="label lbl pull-right label-primary">
+                            <td class="ra"><span class="label lbl label-primary">
                         {% elif task.status == 'in_progress' %}
-                            <span class="label lbl pull-right label-warning">
+                            <td class="ra"><span class="label lbl label-warning">
                         {% elif task.status == 'open' %}
-                            <span class="label lbl pull-right label-default">
+                            <td class="ra"><span class="label lbl label-default">
                         {% elif task.status == 'in_labor' %}
-                            <span class="label lbl pull-right label-danger">
+                            <td class="ra"><span class="label lbl label-danger">
                         {% elif task.status == 'volunteers' %}
-                            <span class="label lbl pull-right label-info ">
+                            <td class="ra"><span class="label lbl label-info ">
                         {% endif %}
-                                {{ task.get_status_display }}</span>
-                        <br>
+                                {{ task.get_status_display }}
+                            </span></td>
+                        </tr>
                     {% endfor %}
+                    </table>
                 </div>
             </div>
             {% endif %}
@@ -157,7 +164,7 @@
                         <table class="usual-letters" border="0" width="100%">
                             <tbody>
                             <tr>
-                                <td valign="middle" width="20">
+                                <td valign="middle" width="30">
                                     {% if task.sector.name == 'Проектный сектор' %}
                                     <span class="sector-label purple"><i class='fa fa-lg fa-circle'></i></span>
                                     {% elif task.sector.name == 'Информационный сектор' %}
