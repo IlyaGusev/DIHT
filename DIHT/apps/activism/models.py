@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 
 
 def upload_to_sector(instance, filename):
-    return 'sectors/%s/%s' % (instance.name, filename)
+    return 'sectors/%s' % (filename)
 
     
 class Sector(Model):
