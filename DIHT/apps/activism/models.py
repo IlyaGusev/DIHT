@@ -13,7 +13,7 @@ from django.core.urlresolvers import reverse
 def upload_to_sector(instance, filename):
     return 'sectors/%s' % filename
 
-    
+
 class Sector(Model):
     name = CharField("Название", max_length=50)
     description = TextField("Описание", blank=True)
