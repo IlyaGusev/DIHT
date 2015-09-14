@@ -41,13 +41,13 @@
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}"
                                                class="sector-current sector-name" id="{{event.sector.pk}}">{{ event.sector.name }}</a>
                                         {% else %}
-                                            <span class="sector-current sector-name" id="">Нет</span>
+                                            <span class="sector-current sector-name" id="">Сектор активистов</span>
                                         {% endif %}
                                             <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                                         </span>
                                         <span class="hidden" id="sector-edit">
                                             <select class="selector" id="sector-field">
-                                                <option class="selector-item" value="">Нет</option>
+                                                <option class="selector-item" value="">Сектор активистов</option>
                                             {% for sector in sectors %}
                                                 <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
                                             {% endfor %}
@@ -58,80 +58,54 @@
                                         {% if event.sector %}
                                             <a href="{% url 'activism:sector' pk=event.sector.pk %}" class="sector-name">{{ event.sector.name }}</a>
                                         {% else %}
-                                            <span class="sector-name">Нет</span>
+                                            <span class="sector-name">Сектор активистов</span>
                                         {% endif %}
                                         </span>
-                                    {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="param">Создатель:</span>
-                                    </td>
-                                    <td class="ra">
-                                    {% if is_creator %}
-                                        <span class="">
-                                        {% if event.creator.avatar.img %}
-                                            {% thumbnail event.creator.avatar.img "22x22" crop="center" as pic %}
-                                                <img src="{{ pic.url }}" class="avatar">
-                                            {% endthumbnail %}
-                                        {% endif %} 
-                                            {{ event.creator.get_full_name }} <span class="grey">(Это вы)</span>
-                                        </span>
-                                    {% else %}
-                                        <a href="{% url 'accounts:profile' pk=event.creator.profile.pk %}" class = "">
-                                        {% if event.creator.avatar.img %}
-                                            {% thumbnail event.creator.avatar.img "22x22" crop="center" as pic %}
-                                                <img src="{{ pic.url }}" class="avatar">
-                                            {% endthumbnail %}
-                                        {% endif %}
-                                            {{ event.creator.get_full_name }}
-                                        </a>
                                     {% endif %}
                                     </td>
                                 </tr>
                                 <tr height="10">
                                 </tr>
                                 <tr>
-                                    {% if event.assignees.all.count == 0 %}
+                                    {% if event.responsible.all.count == 0 %}
                                         <td><span class="param">Нет ответственных</span>
-                                        {% if can_edit %}
+                                        {% if can_edit or is_main %}
                                         <td class="ra">
                                             <a href="#" class="green" id="assign">Назначить <i class="fa fa-user-plus fa-lg "></i></a>
-                                            {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                            {{ form.responsible_autocomplete|add_class:"hidden" }}
                                         </td>
                                         {% endif %}
                                     {% else %}
                                         <td valign="top"><span class="param">Ответственные:</span></td>
                                         <td align="right">
                                             <table class="usual-letters" border="0">
-                                                {% for assignee in event.assignees.all %}
+                                                {% for responsible in event.responsible.all %}
                                                     <tr>
                                                         <td style="padding-right:5px;">
-                                                            <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}">
-                                                                {% if assignee.avatar.img %}
-                                                                    {% thumbnail assignee.avatar.img "22x22" crop="center" as pic %}
+                                                            <a href="{% url 'accounts:profile' pk=responsible.profile.pk %}">
+                                                                {% if responsible.avatar.img %}
+                                                                    {% thumbnail responsible.avatar.img "22x22" crop="center" as pic %}
                                                                     <img src="{{ pic.url }}" class="avatar">
                                                                     {% endthumbnail %}
                                                                 {% endif %}
                                                             </a>
                                                         </td>
-                                                        <td {% if can_edit %} style="padding-right:5px;" {% endif %}>
-                                                            <a href="{% url 'accounts:profile' pk=assignee.profile.pk %}" id="{{assignee.pk}}" class="assignee">
-                                                                {{ assignee.get_full_name }}
+                                                        <td {% if can_edit or is_main %} style="padding-right:5px;" {% endif %}>
+                                                            <a href="{% url 'accounts:profile' pk=responsible.profile.pk %}" id="{{responsible.pk}}" class="responsible">
+                                                                {{ responsible.get_full_name }}
                                                             </a>
                                                         </td>
-                                                        {% if can_edit %}
+                                                        {% if can_edit or is_main %}
                                                         <td align="right">
-                                                        <a href="#" class="red resign" id="{{assignee.pk}}" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
+                                                        <a href="#" class="red resign" id="{{responsible.pk}}" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
                                                         </td>
                                                         {% endif %}
                                                     </tr>
                                                 {% endfor %}
-                                                {% if can_edit %}
+                                                {% if can_edit or is_main %}
                                                     <tr style="height:20px">
                                                         <td colspan = "2">
-                                                                {{ form.assignees_autocomplete|add_class:"hidden" }}
+                                                                {{ form.responsible_autocomplete|add_class:"hidden" }}
                                                         </td>
                                                         <td align = "right">
                                                                 <a href="#" class="green" id="assign"><i class="fa fa-user-plus fa-lg"></i></a>
@@ -189,7 +163,6 @@
         
                 </div>
                 <div class = "section">
-                    <h5 class="section-name">Задачи</h5>
                     <div class="table-responsive">
                         <table class = "table usual-letters">
                             <tr>

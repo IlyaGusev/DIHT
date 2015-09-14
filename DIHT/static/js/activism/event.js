@@ -74,26 +74,26 @@ $(function() {
 	});
 
 
-	// Assign
+	// Assign responsible
 	$('#assign').click(function() {
-		transfer_class('hidden', '#id_assignees_autocomplete-autocomplete', '#assign');
-		$('#id_assignees_autocomplete-autocomplete').focus();
+		transfer_class('hidden', '#id_responsible_autocomplete-autocomplete', '#assign');
+		$('#id_responsible_autocomplete-autocomplete').focus();
 	})
 
-	$('#id_assignees_autocomplete-autocomplete').blur(function() {
-	    var assignees = get_ids('.assignee');
-        assignees.push($("#id_assignees_autocomplete option:selected" ).val())
-        post_event({'assignees': assignees});
-        transfer_class('hidden', '#assign', '#id_assignees_autocomplete-autocomplete');
+	$('#id_responsible_autocomplete-autocomplete').blur(function() {
+	    var responsible = get_ids('.responsible');
+        responsible.push($("#id_responsible_autocomplete option:selected" ).val())
+        post_event({'responsible': responsible});
+        transfer_class('hidden', '#assign', '#id_responsible_autocomplete-autocomplete');
 	})
 
 
     // Resign
 	$('.resign').click(function() {
 		resign_id = $(this)[0].id;
-		var assignees = get_ids('.assignee');
-        assignees.splice($.inArray(resign_id, assignees), 1);
-        post_event({'assignees': assignees});
+		var responsible = get_ids('.responsible');
+        responsible.splice($.inArray(resign_id, responsible), 1);
+        post_event({'responsible': responsible});
 	})
 
     $(document).ready(function() {

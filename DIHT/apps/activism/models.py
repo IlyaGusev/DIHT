@@ -11,14 +11,14 @@ from django.core.urlresolvers import reverse
 
 
 def upload_to_sector(instance, filename):
-    return 'sectors/%s/%s' % (instance.name, filename)
+    return 'sectors/%s' % filename
 
     
 class Sector(Model):
     name = CharField("Название", max_length=50)
     description = TextField("Описание", blank=True)
     main = ForeignKey(User, verbose_name="Руководитель", blank=True, null=True)
-    photo = ImageField (max_length=1024, blank=True, upload_to=upload_to_sector)
+    photo = ImageField(max_length=1024, blank=True, upload_to=upload_to_sector)
 
     class Meta:
         verbose_name = "Сектор"
@@ -34,11 +34,10 @@ class Event(Model):
         ('open', 'Готовится'),
     )
     name = CharField("Название", max_length=50)
-    creator = ForeignKey(User, verbose_name="Создатель")
     date_created = DateField("Дата создания", default=timezone.now)
     date_held = DateField("Дата проведения", default=timezone.now)
     description = TextField("Описание", blank=True)
-    assignees = ManyToManyField(User, "Ответственные", related_name="events", blank=True)
+    responsible = ManyToManyField(User, "Ответственные", related_name="events", blank=True)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=6)
     sector = ForeignKey(Sector, related_name="events", verbose_name="Сектор", blank=True, null=True)
 
@@ -67,7 +66,7 @@ class Task(Model):
     )
 
     name = CharField("Название", max_length=50)
-    creator = ForeignKey(User, verbose_name="Создатель", related_name="tasks_created")
+    responsible = ManyToManyField(User,  "Ответственные", related_name="tasks_responsible", blank=True)
     event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True, null=True)
     description = TextField("Описание", blank=True)
     tags = TaggableManager(through=TaggedTask, blank=True)
@@ -99,7 +98,7 @@ class Task(Model):
         return super(Task, self).save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.name)+" by "+str(self.creator)
+        return str(self.name)
 
 
 class AssigneeTask(Model):

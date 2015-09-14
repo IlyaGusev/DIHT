@@ -17,7 +17,7 @@
     {% comment %} <!-- Управление статусом задачи -->{% endcomment %}
         <div class = "row">
             <div class="col-md-12" style="padding-left:40px;">
-    {% if can_manage %}
+    {% if can_edit %}
             {% if task.status == 'open' %}
                 <a class="btn btn-default action" id="in_labor"
                    href="{% url 'activism:task_action' pk=task.pk action='in_labor'%}"><i class="fa fa-users"></i> На биржу </a>
@@ -27,10 +27,6 @@
             {% elif task.status == 'resolved'%}
                 <a class="btn btn-default action" id="not_resolved"
                    href="{% url 'activism:task_action' pk=task.pk action='not_resolved'%}"><i class="fa fa-lg fa-exclamation red"></i> Не готово</a>
-            {% endif %}
-            {% if task.status == 'resolved' or task.status == 'in_progress' %}
-                <a class="btn btn-default action" id="close"
-                   href="{% url 'activism:task_action' pk=task.pk action='close'%}"><i class="fa fa-check fa-lg green"></i> Закрыть задачу</a>
             {% endif %}
             {% if task.status == 'open' or task.status == 'in_labor' %}
                 <a class="btn btn-default action confirm {% if task.assignees.all.count < task.number_of_assignees %} disabled {% endif %}"
@@ -44,11 +40,16 @@
                     <i class="fa fa-lg fa-trash-o red"></i> Удалить
                 </a>
             {% endif %}
-    {% elif user in task.assignees.all and task.status == 'in_progress' %}
+    {% endif %}
+        {% if can_resolve %}
                 <a class="btn btn-default action" id="resolve"
                    href="{% url 'activism:task_action' pk=task.pk action='resolved'%}"><i class="fa fa-lg fa-check blue"></i> Готово
                 </a>
-    {% endif %}
+        {% endif %}
+        {% if can_close %}
+            <a class="btn btn-default action" id="close"
+               href="{% url 'activism:task_action' pk=task.pk action='close'%}"><i class="fa fa-check fa-lg green"></i> Закрыть задачу</a>
+        {% endif %}
             {% if task.event %}
                  <a class="btn btn-default pull-right" href="{% url 'activism:event' pk=task.event.pk %}" style="margin-left:3px;">
                      <i class="fa fa-lg fa-arrows blue"></i> К мероприятию
@@ -75,7 +76,7 @@
                                 <span class="param">Мероприятие:</span>
                             </td>
                             <td class="ra">
-                            {% if can_edit %}
+                            {% if can_edit and not is_blocked %}
                                 <span id="event">
                                     {% if task.event %}
                                     <a href="{% url 'activism:event' pk=task.event.pk %}"
@@ -111,20 +112,20 @@
                                 <span class="param">Сектор:</span>
                             </td>
                             <td class="ra">
-                            {% if can_edit %}
+                            {% if can_edit_sector %}
                                 <span id="sector">
                                 {% if task.sector %}
                                     <a href="{% url 'activism:sector' pk=task.sector.pk %}"
                                        id="{{task.sector.pk}}" class="sector-current">{{ task.sector.name }}</a>
                                 {% else %}
-                                    <span id="" class="sector-current">Нет</span>
+                                    <span id="" class="sector-current">Сектор активистов</span>
                                 {% endif %}
                                     <a href="#" class="light"><i class="fa fa-pencil" id="sector-pencil"></i></a>
                                 </span>
                                 <span class="hidden" id="sector-edit">
                                     <select class="selector" id="sector-field">
-                                        {% if is_main or user.is_superuser or is_charge %}
-                                        <option class="selector-item" value="">Нет</option>
+                                        {% if is_main or can_all %}
+                                        <option class="selector-item" value="">Сектор активистов</option>
                                         {% endif %}
                                         {% for sector in sectors %}
                                         <option class="selector-item" value="{{ sector.pk }}">{{ sector.name }}</option>
@@ -136,38 +137,63 @@
                                     {% if task.sector %}
                                         <a href="{% url 'activism:sector' pk=task.sector.pk %}">{{ task.sector.name }}</a>
                                     {% else %}
-                                        <span>Нет</span>
+                                        <span>Сектор активистов</span>
                                     {% endif %}
                                 </span>
                             {% endif %}
                             </td>
                         </tr>
+                        <tr height="10">
+                        </tr>
                         <tr>
-                            <td>
-                                <span class="param">Создатель:</span>
-                            </td>
-                            <td class="ra">
-                            {% if user == task.creator %}
-                                <span class="">
-                                    {% if task.creator.avatar.img %}
-                                        {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
-                                        <img src="{{ pic.url }}" class="avatar">
-                                        {% endthumbnail %}
-                                    {% endif %} 
-                                    {{ task.creator.get_full_name }} 
-                                    <span class="grey">(Это вы)</span>
-                                </span>
+                            {% if task.responsible.all.count == 0 %}
+                                <td valign="top"> <span class="param">Нет ответственных</span> </td>
+                                {% if can_edit %}
+                                <td class="ra">
+                                    <a href="#" class="green" id="assign-responsible">Назначить <i class="fa fa-user-plus fa-lg"></i></a>
+                                    {{ form.responsible_autocomplete|add_class:"hidden" }}
+                                </td>
+                                {% endif %}
                             {% else %}
-                                <a href="{% url 'accounts:profile' pk=task.creator.profile.pk %}" class = "">
-                                    {% if task.creator.avatar.img %}
-                                        {% thumbnail task.creator.avatar.img "22x22" crop="center" as pic %}
-                                        <img src="{{ pic.url }}" class="avatar">
-                                        {% endthumbnail %}
-                                    {% endif %}
-                                    {{ task.creator.get_full_name }}
-                                </a>
+                                <td valign="top"><span class="param">Ответственные:</span></td>
+                                <td align="right">
+                                    <table class="usual-letters" border="0">
+                                        {% for responsible in task.responsible.all %}
+                                            <tr>
+                                                <td style="padding-right:5px;">
+                                                    <a href="{% url 'accounts:profile' pk=responsible.profile.pk %}">
+                                                        {% if responsible.avatar.img %}
+                                                            {% thumbnail responsible.avatar.img "22x22" crop="center" as pic %}
+                                                            <img src="{{ pic.url }}" class="avatar">
+                                                            {% endthumbnail %}
+                                                        {% endif %}
+                                                    </a>
+                                                </td>
+                                                <td {% if can_edit %} style="padding-right:5px;" {% endif %}>
+                                                    <a href="{% url 'accounts:profile' pk=responsible.profile.pk %}" id="{{responsible.pk}}" class="responsible">
+                                                        {{ responsible.get_full_name }}
+                                                    </a>
+                                                </td>
+                                                {% if can_edit %}
+                                                <td align="right">
+                                                <a href="#" class="red resign-responsible" id="{{responsible.pk}}" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
+                                                </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                        {% if can_edit %}
+                                            <tr style="height:20px">
+                                                <td colspan = "2">
+                                                        {{ form.responsible_autocomplete|add_class:"hidden" }}
+                                                </td>
+                                                <td align = "right">
+                                                        <a href="#" class="green" id="assign-responsible"><i class="fa fa-user-plus fa-lg"></i></a>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </table>
+                                </td>
                             {% endif %}
-                            </td>
                         </tr>
                         <tr height="10">
                         </tr>
@@ -200,7 +226,7 @@
                                                         {{ assignee.get_full_name }}
                                                     </a>
                                                 </td>
-                                                {% if can_edit %}
+                                                {% if can_edit and not is_blocked %}
                                                 <td align="right">
                                                 <a href="#" class="red resign" id="{{assignee.pk}}" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
                                                 </td>
@@ -342,11 +368,11 @@
         </div>
         <div class="section">
             <h5 class="section-name">Описание <a href="#" class="light">
-                {% if can_edit_always or can_edit %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
+                {% if can_edit %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
             </a></h5>
             <hr class="just-a-line">
             <span id="description"><span id="description-current">{{ task.description|linebreaksbr }}</span></span>
-            {% if can_edit_always or can_edit %}
+            {% if can_edit %}
             <span class="hidden" id="description-edit">
                 <textarea class="form-control" id="description-field" rows="4">{{ task.description }}</textarea>
             </span>

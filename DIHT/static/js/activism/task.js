@@ -112,6 +112,28 @@ $(function() {
 	})
 
 
+	// Assign responsible
+	$('#assign-responsible').click(function() {
+		transfer_class('hidden', '#id_responsible_autocomplete-autocomplete', '#assign-responsible');
+		$('#id_responsible_autocomplete-autocomplete').focus();
+	})
+
+	$('#id_responsible_autocomplete-autocomplete').blur(function() {
+	    var responsible = get_ids('.responsible');
+        responsible.push($("#id_responsible_autocomplete option:selected" ).val())
+        post_task({'responsible': responsible});
+        transfer_class('hidden', '#assign', '#id_responsible_autocomplete-autocomplete');
+	})
+
+    // Resign responsible
+	$('.resign-responsible').click(function() {
+		resign_id = $(this)[0].id;
+		var responsible = get_ids('.responsible');
+        responsible.splice($.inArray(resign_id, responsible), 1);
+        post_task({'responsible': responsible});
+	})
+
+
 	// Approve
 	$('.approve').click(function() {
 		approve_id = $(this)[0].id;

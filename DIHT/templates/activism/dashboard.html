@@ -112,10 +112,10 @@
                 </div>
             </div>
             {% endif %}
-            {% if tasks_created|length > 0 %}
+            {% if tasks_responsible|length > 0 %}
             <div class="panel panel-default dash-pan">
                 <div class="panel-heading">
-                <span class="fa fa-user fa-fw"></span>&nbsp;Созданные мной
+                <span class="fa fa-user fa-fw"></span>&nbsp;Контролируемые
                 <span class="pull-right">
                     <a class="grey" role="button" data-toggle="collapse" href="#dash-created" aria-expanded="true" aria-controls="dash-created">
                         <i style="margin-top: 5px;" class="drop-controller fa fa-lg fa-caret-down"></i>
@@ -124,7 +124,7 @@
                 </div>
                 <div class="panel-body collapse in" id="dash-created">
                     <table class="usual-letters" border="0" style="width:100%;">
-                    {% for task in tasks_created %}
+                    {% for task in tasks_responsible.all %}
                         <tr>
                         <td style="padding-top:8px;"><a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a></td>
                         {% if task.status == 'closed' %}

@@ -46,12 +46,13 @@ class TaskCreateForm(ModelForm):
 
 class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
     assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
+    responsible_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
     tags = TaggitField(widget=TaggitWidget('TagAutocomplete'), required=False)
 
     class Meta:
         model = Task
         fields = ('hours_predict', 'description', 'datetime_limit',
-                  'candidates', 'number_of_assignees',
+                  'candidates', 'number_of_assignees', 'responsible',
                   'event', 'rejected', 'sector', 'tags')
 
     def __init__(self, *args, **kwargs):
@@ -60,12 +61,21 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
                                                                   [('None', 'None'), ], required=False)
         self.fields['candidates'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
                                                                 [('None', 'None'), ], required=False)
+        self.fields['responsible'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+                                                                 [('None', 'None'), ], required=False)
 
     def clean_assignees_pk(self):
         if self.data.get('assignees_pk') is not None:
             if self.data['assignees_pk'] == 'None':
                 return []
             return self.cleaned_data['assignees_pk']
+        return None
+
+    def clean_responsible(self):
+        if self.data.get('responsible') is not None:
+            if self.data['responsible'] == 'None':
+                return []
+            return self.cleaned_data['responsible']
         return None
 
     def clean_candidates(self):
@@ -86,20 +96,20 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
 
 
 class EventForm(OverwriteOnlyModelFormMixin, ModelForm):
-    assignees_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
+    responsible_autocomplete = ModelChoiceField('UserAutocomplete', required=False)
 
     class Meta:
         model = Event
-        fields = ('description', 'date_held', 'sector', 'assignees')
+        fields = ('description', 'date_held', 'sector', 'responsible')
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
-        self.fields['assignees'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
-                                                                  [('None', 'None'), ], required=False)
+        self.fields['responsible'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+                                                                 [('None', 'None'), ], required=False)
 
-    def clean_assignees(self):
-        if self.data.get('assignees') is not None:
-            if self.data['assignees'] == 'None':
+    def clean_responsible(self):
+        if self.data.get('responsible') is not None:
+            if self.data['responsible'] == 'None':
                 return []
-            return self.cleaned_data['assignees']
+            return self.cleaned_data['responsible']
         return None

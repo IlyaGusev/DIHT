@@ -18,12 +18,12 @@ logger = logging.getLogger('DIHT.custom')
     Mixins
 """
 
-
-class CreatorMixin(SingleObjectMixin):
+class PostAccessMixin(SingleObjectMixin):
     def post(self, request, *args, **kwargs):
-        if request.user == self.get_object().creator or request.user.is_superuser or \
-                (Group.objects.get(name="Ответственные за волонтёров") in request.user.groups.all()):
-                return super(CreatorMixin, self).post(request, args, kwargs)
+        if request.user in self.get_object().responsible.all() or request.user.is_superuser or \
+                (Group.objects.get(name="Ответственные за волонтёров") in request.user.groups.all()) or \
+                (Group.objects.get(name="Руководящая группа") in request.user.groups.all()):
+                return super(PostAccessMixin, self).post(request, args, kwargs)
         else:
             raise PermissionDenied
 
@@ -42,15 +42,17 @@ class DefaultContextMixin(object):
         context['can_manage'] = context['is_charge'] or context['is_superuser']
         if hasattr(self, 'object'):
             obj = self.get_object()
-            context['is_creator'] = (user == obj.creator)
-            context['can_manage'] = context['can_manage'] or context['is_creator']
+            context['is_responsible'] = (user in obj.responsible.all())
+            context['can_manage'] = context['can_manage'] or context['is_responsible']
+            if hasattr(obj, 'sector'):
+                context['can_manage'] = context['can_manage'] or obj.sector.main == user
         return context
 
 
 class JsonCreateMixin(object):
     def form_valid(self, form):
-        form.instance.creator = self.request.user
         result = super(JsonCreateMixin, self).form_valid(form)
+        form.instance.responsible.add(self.request.user)
         return JsonResponse({'url': result.url}, status=200)
 
 
@@ -91,12 +93,12 @@ class EventActionView(SingleObjectMixin, GroupRequiredMixin, LoginRequiredMixin,
         event = self.get_object()
         action = kwargs['action']
         user = request.user
-        is_creator = (user == event.creator)
+        is_responsible = (user in event.responsible.all())
         is_charge = (Group.objects.get(name="Ответственные за волонтёров") in request.user.groups.all())
         can_all = user.is_superuser or is_charge
         tasks_ok = (event.tasks.exclude(status="closed").count() == 0)
 
-        if ((is_creator and tasks_ok) or can_all) and action == "close" and event.status == 'open':
+        if ((is_responsible and tasks_ok) or can_all) and action == "close" and event.status == 'open':
             event.status = 'closed'
             event.save()
             return HttpResponseRedirect(reverse('activism:index'))
@@ -131,24 +133,27 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         action = kwargs['action']
         user = request.user
         is_charge = (Group.objects.get(name="Ответственные за волонтёров") in user.groups.all())
-        is_creator = user == task.creator
+        is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
+        is_responsible = user in task.responsible.all()
         is_assignee = (user in task.assignees.all())
         task_number_ok = (task.assignees.all().count() >= task.number_of_assignees)
         task_status_ok = task.status == 'in_labor' or task.status == 'open'
         can_all = user.is_superuser or is_charge
-        can_manage = is_creator or can_all
+        can_manage = is_responsible or can_all
+        can_close = can_manage and (is_main or can_all)
+        can_resolve = (not can_close) and (can_manage or is_assignee)
 
         table = {'in_labor': {'open': ('in_labor', can_manage)},
                  'in_progress': {'in_labor': ('in_progress', can_manage and task_number_ok),
                                  'open': ('in_progress', can_manage and task_number_ok)},
-                 'resolved': {'in_progress': ('resolved', is_assignee)},
+                 'resolved': {'in_progress': ('resolved', can_resolve)},
                  'not_resolved': {'resolved': ('in_progress', can_manage)},
-                 'close': {'resolved': ('closed', can_manage),
+                 'close': {'resolved': ('closed', can_close),
                            'in_progress': ('closed', can_manage)},
                  'open': {'in_labor': ('open', can_manage)}}
 
         if action == 'prop':
-            if (is_creator and task_status_ok) or can_all:
+            if (is_responsible and task_status_ok) or can_all:
                 if request.POST.get('is_urgent') is not None:
                     task.is_urgent = request.POST['is_urgent']
                 else:
@@ -173,7 +178,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                 raise PermissionDenied
 
         if action == 'delete':
-            if (is_creator and task_status_ok) or can_all:
+            if (is_responsible and task_status_ok) or can_all:
                 task.delete()
                 return JsonResponse({'url': reverse('activism:index')}, status=200)
             else:
@@ -227,7 +232,7 @@ class IndexView(LoginRequiredMixin, DefaultContextMixin, TemplateView):
                          user.tasks_rejected.exclude(status='closed')),
                    key=lambda instance: instance.datetime_limit)
         context['tasks_current'] = user.task_set.filter(status__in=['in_progress', 'resolved']).order_by('datetime_limit')
-        context['tasks_created'] = user.tasks_created.exclude(status='closed')
+        context['tasks_responsible'] = user.tasks_responsible.exclude(status='closed')
         return context
 
 
@@ -244,7 +249,7 @@ class EventsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, Li
         return context
 
 
-class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, DefaultContextMixin, JsonErrorsMixin, UpdateView):
+class EventView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultContextMixin, JsonErrorsMixin, UpdateView):
     model = Event
     template_name = 'activism/event.html'
     form_class = EventForm
@@ -256,13 +261,13 @@ class EventView(LoginRequiredMixin,  GroupRequiredMixin, CreatorMixin, DefaultCo
         event = self.get_object()
         user = self.request.user
         tasks_ok = (event.tasks.all().exclude(status="closed").count() == 0)
-        context['can_close'] = (context['is_creator'] or context['can_all']) and event.status == 'open' and tasks_ok
-        context['can_edit'] = (context['is_creator'] or context['can_all']) and event.status == 'open'
-        context['can_create_tasks'] = user in event.assignees.all()
+        context['can_close'] = (context['is_responsible'] or context['can_all']) and event.status == 'open' and tasks_ok
+        context['can_edit'] = (context['is_responsible'] or context['can_all']) and event.status == 'open'
+        context['can_add_responsible'] = (context['is_main'] or context['can_all']) and event.status == 'open'
         return context
 
 
-class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, DefaultContextMixin, JsonErrorsMixin, UpdateView):
+class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin,  DefaultContextMixin, JsonErrorsMixin, UpdateView):
     model = Task
     template_name = 'activism/task.html'
     form_class = TaskForm
@@ -275,8 +280,13 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, CreatorMixin, DefaultCont
         task = context['task']
         if not context['is_main'] and not context['can_all']:
             context['events'] = user.events.filter(status='open')
-        context['can_edit'] = (context['is_creator'] and (task.status == 'open' or task.status == 'in_labor')) or context['can_all']
-        context['can_edit_always'] = (context['is_creator'] and task.status != 'closed') or context['can_all']
+        context['can_edit'] = context['can_manage'] and task.status != 'closed'
+        context['can_close'] = (context['can_manage']) and (context['is_main'] or context['can_all']) and \
+                               (task.status == 'resolved' or task.status == 'in_progress')
+        context['can_resolve'] = (not context['can_close']) and task.status == 'in_progress' and \
+                                 (context['can_manage'] or user in task.assignees.all())
+        context['is_blocked'] = not (task.status == 'open' or task.status == 'in_labor')
+        context['can_edit_sector'] = context['can_edit'] and (context['is_main'] or context['can_all'])
         context['through'] = task.participants.all()
         return context
 
@@ -324,7 +334,6 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     
     def get_context_data(self, **kwargs):
         context = super(ActivistsView, self).get_context_data(**kwargs)
-        print (context['users'])
         activists = [user for user in list(context['users'].all()) if Group.objects.get(name='Активисты') in user.groups.all()]
         context['users'] = sorted(activists, key=lambda user: user.last_name)
         return context
