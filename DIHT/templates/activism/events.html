@@ -15,13 +15,16 @@
 <div class = "row pagezone">
 	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
         {% for event in events %}
-		<div class="panel panel-primary">
-			<div class="panel-heading dash-panel" role="tab" id="heading{{event.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{event.pk}}" aria-expanded="false" aria-controls="body{{event.pk}}">
+		<div class="panel panel-default">
+			<div class="panel-heading event-pan" role="tab" id="heading{{event.pk}}" data-toggle="collapse" data-parent="#accordion" href="#body{{event.pk}}" aria-expanded="false" aria-controls="body{{event.pk}}">
 				<h4>{{ event.name }}</h4>
 			</div>
 			<div id="body{{event.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{event.id}}">
 				<div class="panel-body">
-					{{ event.description }} <br><br>
+                    <p style = "margin-bottom:10px;" class="light">
+					{% if event.description %}{{ event.description }}
+                    {% else %}Нет описания{% endif %}
+                    </p>
                     <span class="grey">Дата проведения: </span><span>{{ event.date_held }}</span>
                     <a class="pull-right" href="{% url 'activism:event' pk=event.pk %}">Страница мероприятия <i class="fa fa-chevron-right"></i></a>
 				</div>
