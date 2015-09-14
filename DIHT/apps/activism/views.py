@@ -136,10 +136,11 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         is_responsible = user in task.responsible.all()
         is_assignee = (user in task.assignees.all())
+        is_sector_main = (task.sector.main == user)
         task_number_ok = (task.assignees.all().count() >= task.number_of_assignees)
         task_status_ok = task.status == 'in_labor' or task.status == 'open'
         can_all = user.is_superuser or is_charge
-        can_manage = is_responsible or can_all
+        can_manage = is_responsible or can_all or is_sector_main
         can_close = can_manage and (is_main or can_all)
         can_resolve = (not can_close) and (can_manage or is_assignee)
 
@@ -287,6 +288,8 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin,  Default
                                  (context['can_manage'] or user in task.assignees.all())
         context['is_blocked'] = not (task.status == 'open' or task.status == 'in_labor')
         context['can_edit_sector'] = context['can_edit'] and (context['is_main'] or context['can_all'])
+        context['can_edit_event'] = (context['can_edit'] and not context['is_blocked']) or context['can_all']
+        context['can_resign_assignee'] = (context['can_edit'] and not context['is_blocked']) or context['can_all']
         context['through'] = task.participants.all()
         return context
 

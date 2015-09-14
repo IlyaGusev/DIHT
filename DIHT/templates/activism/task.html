@@ -76,7 +76,7 @@
                                 <span class="param">Мероприятие:</span>
                             </td>
                             <td class="ra">
-                            {% if can_edit and not is_blocked %}
+                            {% if can_edit_event  %}
                                 <span id="event">
                                     {% if task.event %}
                                     <a href="{% url 'activism:event' pk=task.event.pk %}"
@@ -226,7 +226,7 @@
                                                         {{ assignee.get_full_name }}
                                                     </a>
                                                 </td>
-                                                {% if can_edit and not is_blocked %}
+                                                {% if can_resign_assignee %}
                                                 <td align="right">
                                                 <a href="#" class="red resign" id="{{assignee.pk}}" data-toggle="tooltip" data-placement="left" title="Снять с задачи"><i class="fa fa-user-times fa-lg"></i></a>
                                                 </td>
