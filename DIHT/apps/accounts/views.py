@@ -11,12 +11,18 @@ from django.http import HttpResponseRedirect
 from braces.views import LoginRequiredMixin, UserPassesTestMixin, GroupRequiredMixin
 from django.utils import timezone
 from itertools import chain
-from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, MoneyForm
+from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, MoneyForm, ChangePasswordForm
 from accounts.models import Profile, Avatar, MoneyOperation
 from washing.models import BlackListRecord
 
 import logging
 logger = logging.getLogger('DIHT.custom')
+
+
+class JsonErrorsMixin(object):
+    def form_invalid(self, form):
+        super(JsonErrorsMixin, self).form_invalid(form)
+        return JsonResponse(form.errors, status=400)
 
 
 class SignUpView(FormView):
@@ -104,7 +110,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
         return context
 
 
-class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin, UpdateView):
     model = Profile
     form_class = ProfileForm
     template_name = "accounts/edit_profile.html"
@@ -112,11 +118,7 @@ class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     raise_exception = True
 
     def test_func(self, user):
-        return self.get_object().user.id == user.id
-
-    def form_invalid(self, form):
-        super(ProfileUpdateView, self).form_invalid(form)
-        return JsonResponse(form.errors, status=400)
+        return self.get_object().user == user
 
 
 class AvatarUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -125,7 +127,7 @@ class AvatarUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('main:home')
 
     def test_func(self, user):
-        return self.get_object().user.id == user.id
+        return self.get_object().user == user
 
 
 class SignUpOkView(TemplateView):
@@ -229,11 +231,14 @@ class MoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, ListView):
         return context
 
 
-class UserMoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
+class UserMoneyHistoryView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Profile
-    group_required = 'Ответственные за финансы'
     context_object_name = 'profile'
     template_name = "accounts/money_history.html"
+
+    def test_func(self, user):
+        return (user == self.get_object().user) or user.is_superuser or \
+               (Group.objects.get(name='Ответственные за финансы') in user.groups.all())
 
     def get_context_data(self, **kwargs):
         context = super(UserMoneyHistoryView, self).get_context_data(**kwargs)
@@ -242,3 +247,18 @@ class UserMoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
                          self.get_object().user.moderated_operations.all()),
                    key=lambda instance: instance.timestamp, reverse=True)
         return context
+
+
+class ChangePasswordView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin, UpdateView):
+    model = User
+    form_class = ChangePasswordForm
+    template_name = "accounts/change_password.html"
+    success_url = reverse_lazy("main:home")
+
+    def test_func(self, user):
+        return (user == self.get_object()) or user.is_superuser
+
+    def form_valid(self, form):
+        super(ChangePasswordView, self).form_valid(form)
+        return JsonResponse({'url': reverse('accounts:profile', kwargs={'pk': self.get_object().profile.pk})},
+                            status=200)

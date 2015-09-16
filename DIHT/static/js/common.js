@@ -16,10 +16,9 @@ $(function() {
         return false;
     });
 
-    $('#form-modal').on('submit', '.find-form', function(ev) {
+    $('#form-modal').on('submit', '.find-form,.password-form', function(ev) {
         ev.preventDefault();
         var form = $(this);
-        console.log(form.serialize())
         $.ajax({
             type: form.attr('method'),
             url: form.attr('action'),

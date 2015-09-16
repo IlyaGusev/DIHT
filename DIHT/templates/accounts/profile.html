@@ -54,29 +54,39 @@
     </div>
 </div>
 <br>
-{% if user|has_group:'Ответственные за работу с пользователями' or user|has_group:'Ответственные за финансы' or user.is_superuser %}
+
 <div class="row">
     <div class = "col-md-offset-3 col-md-6">
+        {% if user|has_group:'Ответственные за финансы' or user.is_superuser or profile.user == request.user %}
+        <span class="param">Деньги: {{profile.money}}</span>
         {% if user|has_group:'Ответственные за финансы' or user.is_superuser %}
-        <span class="param">Деньги: {{profile.money}}
+        <span>
             <a href="{% url 'accounts:add_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-plus green"></i></a>
             <a href="{% url 'accounts:remove_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-minus red"></i></a>
         </span>
+        {% endif %}
         <span class="param">
             <a href="{% url 'accounts:history_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-book blue"></i></a>
         </span>
         {% endif %}
         {% if user|has_group:'Ответственные за работу с пользователями' or user.is_superuser %}
             {% if profile.user.is_active %}
-            <span class="pull-right"> <a href="{% url 'accounts:activate' pk=profile.user.pk %}" class="btn btn-default red"> Заблокировать </a></span>
+            <span class="pull-right"> <a href="{% url 'accounts:activate' pk=profile.user.pk %}" class="btn btn-default btn-sm red"> Заблокировать </a></span>
             {% else %}
-            <span class="pull-right"> <a href="{% url 'accounts:activate' pk=profile.user.pk %}" class="btn btn-default green"> Активировать </a></span>
+            <span class="pull-right"> <a href="{% url 'accounts:activate' pk=profile.user.pk %}" class="btn btn-default btn-sm green"> Активировать </a></span>
             {% endif %}
+        {% endif %}
+        {% if profile.user == request.user %}
+            <span class="pull-right">
+                <a href="{% url 'accounts:change_password' pk=profile.user.pk %}"
+                   class="btn btn-default btn-sm" data-target="#form-modal">
+                    Поменять пароль
+                </a>
+            </span>
         {% endif %}
     </div>
 </div>
 <br>
-{% endif %}
 <div class="row">
     <div class = "tabs">
         <ul class = "nav nav-tabs col-md-offset-3 col-md-6">

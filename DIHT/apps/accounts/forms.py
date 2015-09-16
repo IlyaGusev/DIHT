@@ -1,8 +1,9 @@
 import re
+import autocomplete_light
 from django.forms import ValidationError, ModelForm, Form, CharField, PasswordInput, TextInput, TypedChoiceField, IntegerField
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
-import autocomplete_light
+from django.contrib.auth.hashers import make_password
 from accounts.models import Profile
 
 
@@ -146,6 +147,39 @@ class ResetPasswordForm(Form):
         if User.objects.all().filter(username=self.cleaned_data['username']).count() != 1:
             raise ValidationError(u'Некорректный логин')
         return self.cleaned_data['username']
+
+
+class ChangePasswordForm(ModelForm):
+    """
+    Форма изменения данных.
+    """
+
+    old_password = CharField(widget=PasswordInput(), label="Старый пароль")
+    password = CharField(widget=PasswordInput(), label="Новый пароль")
+    password_repeat = CharField(widget=PasswordInput(), label="Повторите новый пароль")
+
+    class Meta:
+        model = User
+        fields = ('old_password', 'password', 'password_repeat')
+
+    def clean_old_password(self):
+        data = self.cleaned_data['old_password']
+        if not self.instance.check_password(data):
+            raise ValidationError("Старый пароль неправильный")
+        return data
+
+    def clean_password(self):
+        l = len(self.cleaned_data['password'])
+        if l <= 5 or l >= 30:
+            raise ValidationError(_('Слишком маленький или слишком большой пароль'))
+        return make_password(self.cleaned_data['password'])
+
+    def clean_password_repeat(self):
+        pass1 = self.data['password']
+        pass2 = self.data['password_repeat']
+        if pass1 != pass2:
+            raise ValidationError("Пароли не совпадают")
+        return pass2
 
 
 class FindForm(Form):
