@@ -1,7 +1,7 @@
 $(function() {
-    var fields = ['description', 'hours_predict', 'number_of_assignees', 'datetime_limit', 'event', 'sector'];
+    var fields = ['description', 'hours_predict', 'number_of_assignees', 'datetime_limit', 'event', 'sector', 'name'];
     var select_fields = ['event', 'sector'];
-    var ajax_fields = ['description',  'hours_predict', 'number_of_assignees'];
+    var ajax_fields = ['description',  'hours_predict', 'number_of_assignees', 'name'];
 
     function transfer_class(attr, elem2, elem1){
         $(elem1).addClass(attr);

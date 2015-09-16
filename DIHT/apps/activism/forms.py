@@ -52,7 +52,7 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
         model = Task
         fields = ('hours_predict', 'description', 'datetime_limit',
                   'candidates', 'number_of_assignees',
-                  'event', 'rejected', 'sector', 'tags')
+                  'event', 'rejected', 'sector', 'tags', 'name')
 
     def __init__(self, *args, **kwargs):
         super(TaskForm, self).__init__(*args, **kwargs)
