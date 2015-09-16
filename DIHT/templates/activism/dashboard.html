@@ -179,7 +179,12 @@
                                     <span class="sector-label grey"><i class='fa fa-lg fa-circle'></i></span>
                                     {% endif %}
                                 </td>
-                                <td align="left"><span class="bigger-letters">{{ task.name }}</span></td>
+                                <td align="left"><span class="bigger-letters">{{ task.name }}
+                                    {% if user in task.responsible.all and task.candidates.all|length > 0 %}
+                                    <i class="fa fa-thumbs-o-up green"></i>
+                                    {% endif %}
+                                    </span>
+                                </td>
                                 <td class="ra"><span class="grey">{% if task.event %}{{task.event}}{% else %}Без мероприятия{% endif %}</span></td>
                             </tr>
                             </tbody>
