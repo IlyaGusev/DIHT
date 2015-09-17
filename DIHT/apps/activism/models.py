@@ -37,7 +37,7 @@ class Event(Model):
     date_created = DateField("Дата создания", default=timezone.now)
     date_held = DateField("Дата проведения", default=timezone.now)
     description = TextField("Описание", blank=True)
-    responsible = ManyToManyField(User, "Ответственные", related_name="events", blank=True)
+    responsible = ManyToManyField(User, verbose_name="Ответственные", related_name="events", blank=True)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=6)
     sector = ForeignKey(Sector, related_name="events", verbose_name="Сектор", blank=True, null=True)
 
@@ -66,7 +66,7 @@ class Task(Model):
     )
 
     name = CharField("Название", max_length=50)
-    responsible = ManyToManyField(User,  "Ответственные", related_name="tasks_responsible", blank=True)
+    responsible = ManyToManyField(User,  verbose_name="Ответственные", related_name="tasks_responsible", blank=True)
     event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True, null=True)
     description = TextField("Описание", blank=True)
     tags = TaggableManager(through=TaggedTask, blank=True)
@@ -74,11 +74,11 @@ class Task(Model):
                                validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
                                blank=False, null=False)
     number_of_assignees = PositiveSmallIntegerField("Количество людей", blank=False, null=False)
-    candidates = ManyToManyField(User, "Кандидаты", related_name="tasks_approve", blank=True)
-    assignees = ManyToManyField(User, "Назначенные", through="AssigneeTask", blank=True)
-    rejected = ManyToManyField(User, "Отклоненные", related_name="tasks_rejected", blank=True)
+    candidates = ManyToManyField(User, verbose_name="Кандидаты", related_name="tasks_approve", blank=True)
+    assignees = ManyToManyField(User, verbose_name="Назначенные", through="AssigneeTask", blank=True)
+    rejected = ManyToManyField(User, verbose_name="Отклоненные", related_name="tasks_rejected", blank=True)
     datetime_created = DateTimeField("Время создания", default=timezone.now)
-    datetime_limit = DateTimeField("До какого времени надо сделать", default=timezone.now)
+    datetime_limit = DateTimeField("Сроки", default=timezone.now)
     datetime_closed = DateTimeField("Время закрытия", blank=True, null=True)
     datetime_last_modified = DateTimeField("Время последнего изменения", default=timezone.now)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=15)

@@ -55,13 +55,18 @@
                      <i class="fa fa-lg fa-arrows blue"></i> К мероприятию
                  </a>
             {% endif %}
+                <a class="btn btn-default pull-right" id="log" style="margin-left:3px;"
+                   href="{% url 'activism:task_log' pk=task.pk %}"
+                   data-target="#form-modal">
+                    <i class="fa fa-lg fa-book grey"></i> История
+                </a>
             {% if task.status == 'in_labor' and user not in task.candidates.all and user not in task.assignees.all and user not in task.rejected.all %}
                 <a class="btn btn-default pull-right action" href="{% url 'activism:task_action' pk=task.pk action='do' %}">
                     <i class="fa fa-lg fa-user green"></i> Хочу выполнить!
                 </a>
             {% endif %}
+            </div>
         </div>
-    </div>
 
     {% comment %} <!-- Управление задачей -->{% endcomment %}
     <div class = "col-md-8">

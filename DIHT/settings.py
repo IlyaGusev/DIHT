@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'autocomplete_light',
     'sorl.thumbnail',
     'social.apps.django_app.default',
+    'reversion',
     'main',
     'accounts',
     'washing',
@@ -49,6 +50,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'reversion.middleware.RevisionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

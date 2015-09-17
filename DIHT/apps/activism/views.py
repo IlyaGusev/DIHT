@@ -9,6 +9,7 @@ from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect, JsonResponse
 from django.utils import timezone
 from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
+from reversion import get_for_object, get_for_object_reference
 from activism.models import Event, Task, AssigneeTask, Sector
 from activism.forms import TaskForm, EventForm, TaskCreateForm
 
@@ -333,10 +334,66 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     template_name = 'activism/activists.html'
     group_required = "Активисты"
     raise_exception = True
-    context_object_name = 'users'
     
     def get_context_data(self, **kwargs):
         context = super(ActivistsView, self).get_context_data(**kwargs)
         activists = [user for user in list(context['users'].all()) if Group.objects.get(name='Активисты') in user.groups.all()]
         context['users'] = sorted(activists, key=lambda user: user.last_name)
+        return context
+
+
+def dict_diff(first, second):
+    diff = {}
+    for key in first.keys():
+        if first[key] != second[key]:
+            diff[key] = (first[key], second[key])
+    return diff
+
+
+def get_full_names(pks):
+    return [user.get_full_name() for user in User.objects.filter(pk__in=pks)]
+
+
+def get_through_pks(version):
+    return [through.field_dict['user'] for through in version.revision.version_set.all().filter(content_type=27)]
+
+
+class TaskLogView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
+    model = Task
+    template_name = 'activism/task_log.html'
+    group_required = "Активисты"
+    raise_exception = True
+
+    def get_context_data(self, **kwargs):
+        context = super(TaskLogView, self).get_context_data(**kwargs)
+        version_list = get_for_object(self.get_object())
+        records = []
+        for index in range(len(version_list)):
+            actions = []
+            version = version_list[index]
+            if index == len(version_list)-1:
+                actions.append({'name': 'Начальное состояние', 'flag': True})
+            else:
+                prev_version = version_list[index+1]
+                diff = dict_diff(prev_version.field_dict, version.field_dict)
+                for key in diff.keys():
+                    if key not in ['datetime_last_modified', ]:
+                        name = str(Task._meta.get_field(key).verbose_name)
+                        if key in ['candidates', 'responsible']:
+                            old = ', '.join(get_full_names(diff[key][0]))
+                            new = ', '.join(get_full_names(diff[key][1]))
+                        else:
+                            old = str(diff[key][0])
+                            new = str(diff[key][1])
+                        actions.append({'name': name, 'old': old, 'new': new})
+                if len(prev_version.revision.version_set.all()) != len(version.revision.version_set.all()):
+                    name = "Исполнители"
+                    old = ', '.join(get_full_names(get_through_pks(prev_version)))
+                    new = ', '.join(get_full_names(get_through_pks(version)))
+                    actions.append({'name': name, 'old': old, 'new': new})
+
+            records.append({'user': version.revision.user,
+                            'date': version.field_dict['datetime_last_modified'],
+                            'actions': actions})
+        context['records'] = records
         return context

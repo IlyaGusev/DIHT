@@ -1,0 +1,33 @@
+{% load add_class %}
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3>История задачи</h3>
+</div>
+<div class="modal-body">
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <tr>
+                <th>Пользователь</th>
+                <th>Дата</th>
+                <th>Действие</th>
+            </tr>
+            {% for record in records %}
+            <tr>
+                <td>{{record.user.get_full_name}}</td>
+                <td>{{record.date}}</td>
+                <td>{% for action in record.actions %}
+                    <p class="blue">{{action.name}}{% if not action.flag %}:{% endif %}</p>
+                    {% if not action.flag %}
+                    <p><span class="red">></span> {{action.old}}</p>
+                    <p><span class="green">></span> {{action.new}}</p>
+                    {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+<div class="modal-footer">
+   <a href="#" class="btn btn-danger" data-dismiss="modal">Закрыть</a>
+</div>
