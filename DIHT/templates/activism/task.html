@@ -11,7 +11,19 @@
 {% endblock %}
 {% block content %}
 <div class="row well namezone">
-    <h3 class="task-name nametext"> {{ task.name }}</h3>
+    {% if can_edit %}
+    <span id="name">
+        <h3 class="task-name nametext">
+            <span id="name-current">{{ task.name }}</span>
+            <a href="#" class="light"><i class="fa fa-pencil" id="name-pencil"></i></a>
+        </h3>
+    </span>
+    <span id="name-edit" class="hidden">
+        <input id="name-field" type="text" value="{{ task.name }}">
+    </span>
+    {% else %}
+    <h3 class="task-name nametext">{{ task.name }}</h3>
+    {% endif %}
 </div>
 <div class = "row pagezone">
     {% comment %} <!-- Управление статусом задачи -->{% endcomment %}

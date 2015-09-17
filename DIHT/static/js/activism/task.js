@@ -1,7 +1,7 @@
 $(function() {
-    var fields = ['description', 'hours_predict', 'number_of_assignees', 'datetime_limit', 'event', 'sector'];
+    var fields = ['description', 'hours_predict', 'number_of_assignees', 'datetime_limit', 'event', 'sector', 'name'];
     var select_fields = ['event', 'sector'];
-    var ajax_fields = ['description',  'hours_predict', 'number_of_assignees'];
+    var ajax_fields = ['description',  'hours_predict', 'number_of_assignees', 'name'];
 
     function transfer_class(attr, elem2, elem1){
         $(elem1).addClass(attr);
@@ -32,7 +32,6 @@ $(function() {
         if ('datetime_limit' in dict)
             dict['datetime_limit'] = dict['datetime_limit'].replace('T', ' ');
         dict = dict_remove_empty(dict);
-        console.log(dict['description'])
         $.ajax({
             type: 'POST',
             url: window.location.href,
