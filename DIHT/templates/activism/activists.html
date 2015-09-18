@@ -14,18 +14,30 @@
     <h3 class="task-name nametext"> Активисты </h3>
 </div>
 <div class = "row pagezone">
-    <table>
+    <table class="table table-bordered">
     {% for user in users %}
         <tr>
             <td style = "padding: 1px 10px;">
-                {% if user.avatar.img %}
-                    {% thumbnail user.avatar.img "25x25" crop="center" as pic %}
+                {% if user.0.avatar.img %}
+                    {% thumbnail user.0.avatar.img "25x25" crop="center" as pic %}
                     <a href = "{% url 'accounts:profile' pk=user.profile.pk %}"><img src="{{ pic.url }}" class="avatar"></a>
                     {% endthumbnail %}
                 {% endif %}
+
+                <a href = "{% url 'accounts:profile' pk=user.profile.pk %}">{{user.0.last_name}} {{user.0.first_name}} {{user.0.profile.middle_name}}</a>
             </td>
             <td>
-                <a href = "{% url 'accounts:profile' pk=user.profile.pk %}">{{user.last_name}} {{user.first_name}} {{user.profile.middle_name}}</a>
+                <table width="100%">
+                {% for through in user.1 %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'activism:task' pk=through.task.pk %}">{{through.task.name}}</a>
+                            </td>
+                            <td align="right">{{ through.hours|stringformat:'.2f' }}</td>
+                        </tr>
+                {% endfor %}
+                    <tr><td>Итог: </td><td align="right" class="big-letters blue">{{user.2|stringformat:'.2f'}}</td></tr>
+                 </table>
             </td>
         </tr>
     {% endfor %}

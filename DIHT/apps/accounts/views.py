@@ -101,6 +101,8 @@ class ProfileView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
         user = self.get_object().user
+        is_charge = Group.objects.get(name="Ответственные за активистов") in self.request.user.groups.all()
+        is_activist = Group.objects.get(name="Активисты").user_set.all() in self.request.user.groups.all()
         context['records'] = user.records.filter(datetime_to__gte=timezone.now()).order_by('-datetime_to').reverse()
         context['task_hours'] = user.participated.filter(task__status__in=['closed', 'resolved'])
         if user.social_auth.filter(provider='vk-oauth2').exists():
@@ -113,6 +115,8 @@ class ProfileView(LoginRequiredMixin, DetailView):
                 context['grade'] = 'Выпускник/Аспирант'
             else:
                 context['grade'] = str(grade)+' курс'
+        context['can_view_tasks'] = (self.request.user == user and is_activist) or self.request.user.is_superuser or is_charge
+
         return context
 
 

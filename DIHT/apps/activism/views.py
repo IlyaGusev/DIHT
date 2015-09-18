@@ -22,7 +22,7 @@ logger = logging.getLogger('DIHT.custom')
 class PostAccessMixin(SingleObjectMixin):
     def post(self, request, *args, **kwargs):
         if request.user in self.get_object().responsible.all() or request.user.is_superuser or \
-                (Group.objects.get(name="Ответственные за волонтёров") in request.user.groups.all()) or \
+                (Group.objects.get(name="Ответственные за активистов") in request.user.groups.all()) or \
                 (Group.objects.get(name="Руководящая группа") in request.user.groups.all()):
                 return super(PostAccessMixin, self).post(request, args, kwargs)
         else:
@@ -34,7 +34,7 @@ class DefaultContextMixin(object):
         context = super(DefaultContextMixin, self).get_context_data(**kwargs)
         user = self.request.user
         context['is_superuser'] = user.is_superuser
-        context['is_charge'] = Group.objects.get(name="Ответственные за волонтёров") in user.groups.all()
+        context['is_charge'] = Group.objects.get(name="Ответственные за активистов") in user.groups.all()
         context['is_main'] = Group.objects.get(name="Руководящая группа") in user.groups.all()
         context['can_all'] = context['is_charge'] or context['is_superuser']
         context['events'] = Event.objects.all()
@@ -81,7 +81,7 @@ class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonCreateMixin, J
     model = Event
     template_name = 'activism/event_create.html'
     fields = ('name', 'sector')
-    group_required = ["Руководящая группа", "Ответственные за волонтёров"]
+    group_required = ["Руководящая группа", "Ответственные за активистов"]
     raise_exception = True
 
 
@@ -95,7 +95,7 @@ class EventActionView(SingleObjectMixin, GroupRequiredMixin, LoginRequiredMixin,
         action = kwargs['action']
         user = request.user
         is_responsible = (user in event.responsible.all())
-        is_charge = (Group.objects.get(name="Ответственные за волонтёров") in request.user.groups.all())
+        is_charge = (Group.objects.get(name="Ответственные за активистов") in request.user.groups.all())
         can_all = user.is_superuser or is_charge
         tasks_ok = (event.tasks.exclude(status="closed").count() == 0)
 
@@ -114,7 +114,7 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, JsonCreateMixin, J
     raise_exception = True
 
     def test_func(self, user):
-        is_charge = Group.objects.get(name="Ответственные за волонтёров") in user.groups.all()
+        is_charge = Group.objects.get(name="Ответственные за активистов") in user.groups.all()
         is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         return user.events.count() != 0 or is_main or user.is_superuser or is_charge
 
@@ -133,7 +133,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         task = self.get_object()
         action = kwargs['action']
         user = request.user
-        is_charge = (Group.objects.get(name="Ответственные за волонтёров") in user.groups.all())
+        is_charge = (Group.objects.get(name="Ответственные за активистов") in user.groups.all())
         is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         is_responsible = user in task.responsible.all()
         is_assignee = (user in task.assignees.all())
@@ -298,7 +298,7 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin,  Default
     def form_valid(self, form):
         task = self.get_object()
         user = self.request.user
-        is_charge = (Group.objects.get(name="Ответственные за волонтёров") in user.groups.all())
+        is_charge = (Group.objects.get(name="Ответственные за активистов") in user.groups.all())
         is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         if hasattr(form.cleaned_data, 'event'):
             if not is_main and not user.is_superuser and not is_charge:
@@ -320,7 +320,7 @@ class SectorView(LoginRequiredMixin, DetailView):
 class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     model = Task
     template_name = 'activism/closed.html'
-    group_required = "Ответственные за волонтёров"
+    group_required = "Ответственные за активистов"
     raise_exception = True
     context_object_name = 'tasks'
     
@@ -333,13 +333,18 @@ class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
 class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     model = User
     template_name = 'activism/activists.html'
-    group_required = "Активисты"
+    group_required = "Ответственные за активистов"
+    context_object_name = 'users'
     raise_exception = True
     
     def get_context_data(self, **kwargs):
         context = super(ActivistsView, self).get_context_data(**kwargs)
-        activists = [user for user in list(context['users'].all()) if Group.objects.get(name='Активисты') in user.groups.all()]
-        context['users'] = sorted(activists, key=lambda user: user.last_name)
+        activists = sorted([user for user in Group.objects.get(name='Активисты').user_set.all()], key=lambda user: user.last_name)
+
+        context['users'] = [(user,
+                             user.participated.filter(task__status__in=['closed']),
+                             sum(user.participated.filter(task__status__in=['closed']).values_list('hours', flat=True)))
+                            for user in activists]
         return context
 
 

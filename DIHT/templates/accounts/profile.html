@@ -91,7 +91,7 @@
     <div class = "tabs">
         <ul class = "nav nav-tabs col-md-offset-3 col-md-6">
             <li class = "active"><a href="#tab-acc" data-toggle="tab">Контакты</a></li>
-            {% if profile.user == request.user and profile.user|has_group:'Активисты' %}
+            {% if can_view_tasks %}
             <li><a href="#tab-tsk" data-toggle="tab">Задачи</a></li>
             {% endif %}
             {% if profile.user|has_group:'Активисты' %}
@@ -137,7 +137,7 @@
                 </div>
                 {% endif %}
             </div>
-            {% if profile.user == request.user and profile.user|has_group:'Активисты'%}
+            {% if can_view_tasks %}
             <div class="tab-pane" id="tab-tsk">
                 <h5>Текущие задачи</h5>
                 <table class = "table usual-letters">
