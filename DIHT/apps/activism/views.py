@@ -46,7 +46,8 @@ class DefaultContextMixin(object):
             context['is_responsible'] = (user in obj.responsible.all())
             context['can_manage'] = context['can_manage'] or context['is_responsible']
             if hasattr(obj, 'sector'):
-                context['can_manage'] = context['can_manage'] or obj.sector.main == user
+                if obj.sector is not None:
+                    context['can_manage'] = context['can_manage'] or obj.sector.main == user
         return context
 
 
@@ -137,7 +138,9 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         is_responsible = user in task.responsible.all()
         is_assignee = (user in task.assignees.all())
-        is_sector_main = (task.sector.main == user)
+        is_sector_main = False
+        if task.sector is not None:
+            is_sector_main = (task.sector.main == user)
         task_number_ok = (task.assignees.all().count() >= task.number_of_assignees)
         task_status_ok = task.status == 'in_labor' or task.status == 'open'
         can_all = user.is_superuser or is_charge
@@ -151,7 +154,8 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                  'resolved': {'in_progress': ('resolved', can_resolve)},
                  'not_resolved': {'resolved': ('in_progress', can_manage)},
                  'close': {'resolved': ('closed', can_close),
-                           'in_progress': ('closed', can_manage)},
+                           'in_progress': ('closed', can_manage),
+                           'closed': ('closed', can_close)},
                  'open': {'in_labor': ('open', can_manage)}}
 
         if action == 'prop':
@@ -284,13 +288,14 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin,  Default
         if not context['is_main'] and not context['can_all']:
             context['events'] = user.events.filter(status='open')
         context['can_edit'] = context['can_manage'] and task.status != 'closed'
-        context['can_close'] = (context['can_manage']) and (context['is_main'] or context['can_all']) and \
-                               (task.status == 'resolved' or task.status == 'in_progress')
+        context['can_close'] = ((context['can_manage']) and (context['is_main'] or context['can_all']) and \
+                                (task.status == 'resolved' or task.status == 'in_progress')) or \
+                               (task.status == 'closed' and context['can_all'])
         context['can_resolve'] = (not context['can_close']) and task.status == 'in_progress' and \
                                  (context['can_manage'] or user in task.assignees.all())
         context['is_blocked'] = not (task.status == 'open' or task.status == 'in_labor')
         context['can_edit_sector'] = context['can_edit'] and (context['is_main'] or context['can_all'])
-        context['can_edit_event'] = (context['can_edit'] and not context['is_blocked']) or context['can_all']
+        context['can_edit_event'] = (context['can_edit'] and not context['is_blocked'])
         context['can_resign_assignee'] = (context['can_edit'] and not context['is_blocked']) or context['can_all']
         context['through'] = task.participants.all()
         return context
