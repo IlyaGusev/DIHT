@@ -1,3 +1,6 @@
+import os
+from DIHT.settings import BASE_DIR
+from django.core.files import File
 from django.views.generic.edit import FormView, UpdateView
 from django.views.generic import DetailView, View, TemplateView, ListView
 from django.contrib.auth.models import User, Group
@@ -52,7 +55,10 @@ class SignUpView(FormView):
                                sex=form['sex'])
 
         BlackListRecord.objects.create(user=user, is_blocked=False)
-        Avatar.objects.create(user=user)
+        avatar = Avatar.objects.create(user=user)
+        with open(os.path.join(BASE_DIR, 'DIHT/static/img/standart_avatar.png'), 'rb') as img_file:
+            avatar.img.save("avatar", File(img_file), save=True)
+        avatar.save()
         user.is_active = False
         user.save()
         # logger.info('Пользователь '+str(form['first_name'])+' '+str(form['last_name'])+' ('+str(form['username'])+') только что зарегистрировался на сайте.')
