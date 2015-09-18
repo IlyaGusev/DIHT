@@ -20,9 +20,9 @@ class Parameters(Model):
         verbose_name_plural = "Наборы параметров"
 
     def __str__(self):
-        return 'Цена: '+str(self.price)+\
-               '; Промежуток: '+str(self.delta_hour) + '-' + str(self.delta_minute) + \
-               '; Начало: '+str(self.start_hour) + '-' + str(self.start_minute)
+        return 'Цена: ' + str(self.price) + \
+               '; Промежуток: ' + str(self.delta_hour) + '-' + str(self.delta_minute) + \
+               '; Начало: ' + str(self.start_hour) + '-' + str(self.start_minute)
 
 
 class WashingMachine(Model):
@@ -56,7 +56,7 @@ class WashingMachineRecord(Model):
         self.delete()
 
     def __str__(self):
-        return str(self.machine)+'; '+str(self.user.last_name) + '; ' + str(self.datetime_from)
+        return str(self.machine) + '; ' + str(self.user.last_name) + '; ' + str(self.datetime_from)
 
 
 class RegularNonWorkingDay(Model):
@@ -68,7 +68,7 @@ class RegularNonWorkingDay(Model):
         verbose_name_plural = "регулярные нерабочие дни"
 
     def __str__(self):
-        return str(self.machine)+'; '+str(self.day_of_week)
+        return str(self.machine) + '; ' + str(self.day_of_week)
 
 
 class NonWorkingDay(Model):
@@ -80,7 +80,7 @@ class NonWorkingDay(Model):
         verbose_name_plural = "Нерабочие дни"
 
     def __str__(self):
-        return str(self.machine)+'; '+str(self.date)
+        return str(self.machine) + '; ' + str(self.date)
 
 
 class BlackListRecord(Model):

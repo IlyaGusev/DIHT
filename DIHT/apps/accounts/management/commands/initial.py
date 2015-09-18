@@ -6,6 +6,7 @@ from django.core.files import File
 import os
 from DIHT.settings import BASE_DIR
 
+
 class Command(BaseCommand):
     help = 'Fills empty models'
 

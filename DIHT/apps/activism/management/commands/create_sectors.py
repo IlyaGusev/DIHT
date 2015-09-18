@@ -4,6 +4,7 @@ from activism.models import Sector
 import logging
 logger = logging.getLogger('DIHT.custom')
 
+
 class Command(BaseCommand):
     help = 'Creates sectors'
 
@@ -13,8 +14,7 @@ class Command(BaseCommand):
                    'Отдел по работе с абитуриентами',
                    'Хозяйственный сектор',
                    'Кураторский сектор',
-                   'Информационный сектор',
-        ]
+                   'Информационный сектор']
         for name in sectors:
             Sector.objects.get_or_create(name=name)
         print("Done")

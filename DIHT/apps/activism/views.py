@@ -19,6 +19,7 @@ logger = logging.getLogger('DIHT.custom')
     Mixins
 """
 
+
 class PostAccessMixin(SingleObjectMixin):
     def post(self, request, *args, **kwargs):
         if request.user in self.get_object().responsible.all() or request.user.is_superuser or \
@@ -196,7 +197,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                 if init[task.status][1]:
                     if action == 'resolved' or action == 'close':
                         for user in task.assignees.all():
-                            user_hours = request.POST['hours_'+str(user.pk)]
+                            user_hours = request.POST['hours_' + str(user.pk)]
                             through = task.participants.get(user=user)
                             through.hours = user_hours
                             if action == 'close':
@@ -274,7 +275,7 @@ class EventView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, Default
         return context
 
 
-class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin,  DefaultContextMixin, JsonErrorsMixin, UpdateView):
+class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultContextMixin, JsonErrorsMixin, UpdateView):
     model = Task
     template_name = 'activism/task.html'
     form_class = TaskForm
@@ -288,7 +289,7 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin,  Default
         if not context['is_main'] and not context['can_all']:
             context['events'] = user.events.filter(status='open')
         context['can_edit'] = context['can_manage'] and task.status != 'closed'
-        context['can_close'] = ((context['can_manage']) and (context['is_main'] or context['can_all']) and \
+        context['can_close'] = ((context['can_manage']) and (context['is_main'] or context['can_all']) and
                                 (task.status == 'resolved' or task.status == 'in_progress')) or \
                                (task.status == 'closed' and context['can_all'])
         context['can_resolve'] = (not context['can_close']) and task.status == 'in_progress' and \
@@ -328,7 +329,7 @@ class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     group_required = "Ответственные за активистов"
     raise_exception = True
     context_object_name = 'tasks'
-    
+
     def get_context_data(self, **kwargs):
         context = super(ClosedTasksView, self).get_context_data(**kwargs)
         context['tasks'] = context['tasks'].filter(status__in=['closed']).order_by('-datetime_last_modified')
@@ -341,7 +342,7 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     group_required = "Ответственные за активистов"
     context_object_name = 'users'
     raise_exception = True
-    
+
     def get_context_data(self, **kwargs):
         context = super(ActivistsView, self).get_context_data(**kwargs)
         activists = sorted([user for user in Group.objects.get(name='Активисты').user_set.all()], key=lambda user: user.last_name)
@@ -382,10 +383,10 @@ class TaskLogView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
         for index in range(len(version_list)):
             actions = []
             version = version_list[index]
-            if index == len(version_list)-1:
+            if index == len(version_list) - 1:
                 actions.append({'name': 'Начальное состояние', 'flag': True})
             else:
-                prev_version = version_list[index+1]
+                prev_version = version_list[index + 1]
                 diff = dict_diff(prev_version.field_dict, version.field_dict)
                 for key in diff.keys():
                     if key not in ['datetime_last_modified', ]:

@@ -66,7 +66,7 @@ class Task(Model):
     )
 
     name = CharField("Название", max_length=50)
-    responsible = ManyToManyField(User,  verbose_name="Ответственные", related_name="tasks_responsible", blank=True)
+    responsible = ManyToManyField(User, verbose_name="Ответственные", related_name="tasks_responsible", blank=True)
     event = ForeignKey(Event, related_name="tasks", verbose_name="Мероприятие", blank=True, null=True)
     description = TextField("Описание", blank=True)
     tags = TaggableManager(through=TaggedTask, blank=True)
@@ -109,7 +109,7 @@ class AssigneeTask(Model):
     approved = BooleanField("Подтверждено", default=False)
 
     def __str__(self):
-        return str(self.user)+" in "+str(self.task)
+        return str(self.user) + " in " + str(self.task)
 
 
 class PointOperation(Model):
@@ -129,4 +129,4 @@ class PointOperation(Model):
         verbose_name_plural = "Операции очков роста"
 
     def __str__(self):
-        return str(self.timestamp)+': '+str(self.user.last_name)+'; '+str(self.amount)
+        return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)

@@ -67,4 +67,4 @@ class MoneyOperation(Model):
         verbose_name_plural = "Денежные операции"
 
     def __str__(self):
-        return str(self.timestamp)+': '+str(self.user.last_name)+'; '+str(self.amount)
+        return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)

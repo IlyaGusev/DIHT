@@ -57,11 +57,11 @@ class TaskForm(OverwriteOnlyModelFormMixin, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TaskForm, self).__init__(*args, **kwargs)
-        self.fields['assignees_pk'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+        self.fields['assignees_pk'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)] +
                                                                   [('None', 'None'), ], required=False)
-        self.fields['candidates'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+        self.fields['candidates'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)] +
                                                                 [('None', 'None'), ], required=False)
-        self.fields['responsible'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+        self.fields['responsible'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)] +
                                                                  [('None', 'None'), ], required=False)
 
     def clean_assignees_pk(self):
@@ -104,7 +104,7 @@ class EventForm(OverwriteOnlyModelFormMixin, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
-        self.fields['responsible'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)]+
+        self.fields['responsible'] = MultipleChoiceField(choices=[(i, i) for i in User.objects.all().values_list('pk', flat=True)] +
                                                                  [('None', 'None'), ], required=False)
 
     def clean_responsible(self):

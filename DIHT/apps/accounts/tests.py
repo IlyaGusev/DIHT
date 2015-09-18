@@ -4,6 +4,8 @@ from django.utils import timezone
 from accounts.models import Profile, MoneyOperation
 
 ''' models test'''
+
+
 class MoneyOperationTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='111', password='111', email='111@l.ru')
@@ -14,7 +16,7 @@ class MoneyOperationTestCase(TestCase):
         self.assertTrue(isinstance(op1, MoneyOperation))
         self.assertEqual(self.user.profile.money, op1.amount)
         op2 = MoneyOperation.objects.create(user=self.user, amount=100, timestamp=timezone.now())
-        self.assertEqual(self.user.profile.money, op1.amount+op2.amount)
+        self.assertEqual(self.user.profile.money, op1.amount + op2.amount)
         op1.cancel()
         self.assertEqual(self.user.profile.money, op2.amount)
         op2.cancel()
@@ -22,6 +24,8 @@ class MoneyOperationTestCase(TestCase):
 
 
 ''' views test '''
+
+
 class RegisterTestCase(TestCase):
     def setUp(self):
         self.client = Client()

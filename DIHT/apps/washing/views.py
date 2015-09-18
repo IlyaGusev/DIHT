@@ -50,9 +50,9 @@ class IndexView(TemplateView):
                     start = params.start_hour * 60 + params.start_minute
                     delta = params.delta_hour * 60 + params.delta_minute
                     for j in range(times):
-                        start_hour = start//60
+                        start_hour = start // 60
                         start_minute = start - start_hour * 60
-                        end_hour = (start + delta)//60
+                        end_hour = (start + delta) // 60
                         end_minute = start + delta - end_hour * 60
                         d = dt.datetime.combine(day, dt.time(start_hour, start_minute, 0))
 
@@ -93,8 +93,8 @@ def parse_record(request):
     time_from = request.POST['time_from']
     time_to = request.POST['time_to']
     machine = WashingMachine.objects.get(id=request.POST['machine'])
-    datetime_from = dt.datetime.strptime(date+' '+time_from, '%d.%m.%Y %H:%M')
-    datetime_to = dt.datetime.strptime(date+' '+time_to, '%d.%m.%Y %H:%M')
+    datetime_from = dt.datetime.strptime(date + ' ' + time_from, '%d.%m.%Y %H:%M')
+    datetime_to = dt.datetime.strptime(date + ' ' + time_to, '%d.%m.%Y %H:%M')
     return {'machine': machine, 'datetime_from': datetime_from, 'datetime_to': datetime_to}
 
 

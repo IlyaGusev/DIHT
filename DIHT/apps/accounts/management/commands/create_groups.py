@@ -4,6 +4,7 @@ from django.contrib.auth.models import Permission, Group
 import logging
 logger = logging.getLogger('DIHT.custom')
 
+
 class Command(BaseCommand):
     help = 'Creates groups'
 
@@ -20,11 +21,10 @@ class Command(BaseCommand):
                   ('Ответственные за качалку', []),
                   ]
 
-
         for g in groups:
             group, created = Group.objects.get_or_create(name=g[0])
             if created:
                 for perm in g[1]:
                     group.permissions.add(perm)
-                logger.info('Создана группа '+g[0])
+                logger.info('Создана группа ' + g[0])
         print("Done")

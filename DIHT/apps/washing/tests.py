@@ -5,6 +5,8 @@ from accounts.models import Profile, MoneyOperation
 from washing.models import WashingMachine, WashingMachineRecord, RegularNonWorkingDay, NonWorkingDay, Parameters, BlackListRecord
 
 ''' views test '''
+
+
 class CreateRecordTestCase(TestCase):
     def setUp(self):
         self.client = Client()

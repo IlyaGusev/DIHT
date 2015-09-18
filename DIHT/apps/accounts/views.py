@@ -108,13 +108,13 @@ class ProfileView(LoginRequiredMixin, DetailView):
         if user.social_auth.filter(provider='vk-oauth2').exists():
             context['vk'] = user.social_auth.get(provider='vk-oauth2').uid
         if context['profile'].group_number != '':
-            grade = int(str(timezone.now().date().year)[-1])-int(str(context['profile'].group_number)[0])
+            grade = int(str(timezone.now().date().year)[-1]) - int(str(context['profile'].group_number)[0])
             if timezone.now().date().month >= 8:
                 grade += 1
             if grade > 6 or grade < 0:
                 context['grade'] = 'Выпускник/Аспирант'
             else:
-                context['grade'] = str(grade)+' курс'
+                context['grade'] = str(grade) + ' курс'
         context['can_view_tasks'] = (self.request.user == user and is_activist) or self.request.user.is_superuser or is_charge
 
         return context

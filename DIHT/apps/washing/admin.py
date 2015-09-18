@@ -1,6 +1,7 @@
 from django.contrib import admin
 from washing.models import WashingMachine, WashingMachineRecord, NonWorkingDay, RegularNonWorkingDay, Parameters, BlackListRecord
 
+
 def cancel_record_operation(modeladmin, request, queryset):
     for obj in queryset:
         obj.cancel()
