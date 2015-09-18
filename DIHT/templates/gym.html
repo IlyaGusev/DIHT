@@ -16,9 +16,12 @@
 		<div class="col-md-5">
 		
 			<table class="table table-bordered table-striped">
-				<tr><td><center><span style="font-size:20px">Ответственный</span></center></td></tr>
-				<tr><td><center>
-					Смирнов Александр, комната 408
+				<tr><td><center><span style="font-size:20px">Ответственные</span></center></td></tr>
+                <tr><td><center>
+                    {% for charge in charge_gym %}
+					{{charge.get_full_name}}, комната {{charge.profile.room_number}}
+                    <br>
+                    {% endfor %}
 				</center></td></tr>
 				<tr><td><center><span style="font-size:20px">График работы</span></center></td></tr>
 				<tr><td><center>Открыт ежедневно с 9:00 до 23:00<br>Женское время:<br>ПН, СР, ПТ: 16:00 - 18:00<br>ВТ, ЧТ: 18:00 - 20:00

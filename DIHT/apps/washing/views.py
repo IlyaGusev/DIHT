@@ -27,7 +27,8 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['charge_washing'] = Group.objects.get(name=u'Ответственные за стиралку').user_set.all()
+        if Group.objects.filter(name='Ответственные за стиралку').exists():
+            context['charge_washing'] = Group.objects.get(name='Ответственные за стиралку').user_set.all()
         machines = WashingMachine.objects.filter(is_active=True)
         current = timezone.now()
 
