@@ -311,7 +311,7 @@
                                         Нет
                                     </span>
                                 {% endif %}
-                                {% if can_edit %}
+                                {% if is_charge or can_all %}
                                 <a id='prop' href="{% url 'activism:task_action' pk=task.pk action='prop'%}" class="light action">
                                     <i class="fa fa-pencil" id="prop-pencil"></i>
                                 </a>

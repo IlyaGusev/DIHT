@@ -80,6 +80,8 @@ $(function() {
             var coef = 1
             if ($('#urgent').length || $('#hard').length)
                 coef = 1.5
+            if ($('#urgent').length && $('#hard').length)
+                coef = 2
             var final = Number((inp.val()*coef).toFixed(2))
             inp.next().find('.final-hours').text(final);
             inp.next().next().val(final)

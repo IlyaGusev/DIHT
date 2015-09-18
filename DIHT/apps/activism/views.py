@@ -155,7 +155,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
                  'open': {'in_labor': ('open', can_manage)}}
 
         if action == 'prop':
-            if (is_responsible and task_status_ok) or can_all:
+            if can_all:
                 if request.POST.get('is_urgent') is not None:
                     task.is_urgent = request.POST['is_urgent']
                 else:
