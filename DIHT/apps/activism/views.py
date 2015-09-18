@@ -226,7 +226,8 @@ class IndexView(LoginRequiredMixin, DefaultContextMixin, TemplateView):
     def get_context_data(self, **kwargs):
         user = self.request.user
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['labor'] = Task.objects.filter(status__in=['in_labor'])
+        context['labor'] = chain(Task.objects.filter(is_urgent=True, status='in_labor').order_by('datetime_limit'),
+                                 Task.objects.filter(is_urgent=False, status='in_labor').order_by('datetime_limit'))
         context['events'] = context['events'].filter(status='open').order_by('date_held')[:5]
         context['bids'] = \
             sorted(chain(user.tasks_approve.all(),
