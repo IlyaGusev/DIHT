@@ -15,12 +15,20 @@
 </div>
 <div class = "row pagezone">
     <table class="table table-bordered">
+        <tr>
+            <th>Активист</th>
+             {% if can_all %}
+            <th class="text-center">ЧРА</th>
+            <th class="text-center">Другие ОР</th>
+            {% endif %}
+            <th class="text-center">Суммарные ОР</th>
+        </tr>
     {% for record in records %}
         <tr>
             <td style = "padding: 1px 10px;">
                 {% if record.user.avatar.img %}
                     {% thumbnail record.user.avatar.img "25x25" crop="center" as pic %}
-                    <a href = "{% url 'accounts:profile' pk=user.profile.pk %}"><img src="{{ pic.url }}" class="avatar"></a>
+                    <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}"><img src="{{ pic.url }}" class="avatar"></a>
                     {% endthumbnail %}
                 {% endif %}
 
@@ -64,7 +72,7 @@
                         <span style="font-size:10px;">ОР</span>
                     </td></tr>
                     <tr><td align="right" colspan="2">
-                        <a href="{% url 'activism:add_points' pk=user.user.pk %}"
+                        <a href="{% url 'activism:add_points' pk=record.user.pk %}"
                            data-target="#form-modal">
                             <i class="fa fa-plus green"></i>
                         </a>
@@ -75,7 +83,7 @@
 
 
             <td><table width="100%">
-                <tr><td>Всего: </td><td align="right">
+                <tr><td align="center">
                     <span class="big-letters blue">{{record.sum_all|stringformat:'.0f'}}</span>
                     <span style="font-size:10px;">ОР</span>
                 </td></tr>

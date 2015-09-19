@@ -408,7 +408,9 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
                                 'operations': operations,
                                 'sum_og': sum_og,
                                 'sum_all': sum_all})
-        context['records'] = list(reversed(sorted(records, key=lambda record: record['sum_all'])))
+        context['records'] = list(reversed(sorted(sorted(reversed(sorted(records, key=lambda record: record['user'].last_name)),
+                                                         key=lambda record: record['sum_hours']),
+                                                  key=lambda record: record['sum_all'])))
         return context
 
 
