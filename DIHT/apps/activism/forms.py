@@ -1,6 +1,6 @@
 from autocomplete_light import ModelForm, ModelChoiceField
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
-from django.forms import HiddenInput, CharField, MultipleChoiceField
+from django.forms import MultipleChoiceField, IntegerField, CharField
 from django.contrib.auth.models import Group, User
 from activism.models import Task, Event, AssigneeTask
 from django.shortcuts import get_object_or_404
@@ -113,3 +113,12 @@ class EventForm(OverwriteOnlyModelFormMixin, ModelForm):
                 return []
             return self.cleaned_data['responsible']
         return None
+
+
+class PointForm(ModelForm):
+    amount = IntegerField(min_value=0, max_value=10000, label="Количество")
+    description = CharField(label="Обоснование")
+
+    class Meta:
+        model = User
+        fields = []

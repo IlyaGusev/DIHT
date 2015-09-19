@@ -16,7 +16,7 @@ $(function() {
         return false;
     });
 
-    $('#form-modal').on('submit', '.find-form,.password-form', function(ev) {
+    $('#form-modal').on('submit', '.find-form,.password-form,.add-points-form,.profile-form,.add-money-form,.remove-money-form', function(ev) {
         ev.preventDefault();
         var form = $(this);
         $.ajax({
@@ -32,5 +32,15 @@ $(function() {
             }
         });
         return false;
+    });
+
+    $("body").on("click", ".delete-view", function(ev) {
+        ev.preventDefault();
+        console.log("!!!!")
+        var button = $(this);
+        var URL = button.attr('href')
+        console.log(URL)
+        $.ajax({type: "POST", url: URL, data: {}, dataType: "JSON"});
+        window.location.reload()
     });
 });

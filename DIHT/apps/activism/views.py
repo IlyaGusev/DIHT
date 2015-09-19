@@ -1,19 +1,37 @@
 import logging
 from itertools import chain
 from django.core.exceptions import PermissionDenied
-from django.views.generic import ListView, View, CreateView, TemplateView, DetailView
+from django.views.generic import ListView, View, CreateView, TemplateView, DetailView, DeleteView
 from django.views.generic.edit import UpdateView
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect, JsonResponse
 from django.utils import timezone
 from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
-from reversion import get_for_object, get_for_object_reference
-from activism.models import Event, Task, AssigneeTask, Sector
-from activism.forms import TaskForm, EventForm, TaskCreateForm
+from reversion import get_for_object
+from activism.models import Event, Task, AssigneeTask, Sector, PointOperation
+from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm
 
 logger = logging.getLogger('DIHT.custom')
+
+
+def get_level(user):
+    if Group.objects.get(name="Руководящая группа") in user.groups.all():
+        return 4
+
+    hours = sum(user.participated.filter(task__status__in=['closed']).values_list('hours', flat=True))
+    gp = hours / 10 + sum(user.point_operations.all().values_list('amount', flat=True))
+    if gp < 4:
+        return {'sign': 'Активист-новичок', 'coef': 0}
+    elif gp < 16:
+        return {'sign': 'Активист', 'coef': 1}
+    elif gp < 35:
+        return {'sign': 'Активист-организатор', 'coef': 1.7}
+    elif gp < 70:
+        return {'sign': 'Активист-лидер', 'coef': 2.4}
+    else:
+        return {'sign': 'Активист-руководитель', 'coef': 4}
 
 """
     Mixins
@@ -220,6 +238,34 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
             raise PermissionDenied
 
 
+class AddPointsView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
+    model = User
+    form_class = PointForm
+    group_required = 'Ответственные за активистов'
+    raise_exception = True
+    context_object_name = 'user'
+    template_name = 'activism/add_points.html'
+
+    def form_invalid(self, form):
+        super(AddPointsView, self).form_invalid(form)
+        return JsonResponse(form.errors, status=400)
+
+    def form_valid(self, form):
+        PointOperation.objects.create(user=self.get_object(),
+                                      amount=form.cleaned_data['amount'],
+                                      timestamp=timezone.now(),
+                                      description=form.cleaned_data['description'],
+                                      moderator=self.request.user)
+        return JsonResponse({'url': reverse('activism:activists')}, status=200)
+
+
+class DeletePointsView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
+    model = PointOperation
+    group_required = 'Ответственные за активистов'
+    success_url = reverse_lazy('activism:activists')
+    raise_exception = True
+
+
 """
     Show views
 """
@@ -336,10 +382,10 @@ class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
         return context
 
 
-class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
+class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, ListView):
     model = User
     template_name = 'activism/activists.html'
-    group_required = "Ответственные за активистов"
+    group_required = "Активисты"
     context_object_name = 'users'
     raise_exception = True
 
@@ -347,10 +393,22 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, ListView):
         context = super(ActivistsView, self).get_context_data(**kwargs)
         activists = sorted([user for user in Group.objects.get(name='Активисты').user_set.all()], key=lambda user: user.last_name)
 
-        context['users'] = [(user,
-                             user.participated.filter(task__status__in=['closed']),
-                             sum(user.participated.filter(task__status__in=['closed']).values_list('hours', flat=True)))
-                            for user in activists]
+        records = []
+        for user in activists:
+            if Group.objects.get(name="Руководящая группа") not in user.groups.all() and \
+               Group.objects.get(name="Ответственные за активистов") not in user.groups.all():
+                throughs = user.participated.filter(task__status__in=['closed'])
+                sum_hours = sum(throughs.values_list('hours', flat=True))
+                operations = user.point_operations.all()
+                sum_og = sum(user.point_operations.all().values_list('amount', flat=True))
+                sum_all = sum_og + int(sum_hours // 10)
+                records.append({'user': user,
+                                'throughs': throughs,
+                                'sum_hours': sum_hours,
+                                'operations': operations,
+                                'sum_og': sum_og,
+                                'sum_all': sum_all})
+        context['records'] = list(reversed(sorted(records, key=lambda record: record['sum_all'])))
         return context
 
 

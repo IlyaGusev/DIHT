@@ -60,7 +60,13 @@
         {% endif %}
         {% if can_close %}
             <a class="btn btn-default action" id="close"
-               href="{% url 'activism:task_action' pk=task.pk action='close'%}"><i class="fa fa-check fa-lg green"></i> Закрыть задачу</a>
+               href="{% url 'activism:task_action' pk=task.pk action='close'%}"><i class="fa fa-check fa-lg green"></i>
+                {% if task.status == 'closed' %}
+                Изменить часы
+                {% else %}
+                Закрыть задачу
+                {% endif %}
+            </a>
         {% endif %}
             {% if task.event %}
                  <a class="btn btn-default pull-right" href="{% url 'activism:event' pk=task.event.pk %}" style="margin-left:3px;">

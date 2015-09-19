@@ -15,29 +15,71 @@
 </div>
 <div class = "row pagezone">
     <table class="table table-bordered">
-    {% for user in users %}
+    {% for record in records %}
         <tr>
             <td style = "padding: 1px 10px;">
-                {% if user.0.avatar.img %}
-                    {% thumbnail user.0.avatar.img "25x25" crop="center" as pic %}
+                {% if record.user.avatar.img %}
+                    {% thumbnail record.user.avatar.img "25x25" crop="center" as pic %}
                     <a href = "{% url 'accounts:profile' pk=user.profile.pk %}"><img src="{{ pic.url }}" class="avatar"></a>
                     {% endthumbnail %}
                 {% endif %}
 
-                <a href = "{% url 'accounts:profile' pk=user.profile.pk %}">{{user.0.last_name}} {{user.0.first_name}} {{user.0.profile.middle_name}}</a>
+                <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}">{{record.user.last_name}} {{record.user.first_name}} {{record.user.profile.middle_name}}</a>
             </td>
+
+            {% if can_all %}
             <td>
                 <table width="100%">
-                {% for through in user.1 %}
+                {% for through in record.throughs %}
                         <tr>
                             <td>
                                 <a href="{% url 'activism:task' pk=through.task.pk %}">{{through.task.name}}</a>
                             </td>
-                            <td align="right">{{ through.hours|stringformat:'.2f' }}</td>
+                            <td align="right">
+                                <span>{{ through.hours|stringformat:'.2f' }}</span>
+                                <span style="font-size:10px;">ЧРА</span>
+                            </td>
                         </tr>
                 {% endfor %}
-                    <tr><td>Итог: </td><td align="right" class="big-letters blue">{{user.2|stringformat:'.2f'}}</td></tr>
+                    <tr><td>Итог: </td><td align="right">
+                        <span class="big-letters blue">{{record.sum_hours|stringformat:'.2f'}}</span>
+                        <span style="font-size:10px;">ЧРА</span>
+                    </td></tr>
                  </table>
+            </td>
+            <td>
+                <table width="100%">
+                    {% for operation in record.operations %}
+                        <tr>
+                            <td>
+                                {{operation.description}}
+                            </td>
+                            <td align="right">{{operation.amount|stringformat:'.0f' }}
+                                <span style="font-size:10px;">ОР </span><a href="{% url 'activism:delete_points' pk=operation.pk %}" class="delete-view"><i class="fa fa-close red"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr><td>Итог: </td><td align="right">
+                        <span class="big-letters blue">{{record.sum_og|stringformat:'.0f'}}</span>
+                        <span style="font-size:10px;">ОР</span>
+                    </td></tr>
+                    <tr><td align="right" colspan="2">
+                        <a href="{% url 'activism:add_points' pk=user.user.pk %}"
+                           data-target="#form-modal">
+                            <i class="fa fa-plus green"></i>
+                        </a>
+                    </td></tr>
+                </table>
+            </td>
+            {% endif %}
+
+
+            <td><table width="100%">
+                <tr><td>Всего: </td><td align="right">
+                    <span class="big-letters blue">{{record.sum_all|stringformat:'.0f'}}</span>
+                    <span style="font-size:10px;">ОР</span>
+                </td></tr>
+                </table>
             </td>
         </tr>
     {% endfor %}
