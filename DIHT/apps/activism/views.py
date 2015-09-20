@@ -279,7 +279,8 @@ class IndexView(LoginRequiredMixin, DefaultContextMixin, TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         context['labor'] = chain(Task.objects.filter(is_urgent=True, status='in_labor').order_by('datetime_limit'),
                                  Task.objects.filter(is_urgent=False, status='in_labor').order_by('datetime_limit'))
-        context['events'] = context['events'].filter(status='open').order_by('date_held')[:5]
+        context['events'] = context['events'].filter(status='open',
+                                                     date_held__gte=timezone.now().date()).order_by('date_held')[:5]
         context['bids'] = \
             sorted(chain(user.tasks_approve.all(),
                          user.task_set.filter(status__in=['open', 'in_labor']),
@@ -299,7 +300,8 @@ class EventsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, Li
 
     def get_context_data(self, **kwargs):
         context = super(EventsView, self).get_context_data(**kwargs)
-        context['events'] = context['events'].filter(status__in=['open'])
+        context['events'] = sorted(context['events'].filter(status__in=['open']),
+                                   key=lambda event: event.date_held - timezone.now().date())
         return context
 
 
@@ -367,19 +369,6 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultC
 class SectorView(LoginRequiredMixin, DetailView):
     model = Sector
     template_name = "activism/sector.html"
-
-
-class ClosedTasksView(LoginRequiredMixin, GroupRequiredMixin, ListView):
-    model = Task
-    template_name = 'activism/closed.html'
-    group_required = "Ответственные за активистов"
-    raise_exception = True
-    context_object_name = 'tasks'
-
-    def get_context_data(self, **kwargs):
-        context = super(ClosedTasksView, self).get_context_data(**kwargs)
-        context['tasks'] = context['tasks'].filter(status__in=['closed']).order_by('-datetime_last_modified')
-        return context
 
 
 class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, ListView):

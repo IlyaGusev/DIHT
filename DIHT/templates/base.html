@@ -50,9 +50,14 @@
                                 {% endcomment %}
                             </ul>
                         </li>
-                        <li {% block activism_active %} {% endblock %}>
-                            <a href="{% url 'activism:index' %}">Актив</a>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Актив <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li {% block activism_active %} {% endblock %}><a href="{% url 'activism:index' %}">Доска</a></li>
+                                <li {% block activism_table_active %} {% endblock %}><a href="{% url 'activism:activists' %}">Список активистов</a></li>
+                            </ul>
                         </li>
+
                         {% comment %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Медиа <b class="caret"></b></a>
