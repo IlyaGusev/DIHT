@@ -149,7 +149,12 @@
             </div>
             {% endif %}
         </div>
-        <div class="col-md-8"> 
+        <div class="col-md-8">
+            <div class="row">
+                <span class="pull-right" style="margin-right:20px"><a class="btn btn-default robotobold" href="{% url 'activism:activists' %}">
+                <i class="fa fa-bar-chart fa-lg" style="margin-right:4px"></i>Список активистов</a>
+                </span>
+            </div>
             <center><h4>Биржа задач</h4></center>
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                 {% for task in labor %}
