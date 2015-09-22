@@ -127,18 +127,19 @@
                     {% for task in tasks_responsible.all %}
                         <tr>
                         <td style="padding-top:8px;"><a href="{% url 'activism:task' pk=task.pk %}">{{task.name}}</a></td>
+                            <td class="ra">
                         {% if task.status == 'closed' %}
-                            <td class="ra"><span class="label lbl label-success">
+                            <span class="label lbl label-success">
                         {% elif task.status == 'resolved' %}
-                            <td class="ra"><span class="label lbl label-primary">
+                            <span class="label lbl label-primary">
                         {% elif task.status == 'in_progress' %}
-                            <td class="ra"><span class="label lbl label-warning">
+                            <span class="label lbl label-warning">
                         {% elif task.status == 'open' %}
-                            <td class="ra"><span class="label lbl label-default">
+                            <span class="label lbl label-default">
                         {% elif task.status == 'in_labor' %}
-                            <td class="ra"><span class="label lbl label-danger">
+                            <span class="label lbl label-danger">
                         {% elif task.status == 'volunteers' %}
-                            <td class="ra"><span class="label lbl label-info ">
+                            <span class="label lbl label-info ">
                         {% endif %}
                                 {{ task.get_status_display }}
                             </span></td>
