@@ -94,9 +94,10 @@
             {% if can_view_tasks %}
             <li><a href="#tab-tsk" data-toggle="tab">Задачи</a></li>
             {% endif %}
-            {% if profile.user|has_group:'Активисты' %}
+            {% comment %}{% if profile.user|has_group:'Активисты' %}
             <li><a href="#tab-ach" data-toggle="tab">Достижения</a></li>
             {% endif %}
+            {% endcomment %}
             {% if profile.user == request.user %}
             <li><a href="#tab-wsh" data-toggle="tab">Стиралка</a></li>
             {% endif %}
@@ -139,16 +140,17 @@
             </div>
             {% if can_view_tasks %}
             <div class="tab-pane" id="tab-tsk">
+                {% if task_current|length > 0 %}
                 <h5>Текущие задачи</h5>
                 <table class = "table usual-letters">
-                    {% for task in profile.user.task_set.all %}
-                        {% if task.status != 'closed' and task.status != 'resolved' %}
+                    {% for task in task_current %}
                         <tr>
                             <td><a href="{% url 'activism:task' pk=task.pk %}">{{ task.name }}</a></td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                 </table>
+                {% endif %}
+                {% if task_hours|length > 0 %}
                 <h5>Готовые задачи</h5>
                 <table class = "table usual-letters">
                     {% for through in task_hours %}
@@ -168,6 +170,8 @@
                         </tr>
                     {% endfor %}
                 </table>
+                {% endif %}
+                {% if task_responsible|length > 0 %}
                 <h5>Контролируемые задачи</h5>
                 <table class = "table usual-letters">
                     {% for task in task_responsible %}
@@ -193,12 +197,13 @@
                         </tr>
                     {% endfor %}
                 </table>
+                {% endif %}
             </div>
             {% endif %}
-            {% if profile.user|has_group:'Активисты' %}
+            {% comment %}{% if profile.user|has_group:'Активисты' %}
             <div class = "tab-pane" id="tab-ach">
             </div>
-            {% endif %}
+            {% endif %}{% endcomment %}
             {% if profile.user == request.user %}
             <div class = "tab-pane" id="tab-wsh">
                 <h5>Записи:<h5>

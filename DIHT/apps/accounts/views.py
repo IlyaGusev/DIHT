@@ -103,11 +103,10 @@ class ProfileView(LoginRequiredMixin, DetailView):
         user = self.get_object().user
         is_charge = Group.objects.get(name="Ответственные за активистов") in self.request.user.groups.all()
         is_activist = Group.objects.get(name="Активисты") in self.request.user.groups.all()
-        context['records'] = user.records.filter(datetime_to__gte=timezone.now()).order_by('-datetime_to').reverse()
-        context['task_responsible'] = chain(sorted(user.tasks_responsible.exclude(status='closed'),
-                                                   key=lambda task: task.datetime_created, reverse=True),
-                                            sorted(user.tasks_responsible.filter(status='closed'),
-                                                   key=lambda task: task.datetime_closed, reverse=True))
+        context['records'] = user.records.order_by('-datetime_to').reverse()
+        context['task_current'] = user.task_set.exclude(status__in=['closed', 'resolved'])
+        context['task_responsible'] = sorted(user.tasks_responsible.all(),
+                                             key=lambda task: task.datetime_created, reverse=True)
         context['task_hours'] = user.participated.filter(task__status__in=['closed', 'resolved'])
         if user.social_auth.filter(provider='vk-oauth2').exists():
             context['vk'] = user.social_auth.get(provider='vk-oauth2').uid
@@ -133,6 +132,10 @@ class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin
 
     def test_func(self, user):
         return self.get_object().user == user
+
+    def form_valid(self, form):
+        super(ProfileUpdateView, self).form_valid(form)
+        return JsonResponse({'url': reverse('accounts:profile', kwargs={'pk': self.get_object().pk})}, status=200)
 
 
 class AvatarUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
