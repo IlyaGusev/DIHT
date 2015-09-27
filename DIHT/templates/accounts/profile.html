@@ -58,7 +58,7 @@
 <div class="row">
     <div class = "col-md-offset-3 col-md-6">
         {% if user|has_group:'Ответственные за финансы' or user.is_superuser or profile.user == request.user %}
-        <span class="param">Деньги: {{profile.money}}</span>
+        <span class="param">Деньги: <span class="blue">{{profile.money}}</span></span>
         {% if user|has_group:'Ответственные за финансы' or user.is_superuser %}
         <span>
             <a href="{% url 'accounts:add_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-plus green"></i></a>
@@ -87,6 +87,17 @@
     </div>
 </div>
 <br>
+{% if user|has_group:'Ответственные за финансы' or user.is_superuser %}
+{% if profile.user|has_group:'Ответственные за финансы' or profile.user.is_superuser %}
+<div class="row">
+    <div class = "col-md-offset-3 col-md-6">
+        <span class="param">Собранные деньги: <span class="blue">{{moderated_money}}</span></span>
+        <a href="{% url 'accounts:approve_money' pk=profile.user.pk %}" class="btn btn-sm btn-default red">Обнулить</a>
+    </div>
+</div>
+<br>
+{% endif %}
+{% endif %}
 <div class="row">
     <div class = "tabs">
         <ul class = "nav nav-tabs col-md-offset-3 col-md-6">

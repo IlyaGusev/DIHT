@@ -2,7 +2,8 @@ from django.conf.urls import url, include
 from django.views.generic import TemplateView
 from accounts.views import SignUpView, ResetPasswordView, ProfileView, ProfileUpdateView, \
     CheckUniqueView, AvatarUpdateView, SignUpOkView, ChargeView, FindView, AddMoneyView, \
-    RemoveMoneyView, ActivateView, MoneyHistoryView, UserMoneyHistoryView, ChangePasswordView
+    RemoveMoneyView, ActivateView, MoneyHistoryView, UserMoneyHistoryView, ChangePasswordView, \
+    ApproveMoneyView
 
 urlpatterns = [
     url(r'^signup/$', SignUpView.as_view(), name='signup'),
@@ -21,6 +22,7 @@ urlpatterns = [
     url(r'^profile/remove_money/(?P<pk>[0-9]*)/$', RemoveMoneyView.as_view(), name='remove_money'),
     url(r'^profile/history_money/(?P<pk>[0-9]*)/$', UserMoneyHistoryView.as_view(), name='history_money'),
     url(r'^profile/find/$', FindView.as_view(), name='find'),
+    url(r'^profile/approve_money/(?P<pk>[0-9]*)/$', ApproveMoneyView.as_view(), name='approve_money'),
 
     url(r'^change_password/(?P<pk>[0-9]*)/$', ChangePasswordView.as_view(), name='change_password'),
     url(r'^activate/(?P<pk>[0-9]*)/$', ActivateView.as_view(), name='activate'),

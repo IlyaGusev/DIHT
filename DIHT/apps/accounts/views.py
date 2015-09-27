@@ -119,7 +119,8 @@ class ProfileView(LoginRequiredMixin, DetailView):
             else:
                 context['grade'] = str(grade) + ' курс'
         context['can_view_tasks'] = (self.request.user == user and is_activist) or self.request.user.is_superuser or is_charge
-
+        context['moderated_money'] = sum(user.moderated_operations.filter(is_approved=False, amount__gte=0)
+                                                                  .values_list('amount', flat=True))
         return context
 
 
@@ -241,6 +242,7 @@ class MoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     group_required = 'Ответственные за финансы'
     context_object_name = 'operations'
     template_name = "accounts/money_history.html"
+    raise_exception = True
 
     def get_context_data(self, **kwargs):
         context = super(MoneyHistoryView, self).get_context_data(**kwargs)
@@ -252,6 +254,7 @@ class UserMoneyHistoryView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Profile
     context_object_name = 'profile'
     template_name = "accounts/money_history.html"
+    raise_exception = True
 
     def test_func(self, user):
         return (user == self.get_object().user) or user.is_superuser or \
@@ -271,6 +274,7 @@ class ChangePasswordView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixi
     form_class = ChangePasswordForm
     template_name = "accounts/change_password.html"
     success_url = reverse_lazy("main:home")
+    raise_exception = True
 
     def test_func(self, user):
         return (user == self.get_object()) or user.is_superuser
@@ -279,3 +283,18 @@ class ChangePasswordView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixi
         super(ChangePasswordView, self).form_valid(form)
         return JsonResponse({'url': reverse('accounts:profile', kwargs={'pk': self.get_object().profile.pk})},
                             status=200)
+
+
+class ApproveMoneyView(LoginRequiredMixin, UserPassesTestMixin,  SingleObjectMixin, View):
+    model = User
+    raise_exception = True
+
+    def test_func(self, user):
+        return user.is_superuser or (Group.objects.get(name='Ответственные за финансы') in user.groups.all())
+
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        for op in user.moderated_operations.filter(amount__gte=0, is_approved=False):
+            op.is_approved = True
+            op.save()
+        return HttpResponseRedirect(reverse('accounts:profile', kwargs={'pk': user.profile.pk}))

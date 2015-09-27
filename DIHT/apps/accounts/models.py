@@ -48,6 +48,7 @@ class MoneyOperation(Model):
     description = CharField("Описание", max_length=150, null=True, blank=True)
     moderator = ForeignKey(User, related_name='moderated_operations',
                            null=True, blank=True, verbose_name="Модератор")
+    is_approved = BooleanField("Подтверждено", default=False)
 
     @transaction.atomic
     def save(self, *args, **kwargs):
@@ -55,6 +56,9 @@ class MoneyOperation(Model):
             super(MoneyOperation, self).save(*args, **kwargs)
             self.user.profile.money += self.amount
             self.user.profile.save()
+        else:
+            super(MoneyOperation, self).save(*args, **kwargs)
+
 
     @transaction.atomic
     def cancel(self):
