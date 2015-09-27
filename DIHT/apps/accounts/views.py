@@ -17,6 +17,7 @@ from itertools import chain
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, MoneyForm, ChangePasswordForm
 from accounts.models import Profile, Avatar, MoneyOperation
 from washing.models import BlackListRecord
+from activism.views import get_level
 
 import logging
 logger = logging.getLogger('DIHT.custom')
@@ -121,6 +122,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context['can_view_tasks'] = (self.request.user == user and is_activist) or self.request.user.is_superuser or is_charge
         context['moderated_money'] = sum(user.moderated_operations.filter(is_approved=False, amount__gte=0)
                                                                   .values_list('amount', flat=True))
+        context['level'] = get_level(user)
         return context
 
 

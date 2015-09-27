@@ -21,7 +21,8 @@ def get_level(user):
         return 4
 
     hours = sum(user.participated.filter(task__status__in=['closed']).values_list('hours', flat=True))
-    gp = hours / 10 + sum(user.point_operations.all().values_list('amount', flat=True))
+    gp = hours // 10 + sum(user.point_operations.all().values_list('amount', flat=True))
+
     if gp < 4:
         return {'sign': 'Активист-новичок', 'coef': 0}
     elif gp < 16:
@@ -391,12 +392,14 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
                 operations = user.point_operations.all()
                 sum_og = sum(user.point_operations.all().values_list('amount', flat=True))
                 sum_all = sum_og + int(sum_hours // 10)
+                level = get_level(user)
                 records.append({'user': user,
                                 'throughs': throughs,
                                 'sum_hours': sum_hours,
                                 'operations': operations,
                                 'sum_og': sum_og,
-                                'sum_all': sum_all})
+                                'sum_all': sum_all,
+                                'level': level['sign']})
         context['records'] = list(reversed(sorted(sorted(reversed(sorted(records, key=lambda record: record['user'].last_name)),
                                                          key=lambda record: record['sum_hours']),
                                                   key=lambda record: record['sum_all'])))

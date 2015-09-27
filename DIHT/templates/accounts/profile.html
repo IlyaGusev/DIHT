@@ -40,7 +40,7 @@
             {% elif profile.user|has_group:'Руководящая группа' %}
                 Руководящая группа
             {% elif profile.user|has_group:'Активисты' %}
-                Активист
+                {{ level.sign }}
             {% else %}
                 Пользователь
             {% endif %}
