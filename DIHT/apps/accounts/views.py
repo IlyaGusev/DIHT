@@ -287,12 +287,10 @@ class ChangePasswordView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixi
                             status=200)
 
 
-class ApproveMoneyView(LoginRequiredMixin, UserPassesTestMixin,  SingleObjectMixin, View):
+class ApproveMoneyView(LoginRequiredMixin, GroupRequiredMixin,  SingleObjectMixin, View):
     model = User
+    group_required = 'Руководители финансов'
     raise_exception = True
-
-    def test_func(self, user):
-        return user.is_superuser or (Group.objects.get(name='Ответственные за финансы') in user.groups.all())
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()
