@@ -155,6 +155,11 @@
                 <span class="pull-right" style="margin-right:20px"><a class="btn btn-default robotobold" href="{% url 'activism:activists' %}">
                 <i class="fa fa-bar-chart fa-lg" style="margin-right:4px"></i>Список активистов</a>
                 </span>
+                {% if is_charge or is_superuser %}
+                <span class="pull-right" style="margin-right:5px"><a class="btn btn-default robotobold" href="{% url 'activism:payments' %}">
+                <i class="fa fa-money fa-lg" style="margin-right:4px"></i>Выплаты</a>
+                </span>
+                {% endif %}
             </div>
             <center><h4>Биржа задач</h4></center>
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">

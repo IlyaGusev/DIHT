@@ -1,5 +1,6 @@
 import logging
 from itertools import chain
+import datetime as dt
 from django.core.exceptions import PermissionDenied
 from django.views.generic import ListView, View, CreateView, TemplateView, DetailView, DeleteView
 from django.views.generic.edit import UpdateView
@@ -372,16 +373,15 @@ class SectorView(LoginRequiredMixin, DetailView):
     template_name = "activism/sector.html"
 
 
-class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, ListView):
-    model = User
+class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, TemplateView):
     template_name = 'activism/activists.html'
     group_required = "Активисты"
-    context_object_name = 'users'
     raise_exception = True
 
     def get_context_data(self, **kwargs):
         context = super(ActivistsView, self).get_context_data(**kwargs)
-        activists = sorted([user for user in Group.objects.get(name='Активисты').user_set.all()], key=lambda user: user.last_name)
+        activists = sorted(Group.objects.get(name='Активисты').user_set.all(),
+                           key=lambda u: u.last_name)
 
         records = []
         for user in activists:
@@ -460,4 +460,48 @@ class TaskLogView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
                             'date': version.field_dict['datetime_last_modified'],
                             'actions': actions})
         context['records'] = records
+        return context
+
+
+class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
+    group_required = "Ответственные за активистов"
+    template_name = 'activism/payments.html'
+    raise_exception = True
+
+    def get_context_data(self, **kwargs):
+        context = super(PaymentsView, self).get_context_data(**kwargs)
+        const = 2000
+        if 'const' in self.request.GET:
+            const = int(self.request.GET['const'])
+        context['const'] = const
+
+        begin = timezone.now()-dt.timedelta(days=30)
+        if 'begin' in self.request.GET:
+            begin = dt.datetime.strptime(self.request.GET['begin'], '%Y-%m-%d')
+        context['begin'] = begin
+
+        end = timezone.now()
+        if 'end' in self.request.GET:
+            end = dt.datetime.strptime(self.request.GET['end'], '%Y-%m-%d')
+        context['end'] = end
+
+        activists = []
+        records = []
+        users = sorted(Group.objects.get(name='Активисты').user_set.all(), key=lambda u: u.last_name)
+        for user in users:
+            if Group.objects.get(name="Руководящая группа") not in user.groups.all() and \
+               Group.objects.get(name="Ответственные за активистов") not in user.groups.all():
+                activists.append(user)
+                records.append({'user': user,
+                                'hours': sum(user.participated.filter(task__status__in=['closed'],
+                                                                      task__datetime_closed__gte=begin,
+                                                                      task__datetime_closed__lte=end)
+                                                              .values_list('hours', flat=True))})
+        norm = max([record['hours'] for record in records])
+        if norm == 0:
+            norm = 1
+        for record in records:
+            record['coef'] = get_level(record['user'])['coef']
+            record['payment'] = (const*record['hours']/norm)*record['coef']
+        context['records'] = sorted(records, key=lambda record: record['payment'], reverse=True)
         return context
