@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db.models import \
     PositiveSmallIntegerField, ForeignKey, DateTimeField, \
     DateField, BooleanField, OneToOneField, FloatField, \
@@ -19,6 +19,8 @@ class Sector(Model):
     description = TextField("Описание", blank=True)
     main = ForeignKey(User, verbose_name="Руководитель", blank=True, null=True)
     photo = ImageField(max_length=1024, blank=True, upload_to=upload_to_sector)
+    color = CharField(verbose_name="Цвет", max_length=6, default="aaaaaa",
+                      validators=[RegexValidator("[^0-9a-fA-F]", inverse_match=True)])
 
     class Meta:
         verbose_name = "Сектор"
