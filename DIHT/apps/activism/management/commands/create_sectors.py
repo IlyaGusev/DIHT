@@ -10,11 +10,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        sectors = ['Проектный сектор',
-                   'Отдел по работе с абитуриентами',
-                   'Хозяйственный сектор',
-                   'Кураторский сектор',
-                   'Информационный сектор']
-        for name in sectors:
-            Sector.objects.get_or_create(name=name)
+        colors = {"Проектный сектор": "9911dd",
+                  "Информационный сектор": "07a0db",
+                  "Хозяйственный сектор": "eeff00",
+                  "Кураторский сектор": "00e900",
+                  "Отдел по работе с абитуриентами": "fa0000"}
+
+        for name, color in sectors.items():
+            Sector.objects.get_or_create(name=name, color=color)
         print("Done")

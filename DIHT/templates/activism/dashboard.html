@@ -171,19 +171,7 @@
                             <tbody>
                             <tr>
                                 <td valign="middle" width="30">
-                                    {% if task.sector.name == 'Проектный сектор' %}
-                                    <span class="sector-label purple"><i class='fa fa-lg fa-circle'></i></span>
-                                    {% elif task.sector.name == 'Информационный сектор' %}
-                                    <span class="sector-label blue"><i class='fa fa-lg fa-circle'></i></span>
-                                    {% elif task.sector.name == 'Хозяйственный сектор' %}
-                                    <span class="sector-label yellow"><i class='fa fa-lg fa-circle'></i></span>
-                                    {% elif task.sector.name == 'Кураторский сектор' %}
-                                    <span class="sector-label green"><i class='fa fa-lg fa-circle'></i></span>
-                                    {% elif task.sector.name == 'Отдел по работе с абитуриентами' %}
-                                    <span class="sector-label red"><i class='fa fa-lg fa-circle'></i></span>
-                                    {% else %}
-                                    <span class="sector-label grey"><i class='fa fa-lg fa-circle'></i></span>
-                                    {% endif %}
+					<span class="sector-label" style="color: #{{ task.sector.color|default:"aaaaaa" }}"><i class='fa fa-lg fa-circle'></i></span>
                                 </td>
                                 <td align="left"><span class="bigger-letters">{{ task.name }}
                                     {% if user in task.responsible.all and task.candidates.all|length > 0 %}
