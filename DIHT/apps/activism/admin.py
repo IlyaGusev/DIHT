@@ -1,6 +1,6 @@
 import reversion
 from django.contrib import admin
-from activism.models import Task, Event, AssigneeTask, Sector, PointOperation
+from activism.models import Task, Event, AssigneeTask, Sector, PointOperation, ResponsibleEvent
 
 
 class AssigneeTaskInline(admin.StackedInline):
@@ -17,6 +17,7 @@ class AssigneeTaskAdmin(reversion.VersionAdmin):
 
 admin.site.register(Event)
 admin.site.register(Sector)
+admin.site.register(ResponsibleEvent)
 admin.site.register(AssigneeTask, AssigneeTaskAdmin)
 admin.site.register(Task, TaskAdmin, follow=["assignees"])
 admin.site.register(PointOperation)

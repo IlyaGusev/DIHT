@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.utils import timezone
 from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
 from reversion import get_for_object
-from activism.models import Event, Task, AssigneeTask, Sector, PointOperation
+from activism.models import Event, Task, AssigneeTask, Sector, PointOperation, ResponsibleEvent
 from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm
 
 logger = logging.getLogger('DIHT.custom')
@@ -35,6 +35,12 @@ def get_level(user):
     else:
         return {'sign': 'Активист-руководитель', 'coef': 4}
 
+
+def get_event_assignees(event):
+    assignees = set()
+    for task in Task.objects.filter(event=event.pk):
+        assignees = assignees.union(set(task.assignees.all()))
+    return list(assignees)
 """
     Mixins
 """
@@ -107,24 +113,82 @@ class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonCreateMixin, J
     raise_exception = True
 
 
+def check_event_closing(event):
+    assignees = get_event_assignees(event)
+    has_main = False
+    all_done = True
+    has_conflicts = False
+    only_main_gp = True
+    for u in [User.objects.get(pk=i) for i in ResponsibleEvent.objects.filter(event=event)
+                                                              .values_list('user', flat=True)]:
+        if Group.objects.get(name="Руководящая группа") in u.groups.all():
+            has_main = True
+
+    for entity in ResponsibleEvent.objects.filter(event=event):
+        if (has_main and
+            Group.objects.get(name="Руководящая группа") in entity.user.groups.all() and
+            not entity.done) or \
+           (not has_main and not entity.done):
+            all_done = False
+
+    for assignee in assignees:
+        op = PointOperation.objects.filter(user=assignee, description="За " + event.name)
+        if op.count() > 1:
+            has_conflicts = True
+        elif op.exists():
+            if op[0].moderator not in Group.objects.get(name="Руководящая группа").user_set.all():
+                only_main_gp = False
+
+    return {"all_done": all_done,
+            "only_main_gp": only_main_gp,
+            "has_conflicts": has_conflicts,
+            "all_ok": all_done and only_main_gp and has_conflicts}
+
+
 class EventActionView(SingleObjectMixin, GroupRequiredMixin, LoginRequiredMixin, View):
     model = Event
     group_required = "Активисты"
     raise_exception = True
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         event = self.get_object()
         action = kwargs['action']
         user = request.user
         is_responsible = (user in event.responsible.all())
         is_charge = (Group.objects.get(name="Ответственные за активистов") in request.user.groups.all())
+        is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         can_all = user.is_superuser or is_charge
         tasks_ok = (event.tasks.exclude(status="closed").count() == 0)
+        assignees = get_event_assignees(event)
 
         if ((is_responsible and tasks_ok) or can_all) and action == "close" and event.status == 'open':
-            event.status = 'closed'
-            event.save()
-            return HttpResponseRedirect(reverse('activism:index'))
+            for assignee in assignees:
+                gp = request.POST.get("gp_"+str(assignee.pk))
+                if gp is not None and gp != '':
+                    gp = int(gp)
+                    if 0 < gp < 3:
+                        old = PointOperation.objects.filter(user=assignee,
+                                                            description="За " + event.name,
+                                                            moderator=user)
+                        if old.exists():
+                            old.delete()
+                        PointOperation.objects.create(user=assignee,
+                                                      amount=gp,
+                                                      timestamp=timezone.now(),
+                                                      description="За " + event.name,
+                                                      moderator=user)
+            through = ResponsibleEvent.objects.get(event=event, user=user)
+            through.done = True
+            through.save()
+
+            if check_event_closing(event)['all_ok']:
+                event.status = 'closed'
+                event.save()
+            return JsonResponse({'url': reverse('activism:event', kwargs={'pk': event.pk})}, status=200)
+            #
+            # event.status = 'closed'
+            # event.save()
+            # return HttpResponseRedirect(reverse('activism:index'))
         else:
             raise PermissionDenied
 
@@ -268,6 +332,7 @@ class DeletePointsView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
     raise_exception = True
 
 
+
 """
     Show views
 """
@@ -322,6 +387,13 @@ class EventView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, Default
         context['can_close'] = (context['is_responsible'] or context['can_all']) and event.status == 'open' and tasks_ok
         context['can_edit'] = (context['is_responsible'] or context['can_all']) and event.status == 'open'
         context['can_add_responsible'] = (context['is_main'] or context['can_all']) and event.status == 'open'
+        context['gps'] = {}
+        assignees = get_event_assignees(event)
+        context['assignees'] = assignees
+        for assignee in assignees:
+            if assignee.point_operations.filter(description="За "+event.name).exists():
+                context['gps'][assignee.pk] = assignee.point_operations.get(description="За "+event.name,
+                                                                            moderator=user)
         return context
 
 

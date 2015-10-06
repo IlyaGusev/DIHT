@@ -2,7 +2,7 @@ from autocomplete_light import ModelForm, ModelChoiceField
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 from django.forms import MultipleChoiceField, IntegerField, CharField
 from django.contrib.auth.models import Group, User
-from activism.models import Task, Event, AssigneeTask
+from activism.models import Task, Event, AssigneeTask, ResponsibleEvent
 from django.shortcuts import get_object_or_404
 
 
@@ -100,7 +100,7 @@ class EventForm(OverwriteOnlyModelFormMixin, ModelForm):
 
     class Meta:
         model = Event
-        fields = ('description', 'date_held', 'sector', 'responsible')
+        fields = ('description', 'date_held', 'sector')
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
@@ -113,6 +113,15 @@ class EventForm(OverwriteOnlyModelFormMixin, ModelForm):
                 return []
             return self.cleaned_data['responsible']
         return None
+
+    def save(self, commit=True):
+        if self.cleaned_data.get('responsible') is not None:
+            for pk in self.cleaned_data['responsible']:
+                ResponsibleEvent.objects.get_or_create(event=self.instance, user=User.objects.get(pk=pk))
+            ResponsibleEvent.objects.filter(event=self.instance)\
+                                    .exclude(user__pk__in=self.cleaned_data['responsible'])\
+                                    .delete()
+        return super(EventForm, self).save(commit)
 
 
 class PointForm(ModelForm):

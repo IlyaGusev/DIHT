@@ -39,7 +39,7 @@ class Event(Model):
     date_created = DateField("Дата создания", default=timezone.now)
     date_held = DateField("Дата проведения", default=timezone.now)
     description = TextField("Описание", blank=True)
-    responsible = ManyToManyField(User, verbose_name="Ответственные", related_name="events", blank=True)
+    responsible = ManyToManyField(User, verbose_name="Ответственные", through="ResponsibleEvent", blank=True)
     status = CharField("Статус", choices=STATUS_CHOICES, default='open', max_length=6)
     sector = ForeignKey(Sector, related_name="events", verbose_name="Сектор", blank=True, null=True)
 
@@ -112,6 +112,15 @@ class AssigneeTask(Model):
 
     def __str__(self):
         return str(self.user) + " in " + str(self.task)
+
+
+class ResponsibleEvent(Model):
+    user = ForeignKey(User, verbose_name="Ответственный", related_name='event_responsible')
+    event = ForeignKey(Event, verbose_name="Мероприятие", related_name='events')
+    done = BooleanField("Готово", default=False)
+
+    def __str__(self):
+        return str(self.user) + " in " + str(self.event)
 
 
 class PointOperation(Model):

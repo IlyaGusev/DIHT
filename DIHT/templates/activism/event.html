@@ -15,7 +15,10 @@
             <div class = "row">
                 <div class="col-md-12" style="padding-left:40px;">
                 {% if can_close %}
-                    <a class="btn btn-default" href="{% url 'activism:event_action' pk=event.pk action='close'%}"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
+                    <a class="btn btn-default action"
+                       href="{% url 'activism:event_action' pk=event.pk action='close'%}"
+                       id="close">
+                        <i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
                 {% else %}
                     <a class="btn btn-default disabled"><i class="fa fa-lg fa-check green"></i> Завершить мероприятие</a>
                 {% endif %}
@@ -214,4 +217,35 @@
                 </div>
             </div>
         </div>
+
+
+<div class="modal" id="close-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="close-form" action="{% url 'activism:event_action' pk=event.pk action='close'%}" method="POST" autocomplete="off">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h3>Очки роста за мероприятие</h3>
+                </div>
+                <div id="close-modal-body" class="modal-body">
+                    {% for assignee in assignees %}
+                    <label for="id_gp_{{assignee.pk}}">{{assignee.get_full_name}}:</label>
+                    <input class="form-control" id="id_gp_{{assignee.pk}}" name="gp_{{assignee.pk}}" min="0" step="1" max="2" type="number"
+                           {% for item in gps.items %}
+                                {% if item.0 == assignee.pk %}
+                                    value="{{item.1.amount|stringformat:'.0f'}}"
+                                {% endif %}
+                            {% endfor %}>
+                    <br>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Подтвердить</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
