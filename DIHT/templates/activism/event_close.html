@@ -12,34 +12,7 @@
     <h3>Очки роста за мероприятие</h3>
 </div>
 <div class = "row pagezone">
-    {% if not can_resolve %}
-    {% if is_responsible %}
-    <form class="close-event-form" action="{% url 'activism:event_close' pk=event.pk %}" method="POST" autocomplete="off">
-        {% csrf_token %}
-        <div class="row">
-            {% for list in assignees|partition:"3" %}
-            <div class="col-sm-4">
-                {% for assignee in list %}
-                <label for="id_gp_{{assignee.pk}}">{{assignee.get_full_name}}:</label>
-                <input class="form-control" id="id_gp_{{assignee.pk}}" name="gp_{{assignee.pk}}" min="0" step="1" max="2" type="number"
-                       {% for item in gps.items %}
-                            {% if item.0 == assignee.pk %}
-                                value="{{item.1.amount|stringformat:'.0f'}}"
-                            {% endif %}
-                        {% endfor %}>
-                <br>
-                {% endfor %}
-            </div>
-            {% endfor %}
-        </div>
-        <center>
-             <button type="submit" class="btn btn-danger">Подтвердить</button>
-        </center>
-    </form>
-    {% else %}
-    Ещё не все ответственные закрыли мероприятие
-    {% endif %}
-    {% else %}
+    {% if can_resolve %}
     <form class="close-event-form" action="{% url 'activism:event_close' pk=event.pk %}" method="POST" autocomplete="off">
         {% csrf_token %}
          <table class="table table-bordered">
@@ -72,6 +45,31 @@
              <button type="submit" class="btn btn-danger">Подтвердить</button>
         </center>
     </form>
+    {% elif is_responsible %}
+    <form class="close-event-form" action="{% url 'activism:event_close' pk=event.pk %}" method="POST" autocomplete="off">
+        {% csrf_token %}
+        <div class="row">
+            {% for list in assignees|partition:"3" %}
+            <div class="col-sm-4">
+                {% for assignee in list %}
+                <label for="id_gp_{{assignee.pk}}">{{assignee.get_full_name}}:</label>
+                <input class="form-control" id="id_gp_{{assignee.pk}}" name="gp_{{assignee.pk}}" min="0" step="1" max="2" type="number"
+                       {% for item in gps.items %}
+                            {% if item.0 == assignee.pk %}
+                                value="{{item.1.amount|stringformat:'.0f'}}"
+                            {% endif %}
+                        {% endfor %}>
+                <br>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <center>
+             <button type="submit" class="btn btn-danger">Подтвердить</button>
+        </center>
+    </form>
+    {% else %}
+    Ещё не все ответственные закрыли мероприятие
     {% endif %}
 </div>
 {% endblock %}

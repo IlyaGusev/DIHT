@@ -119,6 +119,12 @@ class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonCreateMixin, J
     raise_exception = True
 
 
+def check_user_can_manage(user):
+    return (user in Group.objects.get(name="Руководящая группа").user_set.all() or
+            user in Group.objects.get(name="Ответственные за активистов").user_set.all() or
+            user.is_superuser)
+
+
 def check_event_closing(event):
     assignees = get_event_assignees(event)
     has_main = False
@@ -142,13 +148,21 @@ def check_event_closing(event):
         if op.count() > 1:
             has_conflicts = True
         elif op.exists():
-            if op[0].moderator not in Group.objects.get(name="Руководящая группа").user_set.all():
+            if not check_user_can_manage(op[0].moderator):
                 only_main_gp = False
 
     return {"all_done": all_done,
             "only_main_gp": only_main_gp,
             "has_conflicts": has_conflicts,
-            "all_ok": all_done and only_main_gp and has_conflicts}
+            "all_ok": all_done and only_main_gp and not has_conflicts}
+
+
+def create_point_op(request, assignee, event, user):
+    gp = request.POST.get("gp_"+str(assignee.pk))
+    if gp is not None and gp != '':
+        if 0 < int(gp) < 3:
+            PointOperation.objects.create(user=assignee, amount=int(gp), timestamp=timezone.now(),
+                                          description="За " + event.name, moderator=user)
 
 
 class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin, DetailView):
@@ -161,13 +175,14 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
         context = super(EventCloseView, self).get_context_data(**kwargs)
         event = self.get_object()
         user = self.request.user
-        context['gps'] = {}
+        gps = {}
         assignees = get_event_assignees(event)
-        context['assignees'] = assignees
         for assignee in assignees:
             op = assignee.point_operations.filter(description="За "+event.name, moderator=user)
             if op.exists():
-                context['gps'][assignee.pk] = op[0]
+                gps[assignee.pk] = op[0]
+        context['assignees'] = assignees
+        context['gps'] = gps
 
         if context['can_all']:
             gp_table = OrderedDict()
@@ -181,23 +196,20 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
                                                         description="За " + event.name)
                     if gps.exists():
                         gp_table[assignee][responsible] = gps[0].amount
-
-            context['gp_table'] = gp_table
-            context['responsible'] = list(ordered_assignees.keys())
-
             conflict_users = PointOperation.objects.filter(description="За "+event.name)\
                                                    .values('user')\
                                                    .annotate(Count('id')).order_by()\
                                                    .filter(id__count__gt=1)\
                                                    .values_list('user', flat=True)
-            context['conflict_users'] = conflict_users
-
             not_main_users = []
             for assignee in assignees:
                 op = PointOperation.objects.filter(user=assignee, description="За " + event.name)
-                if op.count() == 1 and \
-                   op[0].moderator not in Group.objects.get(name="Руководящая группа").user_set.all():
+                if op.count() == 1 and not check_user_can_manage(op[0].moderator):
                     not_main_users.append(assignee.id)
+
+            context['gp_table'] = gp_table
+            context['responsible'] = list(ordered_assignees.keys())
+            context['conflict_users'] = conflict_users
             context['not_main_users'] = not_main_users
             context['can_resolve'] = context['can_all'] and check_event_closing(event)['all_done']
         return context
@@ -205,41 +217,34 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
     def post(self, request, *args, **kwargs):
         event = self.get_object()
         user = request.user
+        tasks_ok = (event.tasks.exclude(status="closed").count() == 0)
         is_responsible = (user in event.responsible.all())
         is_charge = (Group.objects.get(name="Ответственные за активистов") in request.user.groups.all())
-        is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         can_all = user.is_superuser or is_charge
-        tasks_ok = (event.tasks.exclude(status="closed").count() == 0)
         assignees = get_event_assignees(event)
         checks = check_event_closing(event)
         can_resolve = can_all and checks['all_done']
 
-        if (is_responsible or can_resolve) and tasks_ok and event.status == 'open':
+        if tasks_ok and event.status == 'open':
             if can_resolve:
-                PointOperation.objects.filter(description="За " + event.name).delete()
+                for assignee in assignees:
+                    PointOperation.objects.filter(user=assignee, description="За " + event.name).delete()
+                    create_point_op(request, assignee, event, user)
 
-            for assignee in assignees:
-                gp = request.POST.get("gp_"+str(assignee.pk))
-                if gp is not None and gp != '':
-                    gp = int(gp)
-                    if 0 < gp < 3:
-                        if not can_resolve:
-                            old = PointOperation.objects.filter(user=assignee, description="За " + event.name,
-                                                                moderator=user)
-                            if old.exists():
-                                old.delete()
-                            PointOperation.objects.create(user=assignee, amount=gp, timestamp=timezone.now(),
-                                                          description="За " + event.name, moderator=user)
-                        else:
-                            PointOperation.objects.create(user=assignee, amount=gp, timestamp=timezone.now(),
-                                                          description="За " + event.name, moderator=user)
-            checks = check_event_closing(event)
-            if is_responsible:
+            elif is_responsible:
+                for assignee in assignees:
+                    PointOperation.objects.filter(user=assignee, description="За " + event.name,
+                                                  moderator=user).delete()
+                    create_point_op(request, assignee, event, user)
+
                 through = ResponsibleEvent.objects.get(event=event, user=user)
                 through.done = True
                 through.save()
+            else:
+                raise PermissionDenied
 
-            if checks['all_ok'] or can_resolve:
+            checks = check_event_closing(event)
+            if checks['all_ok']:
                 event.status = 'closed'
                 event.save()
             return HttpResponseRedirect(reverse('activism:event', kwargs={'pk': event.pk}))
