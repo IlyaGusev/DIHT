@@ -485,10 +485,11 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultC
                 if form.cleaned_data['event'] not in user.event_responsible.values_list('event', flat=True):
                     return super(TaskView, self).form_invalid(form)
         result = super(TaskView, self).form_valid(form)
-        if user in task.assignees.all() and user in task.candidates.all():
-            task.candidates.remove(user)
-        if user in task.assignees.all() and user in task.rejected.all():
-            task.rejected.remove(user)
+        for u in list(set(task.assignees.all()).union(set(task.candidates.all())).union(set(task.rejected.all()))):
+            if u in task.assignees.all() and u in task.candidates.all():
+                task.candidates.remove(u)
+            if u in task.assignees.all() and u in task.rejected.all():
+                task.rejected.remove(u)
         return result
 
 
