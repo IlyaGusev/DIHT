@@ -6,10 +6,11 @@
 {% block title %} Закрыть мероприятие {% endblock %}
 {% block custom_scripts %}
     <script src="{% static 'js/activism.js' %}"></script>
+    <script src="{% static 'js/activism/event_close.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
 {% block content %}
 <div class="row well namezone">
-    <h3>Очки роста за мероприятие</h3>
+    <h3>Очки роста за {{event.name}}</h3>
 </div>
 <div class = "row pagezone">
     {% if can_resolve %}
@@ -28,15 +29,16 @@
                 <th> {{ assignee.get_full_name }}</th>
                 {% for res, gp in responsible_dict.items %}
                 <td class="big-letters text-center
-                    {% if assignee.pk in not_main_users and gp != 0 %} red {% endif %}
-                    {% if assignee.pk in conflict_users and gp != 0 %} blue {% endif %}">{% if gp != 0 %}{{ gp }}{% endif %}</td>
+                    {% if assignee.pk in conflict_users and gp != 0 %} blue
+                    {% elif assignee.pk in not_main_users and gp != 0 %} red
+                    {% endif %}" id="cur_id_gp_{{assignee.pk}}">{% if gp != 0 %}{{ gp|stringformat:'.0f' }}{% endif %}</td>
                 {% endfor %}
                 <td>
-                    <input class="form-control"
+                    <input class="form-control assignee-input"
                        id="id_gp_{{assignee.pk}}"
                        name="gp_{{assignee.pk}}"
                        min="0" step="1" max="2"
-                       type="number" value="">
+                       type="number">
                 </td>
             </tr>
             {% endfor %}
