@@ -1,6 +1,9 @@
 import logging
 from itertools import chain
 import datetime as dt
+from collections import OrderedDict
+from copy import deepcopy
+from django.db.models import Count
 from django.core.exceptions import PermissionDenied
 from django.views.generic import ListView, View, CreateView, TemplateView, DetailView, DeleteView
 from django.views.generic.edit import UpdateView
@@ -81,7 +84,10 @@ class DefaultContextMixin(object):
 class JsonCreateMixin(object):
     def form_valid(self, form):
         result = super(JsonCreateMixin, self).form_valid(form)
-        form.instance.responsible.add(self.request.user)
+        if not isinstance(form.instance, Event):
+            form.instance.responsible.add(self.request.user)
+        else:
+            ResponsibleEvent.objects.create(event=form.instance, user=self.request.user)
         return JsonResponse({'url': result.url}, status=200)
 
 
@@ -145,14 +151,59 @@ def check_event_closing(event):
             "all_ok": all_done and only_main_gp and has_conflicts}
 
 
-class EventActionView(SingleObjectMixin, GroupRequiredMixin, LoginRequiredMixin, View):
+class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin, DetailView):
     model = Event
     group_required = "Активисты"
+    template_name = "activism/event_close.html"
     raise_exception = True
+
+    def get_context_data(self, **kwargs):
+        context = super(EventCloseView, self).get_context_data(**kwargs)
+        event = self.get_object()
+        user = self.request.user
+        context['gps'] = {}
+        assignees = get_event_assignees(event)
+        context['assignees'] = assignees
+        for assignee in assignees:
+            op = assignee.point_operations.filter(description="За "+event.name, moderator=user)
+            if op.exists():
+                context['gps'][assignee.pk] = op[0]
+
+        if context['can_all']:
+            gp_table = OrderedDict()
+            ordered_assignees = OrderedDict()
+            for responsible in event.responsible.all():
+                ordered_assignees[responsible] = 0
+            for assignee in assignees:
+                gp_table[assignee] = deepcopy(ordered_assignees)
+                for responsible in event.responsible.all():
+                    gps = PointOperation.objects.filter(user=assignee, moderator=responsible,
+                                                        description="За " + event.name)
+                    if gps.exists():
+                        gp_table[assignee][responsible] = gps[0].amount
+
+            context['gp_table'] = gp_table
+            context['responsible'] = list(ordered_assignees.keys())
+
+            conflict_users = PointOperation.objects.filter(description="За "+event.name)\
+                                                   .values('user')\
+                                                   .annotate(Count('id')).order_by()\
+                                                   .filter(id__count__gt=1)\
+                                                   .values_list('user', flat=True)
+            context['conflict_users'] = conflict_users
+
+            not_main_users = []
+            for assignee in assignees:
+                op = PointOperation.objects.filter(user=assignee, description="За " + event.name)
+                if op.count() == 1 and \
+                   op[0].moderator not in Group.objects.get(name="Руководящая группа").user_set.all():
+                    not_main_users.append(assignee.id)
+            context['not_main_users'] = not_main_users
+            context['can_resolve'] = context['can_all'] and check_event_closing(event)['all_done']
+        return context
 
     def post(self, request, *args, **kwargs):
         event = self.get_object()
-        action = kwargs['action']
         user = request.user
         is_responsible = (user in event.responsible.all())
         is_charge = (Group.objects.get(name="Ответственные за активистов") in request.user.groups.all())
@@ -160,35 +211,38 @@ class EventActionView(SingleObjectMixin, GroupRequiredMixin, LoginRequiredMixin,
         can_all = user.is_superuser or is_charge
         tasks_ok = (event.tasks.exclude(status="closed").count() == 0)
         assignees = get_event_assignees(event)
+        checks = check_event_closing(event)
+        can_resolve = can_all and checks['all_done']
 
-        if ((is_responsible and tasks_ok) or can_all) and action == "close" and event.status == 'open':
+        if (is_responsible or can_resolve) and tasks_ok and event.status == 'open':
+            if can_resolve:
+                PointOperation.objects.filter(description="За " + event.name).delete()
+
             for assignee in assignees:
                 gp = request.POST.get("gp_"+str(assignee.pk))
                 if gp is not None and gp != '':
                     gp = int(gp)
                     if 0 < gp < 3:
-                        old = PointOperation.objects.filter(user=assignee,
-                                                            description="За " + event.name,
-                                                            moderator=user)
-                        if old.exists():
-                            old.delete()
-                        PointOperation.objects.create(user=assignee,
-                                                      amount=gp,
-                                                      timestamp=timezone.now(),
-                                                      description="За " + event.name,
-                                                      moderator=user)
-            through = ResponsibleEvent.objects.get(event=event, user=user)
-            through.done = True
-            through.save()
+                        if not can_resolve:
+                            old = PointOperation.objects.filter(user=assignee, description="За " + event.name,
+                                                                moderator=user)
+                            if old.exists():
+                                old.delete()
+                            PointOperation.objects.create(user=assignee, amount=gp, timestamp=timezone.now(),
+                                                          description="За " + event.name, moderator=user)
+                        else:
+                            PointOperation.objects.create(user=assignee, amount=gp, timestamp=timezone.now(),
+                                                          description="За " + event.name, moderator=user)
+            checks = check_event_closing(event)
+            if is_responsible:
+                through = ResponsibleEvent.objects.get(event=event, user=user)
+                through.done = True
+                through.save()
 
-            if check_event_closing(event)['all_ok']:
+            if checks['all_ok'] or can_resolve:
                 event.status = 'closed'
                 event.save()
-            return JsonResponse({'url': reverse('activism:event', kwargs={'pk': event.pk})}, status=200)
-            #
-            # event.status = 'closed'
-            # event.save()
-            # return HttpResponseRedirect(reverse('activism:index'))
+            return HttpResponseRedirect(reverse('activism:event', kwargs={'pk': event.pk}))
         else:
             raise PermissionDenied
 
@@ -202,7 +256,7 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, JsonCreateMixin, J
     def test_func(self, user):
         is_charge = Group.objects.get(name="Ответственные за активистов") in user.groups.all()
         is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
-        return user.events.count() != 0 or is_main or user.is_superuser or is_charge
+        return user.event_responsible.count() != 0 or is_main or user.is_superuser or is_charge
 
     def get_form_kwargs(self):
         kwargs = super(TaskCreateView, self).get_form_kwargs()
@@ -387,13 +441,6 @@ class EventView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, Default
         context['can_close'] = (context['is_responsible'] or context['can_all']) and event.status == 'open' and tasks_ok
         context['can_edit'] = (context['is_responsible'] or context['can_all']) and event.status == 'open'
         context['can_add_responsible'] = (context['is_main'] or context['can_all']) and event.status == 'open'
-        context['gps'] = {}
-        assignees = get_event_assignees(event)
-        context['assignees'] = assignees
-        for assignee in assignees:
-            if assignee.point_operations.filter(description="За "+event.name).exists():
-                context['gps'][assignee.pk] = assignee.point_operations.get(description="За "+event.name,
-                                                                            moderator=user)
         return context
 
 
@@ -409,7 +456,7 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultC
         user = self.request.user
         task = context['task']
         if not context['is_main'] and not context['can_all']:
-            context['events'] = user.events.filter(status='open')
+            context['events'] = user.event_responsible.filter(event__status='open')
         context['can_edit'] = context['can_manage'] and task.status != 'closed'
         context['can_close'] = ((context['can_manage']) and (context['is_main'] or context['can_all']) and
                                 (task.status == 'resolved' or task.status == 'in_progress')) or \
@@ -430,7 +477,7 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultC
         is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         if hasattr(form.cleaned_data, 'event'):
             if not is_main and not user.is_superuser and not is_charge:
-                if form.cleaned_data['event'] not in user.events.all():
+                if form.cleaned_data['event'] not in user.event_responsible.values_list('event', flat=True):
                     return super(TaskView, self).form_invalid(form)
         result = super(TaskView, self).form_valid(form)
         if user in task.assignees.all() and user in task.candidates.all():

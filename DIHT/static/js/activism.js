@@ -14,25 +14,6 @@ $(function() {
             }
     });
 
-    $('#form-modal').on('submit', '.task-create-form,.event-create-form', function(ev) {
-        ev.preventDefault();
-        var form = $(this);
-        $.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: form.serialize(),
-            success: function(response) {
-                $("#form-modal").modal('hide');
-                window.location.replace(response.url)
-            },
-            error: function(request, status, error) {
-                view_modal_errors(form, request)
-            }
-        });
-        return false;
-    });
-
-
      // Task actions
     function post_action(url, data){
         $.ajax({

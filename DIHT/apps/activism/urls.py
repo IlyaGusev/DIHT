@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from activism.views import EventView, TaskView, IndexView, TaskCreateView, \
-    EventsView, EventCreateView, TaskActionView, EventActionView, UnlockView, \
+    EventsView, EventCreateView, TaskActionView, EventCloseView, UnlockView, \
     SectorView, ActivistsView, TaskLogView, AddPointsView, DeletePointsView, \
     PaymentsView
 
@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^events/$', EventsView.as_view(), name='events'),
     url(r'^events/create/$', EventCreateView.as_view(), name='create_event'),
     url(r'^events/(?P<pk>[0-9]*)/$', EventView.as_view(), name='event'),
-    url(r'^events/(?P<pk>[0-9]*)/(?P<action>[0-9_a-z]+)$', EventActionView.as_view(), name='event_action'),
+    url(r'^events/(?P<pk>[0-9]*)/close/$', EventCloseView.as_view(), name='event_close'),
 
     url(r'^sectors/(?P<pk>[0-9]*)/$', SectorView.as_view(), name='sector'),
 

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load add_class %}
+{% load thumbnail %}
+{% load list_utils %}
+{% block title %} Закрыть мероприятие {% endblock %}
+{% block custom_scripts %}
+    <script src="{% static 'js/activism.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
+{% block content %}
+<div class="row well namezone">
+    <h3>Очки роста за мероприятие</h3>
+</div>
+<div class = "row pagezone">
+    {% if not can_resolve %}
+    {% if is_responsible %}
+    <form class="close-event-form" action="{% url 'activism:event_close' pk=event.pk %}" method="POST" autocomplete="off">
+        {% csrf_token %}
+        <div class="row">
+            {% for list in assignees|partition:"3" %}
+            <div class="col-sm-4">
+                {% for assignee in list %}
+                <label for="id_gp_{{assignee.pk}}">{{assignee.get_full_name}}:</label>
+                <input class="form-control" id="id_gp_{{assignee.pk}}" name="gp_{{assignee.pk}}" min="0" step="1" max="2" type="number"
+                       {% for item in gps.items %}
+                            {% if item.0 == assignee.pk %}
+                                value="{{item.1.amount|stringformat:'.0f'}}"
+                            {% endif %}
+                        {% endfor %}>
+                <br>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <center>
+             <button type="submit" class="btn btn-danger">Подтвердить</button>
+        </center>
+    </form>
+    {% else %}
+    Ещё не все ответственные закрыли мероприятие
+    {% endif %}
+    {% else %}
+    <form class="close-event-form" action="{% url 'activism:event_close' pk=event.pk %}" method="POST" autocomplete="off">
+        {% csrf_token %}
+         <table class="table table-bordered">
+            <tr>
+                    <th></th>
+                {% for res in responsible %}
+                    <th class="text-center">{{res.get_full_name}}</th>
+                {% endfor %}
+                    <th class="text-center"> Я </th>
+            </tr>
+            {% for assignee, responsible_dict in gp_table.items%}
+            <tr>
+                <th> {{ assignee.get_full_name }}</th>
+                {% for res, gp in responsible_dict.items %}
+                <td class="big-letters text-center
+                    {% if assignee.pk in not_main_users and gp != 0 %} red {% endif %}
+                    {% if assignee.pk in conflict_users and gp != 0 %} blue {% endif %}">{% if gp != 0 %}{{ gp }}{% endif %}</td>
+                {% endfor %}
+                <td>
+                    <input class="form-control"
+                       id="id_gp_{{assignee.pk}}"
+                       name="gp_{{assignee.pk}}"
+                       min="0" step="1" max="2"
+                       type="number" value="">
+                </td>
+            </tr>
+            {% endfor %}
+         </table>
+        <center>
+             <button type="submit" class="btn btn-danger">Подтвердить</button>
+        </center>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
+

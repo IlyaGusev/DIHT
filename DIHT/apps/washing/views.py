@@ -1,6 +1,6 @@
-import collections
 import datetime as dt
 import logging
+from collections import OrderedDict
 from django.views.generic import TemplateView
 from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
@@ -32,12 +32,12 @@ class IndexView(TemplateView):
         machines = WashingMachine.objects.filter(is_active=True)
         current = timezone.now()
 
-        schedule = collections.OrderedDict()
+        schedule = OrderedDict()
 
         day = current.date()
         context['current'] = day
         for i in range(7):
-            schedule[day] = collections.OrderedDict()
+            schedule[day] = OrderedDict()
             can_show = False
             for machine in machines:
                 machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
@@ -73,7 +73,7 @@ class IndexView(TemplateView):
                         interval = (dt.time(start_hour, start_minute, 0),
                                     dt.time(end_hour, end_minute, 0))
                         if schedule[day].get(interval) is None:
-                            schedule[day][interval] = collections.OrderedDict()
+                            schedule[day][interval] = OrderedDict()
                         schedule[day][interval][machine] = [status, params.price, user, False]
                         start += delta
             if can_show:

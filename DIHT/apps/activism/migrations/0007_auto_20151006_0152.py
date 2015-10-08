@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='responsibleevent',
             name='event',
-            field=models.ForeignKey(verbose_name='Мероприятие', related_name='events', to='activism.Event'),
+            field=models.ForeignKey(verbose_name='Мероприятие', related_name='responsibles', to='activism.Event'),
         ),
         migrations.AddField(
             model_name='responsibleevent',

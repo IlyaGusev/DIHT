@@ -116,7 +116,7 @@ class AssigneeTask(Model):
 
 class ResponsibleEvent(Model):
     user = ForeignKey(User, verbose_name="Ответственный", related_name='event_responsible')
-    event = ForeignKey(Event, verbose_name="Мероприятие", related_name='events')
+    event = ForeignKey(Event, verbose_name="Мероприятие", related_name='responsibles')
     done = BooleanField("Готово", default=False)
 
     def __str__(self):

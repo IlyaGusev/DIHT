@@ -92,12 +92,12 @@
             <hr class="just-a-line">
             <div class = "row">
                 <div class = "col-md-6">
-                    <table class="usual-letters" border="0" style="width:100%; margin-bottom:15px;">
+                    <table class="usual-letters" border="0" style="width:100%; margin-bottom:15px; table-layout:fixed;">
                         <tr>
-                            <td>
+                            <td style="width:100px;">
                                 <span class="param">Мероприятие:</span>
                             </td>
-                            <td class="ra">
+                            <td class="ra" style="width:100%;">
                             {% if can_edit_event  %}
                                 <span id="event">
                                     {% if task.event %}

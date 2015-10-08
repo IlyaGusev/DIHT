@@ -16,7 +16,15 @@ $(function() {
         return false;
     });
 
-    $('#form-modal').on('submit', '.find-form,.password-form,.add-points-form,.profile-form,.add-money-form,.remove-money-form', function(ev) {
+    $('#form-modal').on('submit', '.find-form, \
+                                   .password-form, \
+                                   .add-points-form, \
+                                   .profile-form, \
+                                   .add-money-form, \
+                                   .remove-money-form, \
+                                   .task-create-form, \
+                                   .event-create-form',
+                                   function(ev) {
         ev.preventDefault();
         var form = $(this);
         $.ajax({
