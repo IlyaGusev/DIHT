@@ -581,7 +581,7 @@ class TaskLogView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
                 for key in diff.keys():
                     if key not in ['datetime_last_modified', ]:
                         name = str(Task._meta.get_field(key).verbose_name)
-                        if key in ['candidates', 'responsible']:
+                        if key in ['candidates', 'responsible', 'rejected']:
                             old = ', '.join(get_full_names(diff[key][0]))
                             new = ', '.join(get_full_names(diff[key][1]))
                         else:
