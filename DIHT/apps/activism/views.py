@@ -482,7 +482,9 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultC
         is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
         if hasattr(form.cleaned_data, 'event'):
             if not is_main and not user.is_superuser and not is_charge:
-                if form.cleaned_data['event'] not in user.event_responsible.values_list('event', flat=True):
+                if form.cleaned_data['event'] not in Event.objects.filter(pk__in=user.event_responsible
+                                                                                     .filter(event__status='open')
+                                                                                     .values_list('event', flat=True)):
                     return super(TaskView, self).form_invalid(form)
         result = super(TaskView, self).form_valid(form)
         for u in list(set(task.assignees.all()).union(set(task.candidates.all())).union(set(task.rejected.all()))):
