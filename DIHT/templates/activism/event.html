@@ -25,6 +25,16 @@
                 </div>
             </div>
             {% endif %}
+            {% if can_all and event.status == 'closed'%}
+            <div class = "row">
+                <div class="col-md-12" style="padding-left:40px;">
+                    <a class="btn btn-default"
+                       href="{% url 'activism:event_close' pk=event.pk %}"
+                       id="close">
+                        <i class="fa fa-lg fa-check green"></i> Переназначить ОР</a>
+                </div>
+            </div>
+            {% endif %}
             <div class = "col-md-12">
                 <div class="section">
                     <h5 class="section-name">Информация</h5>
@@ -164,6 +174,25 @@
                     {% endif %}
         
                 </div>
+                {% if event.status == 'closed' %}
+                <br>
+                <div class = "section">
+                     <h5 class="section-name">Очки роста</h5>
+                    <hr class="just-a-line">
+                    {% for op in operations %}
+                        <a href="{% url 'accounts:profile' pk=op.user.profile.pk %}">
+                            {% if op.user.avatar.img %}
+                                {% thumbnail op.user.avatar.img "22x22" crop="center" as pic %}
+                                <img src="{{ pic.url }}" class="avatar">
+                                {% endthumbnail %}
+                            {% endif %}{{ op.user.get_full_name }}</a>:
+                            <span class="big-letters">{{ op.amount|stringformat:'.0f' }}</span>
+                            <span style="font-size:10px;">ОР</span>
+                    <br>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <br>
                 <div class = "section">
                     <div class="table-responsive">
                         <table class = "table usual-letters">
@@ -177,7 +206,7 @@
                                 <td><a href="{% url 'activism:task' pk=task.pk %}">{{ task.name }}</a></td>
                                 <td> {% for part in task.participants.all %}
                                     <a href="{% url 'accounts:profile' pk=part.user.profile.pk %}">
-                                    {% if part.user.avatar.img %}
+                                        {% if part.user.avatar.img %}
                                             {% thumbnail part.user.avatar.img "22x22" crop="center" as pic %}
                                             <img src="{{ pic.url }}" class="avatar">
                                             {% endthumbnail %}
@@ -206,7 +235,7 @@
                             {% endfor %}
                         </table>
                     </div>
-                    {% if can_edit or can_create_tasks %}
+                    {% if can_edit and can_create_tasks %}
                     <center><a href="{% url 'activism:create_task' %}"
                                class="btn btn-default robotobold"
                                data-target="#form-modal">
@@ -217,4 +246,5 @@
                 </div>
             </div>
         </div>
+
 {% endblock %}

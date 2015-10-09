@@ -218,7 +218,7 @@
                     </div>
                 </div>
                 {% endfor %}
-                {% if user.event_responsible.all.count > 0 or user.is_superuser or is_charge or is_main%}
+                {% if can_create_tasks %}
                 <center>
                     <a href="{% url 'activism:create_task' %}" 
                        class="btn btn-default robotobold"

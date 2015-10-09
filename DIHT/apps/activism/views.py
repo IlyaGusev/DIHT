@@ -71,6 +71,8 @@ class DefaultContextMixin(object):
         context['sectors'] = Sector.objects.all()
         context['users'] = User.objects.all()
         context['can_manage'] = context['is_charge'] or context['is_superuser']
+        context['can_create_tasks'] = (user.event_responsible.count() != 0 or context['is_charge'] or
+                                      context['is_superuser'] or context['is_main'])
         if hasattr(self, 'object'):
             obj = self.get_object()
             context['is_responsible'] = (user in obj.responsible.all())
@@ -206,12 +208,19 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
                 op = PointOperation.objects.filter(user=assignee, description="За " + event.name)
                 if op.count() == 1 and not check_user_can_manage(op[0].moderator):
                     not_main_users.append(assignee.id)
+            responsible = OrderedDict()
+            for res in ordered_assignees.keys():
+                responsible[res] = ResponsibleEvent.objects.get(event=event, user=res).done
 
+            can_resolve = context['can_all']
+            if context['is_responsible'] and context['can_all']:
+                can_resolve = can_resolve and ResponsibleEvent.objects.get(event=event, user=user).done
+
+            context['can_resolve'] = can_resolve
             context['gp_table'] = gp_table
-            context['responsible'] = list(ordered_assignees.keys())
+            context['responsible'] = responsible
             context['conflict_users'] = conflict_users
             context['not_main_users'] = not_main_users
-            context['can_resolve'] = context['can_all'] and check_event_closing(event)['all_done']
         return context
 
     def post(self, request, *args, **kwargs):
@@ -222,16 +231,16 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
         is_charge = (Group.objects.get(name="Ответственные за активистов") in request.user.groups.all())
         can_all = user.is_superuser or is_charge
         assignees = get_event_assignees(event)
-        checks = check_event_closing(event)
-        can_resolve = can_all and checks['all_done']
+        can_resolve = can_all
+        if is_responsible and can_all:
+            can_resolve = can_resolve and ResponsibleEvent.objects.get(event=event, user=user).done
 
-        if tasks_ok and event.status == 'open':
+        if tasks_ok:
             if can_resolve:
                 for assignee in assignees:
                     PointOperation.objects.filter(user=assignee, description="За " + event.name).delete()
                     create_point_op(request, assignee, event, user)
-
-            elif is_responsible:
+            elif is_responsible and event.status == 'open':
                 for assignee in assignees:
                     PointOperation.objects.filter(user=assignee, description="За " + event.name,
                                                   moderator=user).delete()
@@ -243,10 +252,11 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
             else:
                 raise PermissionDenied
 
-            checks = check_event_closing(event)
-            if checks['all_ok']:
-                event.status = 'closed'
-                event.save()
+            if event.status == 'open':
+                checks = check_event_closing(event)
+                if checks['all_ok'] or (can_resolve and checks['only_main_gp'] and not checks['has_conflicts']):
+                    event.status = 'closed'
+                    event.save()
             return HttpResponseRedirect(reverse('activism:event', kwargs={'pk': event.pk}))
         else:
             raise PermissionDenied
@@ -446,6 +456,7 @@ class EventView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, Default
         context['can_close'] = (context['is_responsible'] or context['can_all']) and event.status == 'open' and tasks_ok
         context['can_edit'] = (context['is_responsible'] or context['can_all']) and event.status == 'open'
         context['can_add_responsible'] = (context['is_main'] or context['can_all']) and event.status == 'open'
+        context['operations'] = PointOperation.objects.filter(description="За "+event.name)
         return context
 
 
