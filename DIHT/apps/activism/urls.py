@@ -22,7 +22,7 @@ urlpatterns = [
 
     url(r'^activists/$', ActivistsView.as_view(), name='activists'),
     url(r'^activists/(?P<pk>[0-9]*)/add_points/$', AddPointsView.as_view(), name='add_points'),
-    url(r'^activists/delete_points/(?P<pk>[0-9]*)/$', DeletePointsView.as_view(), name='delete_points'),
+    url(r'^activists/(?P<pk>[0-9]*)/delete_points/$', DeletePointsView.as_view(), name='delete_points'),
 
     url(r'^payments/$', PaymentsView.as_view(), name='payments'),
 ]

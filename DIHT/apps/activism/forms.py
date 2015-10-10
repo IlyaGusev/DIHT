@@ -1,9 +1,10 @@
-from autocomplete_light import ModelForm, ModelChoiceField
-from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 from django.forms import MultipleChoiceField, IntegerField, CharField
 from django.contrib.auth.models import Group, User
-from activism.models import Task, Event, AssigneeTask, ResponsibleEvent
 from django.shortcuts import get_object_or_404
+from autocomplete_light import ModelForm, ModelChoiceField
+from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
+from activism.models import Task, Event, AssigneeTask, ResponsibleEvent
+from activism.utils import global_checks
 
 
 class OverwriteOnlyModelFormMixin(object):
@@ -31,9 +32,8 @@ class OverwriteOnlyModelFormMixin(object):
 class TaskCreateForm(ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(TaskCreateForm, self).__init__(*args, **kwargs)
-        is_charge = (Group.objects.get(name="Ответственные за активистов") in user.groups.all())
-        is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
-        if not (is_main or user.is_superuser or is_charge):
+        checks = global_checks(user)
+        if not checks['can_choose_all_events']:
             self.fields['event'].queryset = Event.objects.filter(pk__in=user.event_responsible
                                                                             .filter(event__status='open')
                                                                             .values_list('event', flat=True))

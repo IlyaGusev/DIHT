@@ -1,6 +1,5 @@
-import logging
-from itertools import chain
 import datetime as dt
+from itertools import chain
 from collections import OrderedDict
 from copy import deepcopy
 from django.db.models import Count
@@ -16,34 +15,9 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestM
 from reversion import get_for_object
 from activism.models import Event, Task, AssigneeTask, Sector, PointOperation, ResponsibleEvent
 from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm
-
-logger = logging.getLogger('DIHT.custom')
-
-
-def get_level(user):
-    if Group.objects.get(name="Руководящая группа") in user.groups.all():
-        return 4
-
-    hours = sum(user.participated.filter(task__status__in=['closed']).values_list('hours', flat=True))
-    gp = hours // 10 + sum(user.point_operations.all().values_list('amount', flat=True))
-
-    if gp < 4:
-        return {'sign': 'Активист-новичок', 'coef': 0}
-    elif gp < 16:
-        return {'sign': 'Активист', 'coef': 1}
-    elif gp < 35:
-        return {'sign': 'Активист-организатор', 'coef': 1.7}
-    elif gp < 70:
-        return {'sign': 'Активист-лидер', 'coef': 2.4}
-    else:
-        return {'sign': 'Активист-руководитель', 'coef': 4}
+from activism.utils import global_checks, get_level
 
 
-def get_event_assignees(event):
-    assignees = set()
-    for task in Task.objects.filter(event=event.pk):
-        assignees = assignees.union(set(task.assignees.all()))
-    return list(assignees)
 """
     Mixins
 """
@@ -51,10 +25,9 @@ def get_event_assignees(event):
 
 class PostAccessMixin(SingleObjectMixin):
     def post(self, request, *args, **kwargs):
-        if request.user in self.get_object().responsible.all() or request.user.is_superuser or \
-                (Group.objects.get(name="Ответственные за активистов") in request.user.groups.all()) or \
-                (Group.objects.get(name="Руководящая группа") in request.user.groups.all()):
-                return super(PostAccessMixin, self).post(request, args, kwargs)
+        checks = global_checks(request.user, self.get_object())
+        if checks['is_responsible'] or checks['can_all'] or checks['is_main']:
+            return super(PostAccessMixin, self).post(request, args, kwargs)
         else:
             raise PermissionDenied
 
@@ -63,23 +36,11 @@ class DefaultContextMixin(object):
     def get_context_data(self, **kwargs):
         context = super(DefaultContextMixin, self).get_context_data(**kwargs)
         user = self.request.user
-        context['is_superuser'] = user.is_superuser
-        context['is_charge'] = Group.objects.get(name="Ответственные за активистов") in user.groups.all()
-        context['is_main'] = Group.objects.get(name="Руководящая группа") in user.groups.all()
-        context['can_all'] = context['is_charge'] or context['is_superuser']
         context['events'] = Event.objects.all()
         context['sectors'] = Sector.objects.all()
         context['users'] = User.objects.all()
-        context['can_manage'] = context['is_charge'] or context['is_superuser']
-        context['can_create_tasks'] = (user.event_responsible.count() != 0 or context['is_charge'] or
-                                      context['is_superuser'] or context['is_main'])
-        if hasattr(self, 'object'):
-            obj = self.get_object()
-            context['is_responsible'] = (user in obj.responsible.all())
-            context['can_manage'] = context['can_manage'] or context['is_responsible']
-            if hasattr(obj, 'sector'):
-                if obj.sector is not None:
-                    context['can_manage'] = context['can_manage'] or obj.sector.main == user
+        obj = self.get_object() if hasattr(self, 'object') else None
+        context.update(global_checks(user, obj))
         return context
 
 
@@ -121,10 +82,18 @@ class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonCreateMixin, J
     raise_exception = True
 
 
-def check_user_can_manage(user):
-    return (user in Group.objects.get(name="Руководящая группа").user_set.all() or
-            user in Group.objects.get(name="Ответственные за активистов").user_set.all() or
-            user.is_superuser)
+# EventClosingView  - begin
+
+def get_event_assignees(event):
+    assignees = set()
+    for task in Task.objects.filter(event=event.pk):
+        assignees = assignees.union(set(task.assignees.all()))
+    return list(assignees)
+
+
+def check_user_can_create_gp(user):
+    checks = global_checks(user)
+    return checks['is_main'] or checks['can_all']
 
 
 def check_event_closing(event):
@@ -150,7 +119,7 @@ def check_event_closing(event):
         if op.count() > 1:
             has_conflicts = True
         elif op.exists():
-            if not check_user_can_manage(op[0].moderator):
+            if not check_user_can_create_gp(op[0].moderator):
                 only_main_gp = False
 
     return {"all_done": all_done,
@@ -206,7 +175,7 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
             not_main_users = []
             for assignee in assignees:
                 op = PointOperation.objects.filter(user=assignee, description="За " + event.name)
-                if op.count() == 1 and not check_user_can_manage(op[0].moderator):
+                if op.count() == 1 and not check_user_can_create_gp(op[0].moderator):
                     not_main_users.append(assignee.id)
             responsible = OrderedDict()
             for res in ordered_assignees.keys():
@@ -226,13 +195,12 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
     def post(self, request, *args, **kwargs):
         event = self.get_object()
         user = request.user
+        checks = global_checks(user, event)
         tasks_ok = (event.tasks.exclude(status="closed").count() == 0)
-        is_responsible = (user in event.responsible.all())
-        is_charge = (Group.objects.get(name="Ответственные за активистов") in request.user.groups.all())
-        can_all = user.is_superuser or is_charge
         assignees = get_event_assignees(event)
-        can_resolve = can_all
-        if is_responsible and can_all:
+
+        can_resolve = checks['can_all']
+        if checks['is_responsible'] and checks['can_all']:
             can_resolve = can_resolve and ResponsibleEvent.objects.get(event=event, user=user).done
 
         if tasks_ok:
@@ -240,7 +208,7 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
                 for assignee in assignees:
                     PointOperation.objects.filter(user=assignee, description="За " + event.name).delete()
                     create_point_op(request, assignee, event, user)
-            elif is_responsible and event.status == 'open':
+            elif checks['is_responsible'] and event.status == 'open':
                 for assignee in assignees:
                     PointOperation.objects.filter(user=assignee, description="За " + event.name,
                                                   moderator=user).delete()
@@ -261,6 +229,8 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
         else:
             raise PermissionDenied
 
+# EventClosingView  - end
+
 
 class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, JsonCreateMixin, JsonErrorsMixin, CreateView):
     model = Task
@@ -269,14 +239,60 @@ class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, JsonCreateMixin, J
     raise_exception = True
 
     def test_func(self, user):
-        is_charge = Group.objects.get(name="Ответственные за активистов") in user.groups.all()
-        is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
-        return user.event_responsible.count() != 0 or is_main or user.is_superuser or is_charge
+        checks = global_checks(user)
+        return checks['can_create_tasks']
 
     def get_form_kwargs(self):
         kwargs = super(TaskCreateView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+
+
+# TaskActionView - begin
+
+def table_actions(request, task, action):
+    if action == 'resolved':
+        for key in request.POST.keys():
+            if key.split('_')[0] == 'hours':
+                user_hours = request.POST[key]
+                through = task.participants.get(user__pk=key.split('_')[1])
+                through.done = True
+                through.hours = user_hours
+                through.save()
+    elif action == 'close':
+        table_actions(request, task, 'resolve')
+        for u in task.assignees.all():
+            through = task.participants.get(user=u)
+            through.approved = True
+            through.save()
+        task.datetime_closed = timezone.now()
+        task.save()
+    elif action == 'in_progress' or action == 'open':
+        if task.candidates.count() != 0:
+            task.rejected.add(*task.candidates.all())
+            task.candidates.clear()
+        task.save()
+    elif action == 'delete':
+        task.delete()
+    elif action == 'do':
+        task.candidates.add(request.user)
+    elif action == 'prop':
+        task.is_urgent = request.POST['is_urgent'] if (request.POST.get('is_urgent') is not None) else False
+        task.is_hard = request.POST['is_hard'] if (request.POST.get('is_hard') is not None) else False
+        task.save()
+
+
+def table_post(request, task, action):
+    if action == 'resolved':
+        return task.participants.filter(done=True).count() == task.participants.all().count()
+    elif action == 'delete':
+        return False
+    elif action == 'prop':
+        return False
+    elif action == 'do':
+        return False
+    else:
+        return True
 
 
 class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, View):
@@ -288,89 +304,56 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         task = self.get_object()
         action = kwargs['action']
         user = request.user
-        is_charge = (Group.objects.get(name="Ответственные за активистов") in user.groups.all())
-        is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
-        is_responsible = user in task.responsible.all()
-        is_assignee = (user in task.assignees.all())
-        is_sector_main = False
-        if task.sector is not None:
-            is_sector_main = (task.sector.main == user)
+        checks = global_checks(user, task)
+
+        # Preconditions
         task_number_ok = (task.assignees.all().count() >= task.number_of_assignees)
-        task_status_ok = task.status == 'in_labor' or task.status == 'open'
-        can_all = user.is_superuser or is_charge
-        can_manage = is_responsible or can_all or is_sector_main
-        can_close = can_manage and (is_main or can_all)
-        can_resolve = (not can_close) and (can_manage or is_assignee)
+        can_all = checks['can_all']
+        can_manage = checks['can_manage']
+        can_close = can_manage and (checks['is_main'] or can_all)
+        can_resolve = (not can_close) and checks['is_assignee']
+        can_do = (user not in task.candidates.all() and
+                  user not in task.assignees.all() and
+                  user not in task.rejected.all())
 
-        table = {'in_labor': {'open': ('in_labor', can_manage)},
-                 'in_progress': {'in_labor': ('in_progress', can_manage and task_number_ok),
-                                 'open': ('in_progress', can_manage and task_number_ok)},
-                 'resolved': {'in_progress': ('resolved', can_resolve)},
-                 'not_resolved': {'resolved': ('in_progress', can_manage)},
-                 'close': {'resolved': ('closed', can_close),
-                           'in_progress': ('closed', can_manage),
-                           'closed': ('closed', can_close)},
-                 'open': {'in_labor': ('open', can_manage)}}
+        # Route table
+        table = {'in_labor':     {'open':        ('in_labor',    can_manage)},
+                 'in_progress':  {'in_labor':    ('in_progress', can_manage and task_number_ok),
+                                  'open':        ('in_progress', can_manage and task_number_ok)},
+                 'resolved':     {'in_progress': ('resolved',    can_resolve)},
+                 'not_resolved': {'resolved':    ('in_progress', can_manage)},
+                 'close':        {'resolved':    ('closed',      can_close),
+                                  'in_progress': ('closed',      can_manage),
+                                  'closed':      ('closed',      can_close)},
+                 'open':         {'in_labor':    ('open',        can_manage)},
+                 'delete':       {'open':        (None,          can_manage),
+                                  'in_labor':    (None,          can_manage),
+                                  'in_progress': (None,          can_all)},
+                 'do':           {'in_labor':    (None,          can_do)},
+                 'prop':         {'any':         (None,          can_all)}}
 
-        if action == 'prop':
-            if can_all:
-                if request.POST.get('is_urgent') is not None:
-                    task.is_urgent = request.POST['is_urgent']
-                else:
-                    task.is_urgent = False
-                if request.POST.get('is_hard') is not None:
-                    task.is_hard = request.POST['is_hard']
-                else:
-                    task.is_hard = False
-                task.save()
-                return JsonResponse({'url': reverse('activism:task', kwargs={'pk': task.pk})}, status=200)
-            else:
-                raise PermissionDenied
-
-        if action == 'do':
-            if user not in task.candidates.all() and \
-               user not in task.assignees.all() and \
-               user not in task.rejected.all():
-                task.candidates.add(request.user)
-                task.save()
-                return JsonResponse({'url': reverse('activism:index')}, status=200)
-            else:
-                raise PermissionDenied
-
-        if action == 'delete':
-            if (is_responsible and task_status_ok) or can_all:
-                task.delete()
-                return JsonResponse({'url': reverse('activism:index')}, status=200)
-            else:
-                raise PermissionDenied
-
+        # Transition
         if table.get(action) is not None:
             init = table[action]
-            if init.get(task.status) is not None:
-                if init[task.status][1]:
-                    if action == 'resolved' or action == 'close':
-                        for user in task.assignees.all():
-                            user_hours = request.POST['hours_' + str(user.pk)]
-                            through = task.participants.get(user=user)
-                            through.hours = user_hours
-                            if action == 'close':
-                                through.approved = True
-                                task.datetime_closed = timezone.now()
-                            through.save()
-                    task.status = init[task.status][0]
-                    task.save()
-                    if task.status != 'in_labor':
-                        if task.candidates.count() != 0:
-                            task.rejected.add(*task.candidates.all())
-
-                            task.candidates.clear()
-                    return JsonResponse({'url': reverse('activism:task', kwargs={'pk': task.pk})}, status=200)
+            status = 'any' if (init.get('any') is not None) else task.status
+            if init.get(status) is not None:
+                if init[status][1]:
+                    table_actions(request, task, action)
+                    if table_post(request, task, action):
+                        task.status = init[status][0]
+                        task.save()
+                    if task.pk is not None:
+                        return JsonResponse({'url': reverse('activism:task', kwargs={'pk': task.pk})}, status=200)
+                    else:
+                        return JsonResponse({'url': reverse('activism:index')}, status=200)
                 else:
                     raise PermissionDenied
             else:
                 raise PermissionDenied
         else:
             raise PermissionDenied
+
+# TaskActionView - end
 
 
 class AddPointsView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
@@ -399,7 +382,6 @@ class DeletePointsView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
     group_required = 'Ответственные за активистов'
     success_url = reverse_lazy('activism:activists')
     raise_exception = True
-
 
 
 """
@@ -489,10 +471,9 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultC
     def form_valid(self, form):
         task = self.get_object()
         user = self.request.user
-        is_charge = (Group.objects.get(name="Ответственные за активистов") in user.groups.all())
-        is_main = Group.objects.get(name="Руководящая группа") in user.groups.all()
+        checks = global_checks(user, task)
         if hasattr(form.cleaned_data, 'event'):
-            if not is_main and not user.is_superuser and not is_charge:
+            if not (checks['can_choose_all_events']):
                 if form.cleaned_data['event'] not in Event.objects.filter(pk__in=user.event_responsible
                                                                                      .filter(event__status='open')
                                                                                      .values_list('event', flat=True)):
@@ -543,6 +524,8 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
                                                   key=lambda record: record['sum_all'])))
         return context
 
+
+# TaskLog - begin
 
 def dict_diff(first, second):
     diff = {}
@@ -600,6 +583,8 @@ class TaskLogView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
         context['records'] = records
         return context
 
+# TaskLog - end
+
 
 class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
     group_required = "Ответственные за активистов"
@@ -608,9 +593,8 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(PaymentsView, self).get_context_data(**kwargs)
-        const = 2000
-        if 'const' in self.request.GET:
-            const = int(self.request.GET['const'])
+
+        const = int(self.request.GET['const']) if 'const' in self.request.GET else 2000
         context['const'] = const
 
         begin = timezone.now()-dt.timedelta(days=30)

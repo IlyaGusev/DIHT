@@ -456,7 +456,7 @@
                     </td>
                 </tr>
             {% endif %}
-            {% if task.status == 'closed' or task.status == 'resolved' %}
+            {% if task.status == 'closed' or task.status == 'resolved' or task.status == 'in_progress'%}
                 <tr>
                     <td>
                         <span class="param">Реальные:</span>
@@ -572,11 +572,9 @@
                     <h3>Введите количество часов</h3>
                 </div>
                 <div id="resolve-modal-body" class="modal-body">
-                    {% for user in task.assignees.all %}
                     <label for="id_hours_{{user.pk}}">{{user.get_full_name}}: </label>
                     <input class="form-control" id="id_hours_{{user.pk}}" min="0" name="hours_{{user.pk}}" step="any"
                            type="number" value="{{task.hours_predict|stringformat:'.1f'}}">
-                    {% endfor %}
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-danger">Подтвердить</button>
