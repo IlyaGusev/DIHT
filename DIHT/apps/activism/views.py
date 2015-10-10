@@ -260,7 +260,7 @@ def table_actions(request, task, action):
                 through.hours = user_hours
                 through.save()
     elif action == 'close':
-        table_actions(request, task, 'resolve')
+        table_actions(request, task, 'resolved')
         for u in task.assignees.all():
             through = task.participants.get(user=u)
             through.approved = True
