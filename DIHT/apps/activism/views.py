@@ -311,7 +311,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         can_all = checks['can_all']
         can_manage = checks['can_manage']
         can_close = can_manage and (checks['is_main'] or can_all)
-        can_resolve = (not can_close) and checks['is_assignee']
+        can_resolve = (not can_close) and (checks['is_assignee'] or checks['is_responsible'])
         can_do = (user not in task.candidates.all() and
                   user not in task.assignees.all() and
                   user not in task.rejected.all())

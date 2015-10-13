@@ -572,9 +572,22 @@
                     <h3>Введите количество часов</h3>
                 </div>
                 <div id="resolve-modal-body" class="modal-body">
+
+                    {% if is_responsible %}
+                    {% for entity in through %}
+                     <label for="id_hours_{{entity.user.pk}}">{{entity.user.get_full_name}}: </label>
+                    <input class="form-control" id="id_hours_{{entity.user.pk}}" name="hours_{{entity.user.pk}}" min="0" step="any" type="number"
+                           {% if entity.hours %}
+                                value="{{entity.hours|stringformat:'.1f'}}"
+                            {% else %}
+                                value="{{entity.task.hours_predict|stringformat:'.1f'}}"
+                            {% endif %}>
+                    {% endfor %}
+                    {% else %}
                     <label for="id_hours_{{user.pk}}">{{user.get_full_name}}: </label>
                     <input class="form-control" id="id_hours_{{user.pk}}" min="0" name="hours_{{user.pk}}" step="any"
                            type="number" value="{{task.hours_predict|stringformat:'.1f'}}">
+                    {% endif %}
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-danger">Подтвердить</button>

@@ -33,8 +33,9 @@
     <table class="table table-bordered">
         <tr>
             <th class="text-center">Активист</th>
-            <th class="text-center hidden-sm hidden-xs">Часы</th>
-            <th class="text-center hidden-sm hidden-xs">Коэффициент</th>
+            <th class="text-center">Группа</th>
+            <th class="text-center">Часы</th>
+            <th class="text-center">Коэффициент</th>
             <th class="text-center">Деньги</th>
         </tr>
     {% for record in records %}
@@ -42,10 +43,13 @@
             <td style = "padding: 1px 10px;">
                 <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}">{{record.user.last_name}} {{record.user.first_name}} {{record.user.profile.middle_name}}</a>
             </td>
-            <td class="hidden-sm hidden-xs">
+            <td class="">
+                {{record.user.profile.group_number}}
+            </td>
+            <td class="">
                 {{record.hours}}
             </td>
-            <td class="hidden-sm hidden-xs">
+            <td class="">
                 {{record.coef}}
             </td>
             <td>
