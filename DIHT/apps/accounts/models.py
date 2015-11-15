@@ -3,6 +3,7 @@ from django.db.models import Model, OneToOneField, BooleanField, CharField, \
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils import timezone
+import hashlib
 
 
 class Profile(Model):
@@ -25,7 +26,7 @@ class Profile(Model):
 
 
 def upload_to(instance, filename):
-    return 'avatars/%s/%s' % (instance.user.username, filename)
+    return 'avatars/%s/%s' % (instance.user.username, hashlib.md5(filename.encode()).hexdigest()+filename[-4:])
 
 
 class Avatar(Model):

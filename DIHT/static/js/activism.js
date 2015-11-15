@@ -73,4 +73,11 @@ $(function() {
             })
         });
     });
+
+    $('#id_assignees_autocomplete-autocomplete, #id_responsible_autocomplete-autocomplete').on('input', function(){
+        var st = $(this).val();
+        if ((('a'<= st[0] && st[0] <= 'z') || ('а'<= st[0] && st[0] <= 'я')) && st.length > 0){
+            $(this).val(st[0].toUpperCase() + st.slice(1));
+        }
+    });
 });

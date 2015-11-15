@@ -107,6 +107,9 @@
             {% if can_view_tasks %}
             <li><a href="#tab-tsk" data-toggle="tab">Задачи</a></li>
             {% endif %}
+            {% if profile.user == request.user %}
+            <li><a href="#tab-gps" data-toggle="tab">Очки роста</a></li>
+            {% endif %}
             {% comment %}{% if profile.user|has_group:'Активисты' %}
             <li><a href="#tab-ach" data-toggle="tab">Достижения</a></li>
             {% endif %}
@@ -223,6 +226,33 @@
                 {% for record in records %}
                     <p>{{ record.machine.name }}, {{ record.datetime_from.date }}, с {{ record.datetime_from.time }} до {{ record.datetime_to.time }} </p>
                 {% endfor %}
+            </div>
+            {% endif %}
+            {% if profile.user == request.user %}
+            <div class = "tab-pane" id="tab-gps">
+                <h5>Очки роста:</h5>
+                <table class = "table usual-letters">
+                {% for operation in operations %}
+                    <tr>
+                        <td>
+                            {{operation.description}}
+                        </td>
+                        <td align="right">{{operation.amount|stringformat:'.0f' }}
+                            <span style="font-size:10px;">ОР </span>
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% if op_for_hours != 0 %}
+                    <tr>
+                        <td>
+                            За ЧРА
+                        </td>
+                        <td align="right">{{op_for_hours}}
+                            <span style="font-size:10px;">ОР </span>
+                        </td>
+                    </tr>
+                {% endif %}
+                </table>
             </div>
             {% endif %}
         </div>

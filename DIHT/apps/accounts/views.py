@@ -122,6 +122,9 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context['can_view_tasks'] = (self.request.user == user and is_activist) or self.request.user.is_superuser or is_charge
         context['moderated_money'] = sum(user.moderated_operations.filter(is_approved=False, amount__gte=0)
                                                                   .values_list('amount', flat=True))
+        context['operations'] = user.point_operations.all()
+        context['op_for_hours'] = int(sum(user.participated.filter(task__status__in=['closed'])
+                                              .values_list('hours', flat=True)) // 10)
         context['level'] = get_level(user)
         return context
 
