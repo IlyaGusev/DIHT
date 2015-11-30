@@ -73,3 +73,30 @@ class MoneyOperation(Model):
 
     def __str__(self):
         return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)
+
+
+class Key(Model):
+    name = CharField("Описание", max_length=150)
+    owner = ForeignKey(User, null=False, blank=False, related_name='keys', verbose_name="Владелец")
+
+    class Meta:
+        verbose_name = "Ключ"
+        verbose_name_plural = "Ключи"
+
+    def __str__(self):
+        return str(self.name) + ': ' + str(self.owner.last_name)
+
+
+class KeyTransfer(Model):
+    key = ForeignKey(Key, null=False, blank=False, related_name='transfers', verbose_name="Передачи")
+    first_owner = ForeignKey(User, null=False, blank=False, related_name='keys_first', verbose_name="От кого")
+    second_owner = ForeignKey(User, null=False, blank=False, related_name='keys_second', verbose_name="К кому")
+    timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)
+
+    class Meta:
+        verbose_name = "Передача ключа"
+        verbose_name_plural = "Передачи ключа"
+
+    def __str__(self):
+        return (str(self.key.name) + ' at ' + str(self.timestamp) + ' from' +
+                str(self.first_owner.last_name) + ' to ' + str(self.second_owner.last_name))

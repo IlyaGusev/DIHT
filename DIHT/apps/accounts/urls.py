@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 from accounts.views import SignUpView, ResetPasswordView, ProfileView, ProfileUpdateView, \
     CheckUniqueView, AvatarUpdateView, SignUpOkView, ChargeView, FindView, AddMoneyView, \
     RemoveMoneyView, ActivateView, MoneyHistoryView, UserMoneyHistoryView, ChangePasswordView, \
-    ApproveMoneyView
+    ApproveMoneyView, KeysView, KeyCreateView, KeyUpdateView, KeyDeleteView
 
 urlpatterns = [
     url(r'^signup/$', SignUpView.as_view(), name='signup'),
@@ -27,6 +27,10 @@ urlpatterns = [
     url(r'^change_password/(?P<pk>[0-9]*)/$', ChangePasswordView.as_view(), name='change_password'),
     url(r'^activate/(?P<pk>[0-9]*)/$', ActivateView.as_view(), name='activate'),
     url(r'^money_history/$', MoneyHistoryView.as_view(), name='all_money_history'),
+    url(r'^keys/$', KeysView.as_view(), name='keys'),
+    url(r'^keys/create/$', KeyCreateView.as_view(), name='key_create'),
+    url(r'^keys/(?P<pk>[0-9]*)/delete/$', KeyDeleteView.as_view(), name='key_delete'),
+    url(r'^keys/(?P<pk>[0-9]*)/update/$', KeyUpdateView.as_view(), name='key_update'),
 
     url(r'^check_unique/$', CheckUniqueView.as_view(), name='check_unique'),
     url(r'^avatar/change/(?P<pk>[0-9]*)/$', AvatarUpdateView.as_view(), name='change_avatar'),

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load has_group %}
+{% load thumbnail %}
+{% block title %} Активисты {% endblock %}
+{% block activism_table_active %} class = "active" {% endblock %}
+{% block custom_scripts %}
+{% endblock %}
+
+{% block content %}
+<div class="row well namezone">
+    <h3 class="task-name nametext"> Ключи </h3>
+</div>
+<div class = "row pagezone">
+    <div class="table-responsive col-sm-12">
+    <table class="table">
+    {% for key in keys %}
+        <tr>
+        <td>{{key.name}}
+            <a href="{% url 'accounts:key_delete' pk=key.pk %}" class="delete-view"><i class="fa fa-close red"></i></a>
+        </td>
+        <td>{{key.owner.last_name}}</td>
+        <td align="right">
+        <a class="btn btn-primary" type="submit" href="{% url 'accounts:key_update' pk=key.pk %}" data-target="#form-modal">Передать</a>
+        </td>
+        </tr>
+    {% endfor %}
+    </table>
+    </div>
+    <a class="btn btn-primary" type="submit" href="{% url 'accounts:key_create' %}" data-target="#form-modal">Добавить</a>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 import os
 from DIHT.settings import BASE_DIR
 from django.core.files import File
-from django.views.generic.edit import FormView, UpdateView
+from django.views.generic.edit import FormView, UpdateView, DeleteView
 from django.views.generic import DetailView, View, TemplateView, ListView
 from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse_lazy
@@ -14,8 +14,9 @@ from django.http import HttpResponseRedirect
 from braces.views import LoginRequiredMixin, UserPassesTestMixin, GroupRequiredMixin
 from django.utils import timezone
 from itertools import chain
-from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, MoneyForm, ChangePasswordForm
-from accounts.models import Profile, Avatar, MoneyOperation
+from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, \
+    MoneyForm, ChangePasswordForm, KeyCreateForm, KeyUpdateForm
+from accounts.models import Profile, Avatar, MoneyOperation, Key, KeyTransfer
 from washing.models import BlackListRecord
 from activism.views import get_level
 
@@ -301,3 +302,50 @@ class ApproveMoneyView(LoginRequiredMixin, GroupRequiredMixin,  SingleObjectMixi
             op.is_approved = True
             op.save()
         return HttpResponseRedirect(reverse('accounts:profile', kwargs={'pk': user.profile.pk}))
+
+
+class KeyCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonErrorsMixin, FormView):
+    model = Key
+    template_name = 'accounts/add_key.html'
+    form_class = KeyCreateForm
+    group_required = 'Ответственные за стиралку'
+    raise_exception = True
+    success_url = reverse_lazy('accounts:keys')
+
+    def form_valid(self, form):
+        super(KeyCreateView, self).form_valid(form)
+        Key.objects.create(name=form.cleaned_data['name'],
+                           owner=form.cleaned_data['owner_autocomplete'])
+        return JsonResponse({'url': reverse('accounts:keys')}, status=200)
+
+
+class KeyUpdateView(LoginRequiredMixin, GroupRequiredMixin, JsonErrorsMixin, UpdateView):
+    model = Key
+    template_name = 'accounts/update_key.html'
+    form_class = KeyUpdateForm
+    group_required = 'Ответственные за стиралку'
+    raise_exception = True
+
+    def form_valid(self, form):
+        KeyTransfer.objects.create(key=self.get_object(),
+                                   first_owner=self.get_object().owner,
+                                   second_owner=form.cleaned_data['second_owner_autocomplete'])
+        key = Key.objects.get(pk=self.get_object().pk)
+        key.owner = form.cleaned_data['second_owner_autocomplete']
+        key.save()
+        return JsonResponse({'url': reverse('accounts:keys')}, status=200)
+
+
+class KeysView(LoginRequiredMixin, GroupRequiredMixin,  ListView):
+    model = Key
+    context_object_name = 'keys'
+    template_name = 'accounts/keys.html'
+    group_required = 'Ответственные за стиралку'
+    raise_exception = True
+
+
+class KeyDeleteView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
+    model = Key
+    group_required = 'Ответственные за стиралку'
+    success_url = reverse_lazy('accounts:keys')
+    raise_exception = True

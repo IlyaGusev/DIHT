@@ -79,6 +79,9 @@
                                 {% if user.is_staff %}
                                 <li><a href="/admin/"><i class="fa fa-wrench"></i> Панель управления</a></li>
                                 {% endif %}
+                                {% if user|has_group:'Ответственные за стиралку' or user.is_superuser %}
+                                <li><a href="{% url 'accounts:keys' %}"><i class="fa fa-key"></i> Ключи </a></li>
+                                {% endif %}
                                 {% if user|has_group:'Ответственные за работу с пользователями' or user|has_group:'Ответственные за финансы' or user.is_superuser %}
                                 <li><a href="{% url 'accounts:find' %}" data-target="#form-modal"><i class="fa fa-search"></i> Поиск пользователя</a></li>
                                 {% endif %}

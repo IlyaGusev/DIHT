@@ -23,7 +23,9 @@ $(function() {
                                    .add-money-form, \
                                    .remove-money-form, \
                                    .task-create-form, \
-                                   .event-create-form',
+                                   .event-create-form, \
+                                   .key-update-form, \
+                                   .key-create-form',
                                    function(ev) {
         ev.preventDefault();
         var form = $(this);
@@ -44,7 +46,6 @@ $(function() {
 
     $("body").on("click", ".delete-view", function(ev) {
         ev.preventDefault();
-        console.log("!!!!")
         var button = $(this);
         var URL = button.attr('href')
         console.log(URL)

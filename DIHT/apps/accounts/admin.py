@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
-from accounts.models import Profile, MoneyOperation, Avatar
+from accounts.models import Profile, MoneyOperation, Avatar, Key, KeyTransfer
 from washing.models import BlackListRecord
 
 admin.site.unregister(User)
@@ -34,6 +34,17 @@ class MoneyOperationAdmin(admin.ModelAdmin):
     model = MoneyOperation
     actions = [cancel_money_operation]
 
+
+class KeyTransferInline(admin.StackedInline):
+    model = KeyTransfer
+
+
+class KeyAdmin(admin.ModelAdmin):
+    model = Key
+    inlines = [KeyTransferInline, ]
+
 admin.site.register(User, ProfileAdmin)
 admin.site.register(Avatar)
 admin.site.register(MoneyOperation, MoneyOperationAdmin)
+admin.site.register(KeyTransfer)
+admin.site.register(Key, KeyAdmin)

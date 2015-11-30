@@ -4,7 +4,7 @@ from django.forms import ValidationError, ModelForm, Form, CharField, PasswordIn
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from accounts.models import Profile
+from accounts.models import Profile, Key
 
 
 class SignUpForm(ModelForm):
@@ -191,4 +191,23 @@ class MoneyForm(ModelForm):
 
     class Meta:
         model = Profile
+        fields = []
+
+
+class KeyCreateForm(autocomplete_light.ModelForm):
+    owner_autocomplete = autocomplete_light.ModelChoiceField('ProfileAutocomplete',required=True, label=_('Владелец'))
+
+    class Meta:
+        model = Key
+        fields = ('name', )
+        labels = {
+            'name': _('Название'),
+        }
+
+
+class KeyUpdateForm(autocomplete_light.ModelForm):
+    second_owner_autocomplete = autocomplete_light.ModelChoiceField('ProfileAutocomplete', required=True, label=_('Кому'))
+
+    class Meta:
+        model = Key
         fields = []
