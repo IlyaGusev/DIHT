@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания: 04/08/2015
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Тесты модуля accounts. Их недостаточно, нужно больше.
+"""
 from django.test import TestCase, Client
 from django.contrib.auth.models import User, Permission
 from django.utils import timezone

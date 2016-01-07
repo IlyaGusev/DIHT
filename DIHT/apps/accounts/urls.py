@@ -1,9 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания: 22/07/2015
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        URL resolver модуля accounts.
+"""
 from django.conf.urls import url, include
 from django.views.generic import TemplateView
 from accounts.views import SignUpView, ResetPasswordView, ProfileView, ProfileUpdateView, \
-    CheckUniqueView, AvatarUpdateView, SignUpOkView, ChargeView, FindView, AddMoneyView, \
-    RemoveMoneyView, ActivateView, MoneyHistoryView, UserMoneyHistoryView, ChangePasswordView, \
-    ApproveMoneyView, KeysView, KeyCreateView, KeyUpdateView, KeyDeleteView
+    CheckUniqueView, AvatarUpdateView, SignUpOkView, FindView, AddMoneyView, RemoveMoneyView, \
+    ActivateView, MoneyHistoryView, UserMoneyHistoryView, ChangePasswordView, \
+    ApproveMoneyView, KeysView, KeyCreateView, KeyUpdateView, KeyDeleteView, ChargeView
 
 urlpatterns = [
     url(r'^signup/$', SignUpView.as_view(), name='signup'),

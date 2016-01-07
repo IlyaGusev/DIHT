@@ -1,8 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания: 02/08/2015
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Команда для создания групп при первом запуске
+        Использование: python3 manage.py create_groups
+"""
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission, Group
-import logging
-logger = logging.getLogger('DIHT.custom')
 
 
 class Command(BaseCommand):
@@ -27,5 +35,5 @@ class Command(BaseCommand):
             if created:
                 for perm in g[1]:
                     group.permissions.add(perm)
-                logger.info('Создана группа ' + g[0])
+                print('Создана группа ' + g[0])
         print("Done")

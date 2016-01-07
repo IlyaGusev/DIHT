@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания: 22/07/2015
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Логика, связанная с профилями пользователей.
+        Клиентская часть в signup.js, common.js, profile.js.
+        3 вида views - страница, действие, модаль (всплывающее окно).
+        Все модали работают с common.js. Если видишь JSON - это туда.
+"""
 import os
 from DIHT.settings import BASE_DIR
 from django.core.files import File
@@ -25,12 +37,20 @@ logger = logging.getLogger('DIHT.custom')
 
 
 class JsonErrorsMixin(object):
+    """
+    Mixin для правильной обработки ошибок в модальных формах.
+    Клентская часть в common.js, функция view_modal_errors.
+    """
     def form_invalid(self, form):
         super(JsonErrorsMixin, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)
 
 
 class SignUpView(FormView):
+    """
+    Страница регистрации пользователя. Пользователь создаётся НЕ активным, нужно подтверждение.
+    Дополнительные действия - установка стандартной аватарки.
+    """
     template_name = 'accounts/signup.html'
     form_class = SignUpForm
     success_url = reverse_lazy('accounts:signup_ok')
@@ -67,6 +87,9 @@ class SignUpView(FormView):
 
 
 class ResetPasswordView(FormView):
+    """
+    Старница сброса пароля с отправкой письма на e-mail. Никаких проверок не делает.
+    """
     template_name = 'accounts/reset_password.html'
     form_class = ResetPasswordForm
     success_url = reverse_lazy('accounts:reset_password_ok')
@@ -83,6 +106,10 @@ class ResetPasswordView(FormView):
 
 
 class CheckUniqueView(View):
+    """
+    Действие для проверки уникальности логина и почты.
+    Клиентская часть в signup.js, функции check_username и check_email.
+    """
     def get(self, request, *args, **kwargs):
         username = request.GET['username']
         email = request.GET['email']
@@ -97,6 +124,9 @@ class CheckUniqueView(View):
 
 
 class ProfileView(LoginRequiredMixin, DetailView):
+    """
+    Страница для отображения профиля
+    """
     template_name = 'accounts/profile.html'
     model = Profile
 
@@ -131,6 +161,9 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
 
 class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin, UpdateView):
+    """
+    Модаль для изменения профиля
+    """
     model = Profile
     form_class = ProfileForm
     template_name = "accounts/edit_profile.html"
@@ -146,6 +179,10 @@ class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin
 
 
 class AvatarUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """
+    Действие для установки аватарки.
+    Клиенсткая часть в profile.js.
+    """
     model = Avatar
     fields = ('img', )
     success_url = reverse_lazy('main:home')
@@ -155,6 +192,10 @@ class AvatarUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class SignUpOkView(TemplateView):
+    """
+    Страница успешной регистрации.
+    Показывает людей, к которым нужно обращаться для подтверждения аккаунта.
+    """
     template_name = 'accounts/signup_ok.html'
 
     def get_context_data(self, **kwargs):
@@ -165,6 +206,10 @@ class SignUpOkView(TemplateView):
 
 
 class ChargeView(TemplateView):
+    """
+    Модаль при неправильном вводе логина.
+    Показывает людей, к которым нужно обращаться для подтверждения аккаунта.
+    """
     template_name = 'accounts/charge.html'
 
     def get_context_data(self, **kwargs):
@@ -175,6 +220,9 @@ class ChargeView(TemplateView):
 
 
 class FindView(LoginRequiredMixin, GroupRequiredMixin, FormView):
+    """
+    Модаль, которая ищет профиль пользователя по имени или фамилии с автодополнением.
+    """
     template_name = 'accounts/find.html'
     form_class = FindForm
     group_required = ['Ответственные за работу с пользователями', 'Ответственные за финансы']
@@ -190,6 +238,10 @@ class FindView(LoginRequiredMixin, GroupRequiredMixin, FormView):
 
 
 class MoneyView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
+    """
+    Модаль, меняющяя количество денег. НЕ ИСПОЛЬЗОВАТЬ БЕЗ НАСЛЕДОВАНИЯ
+    UpdateView для self.get_object()..
+    """
     model = Profile
     form_class = MoneyForm
     group_required = 'Ответственные за финансы'
@@ -200,6 +252,9 @@ class MoneyView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
 
 
 class AddMoneyView(MoneyView):
+    """
+    Модаль, которая добавляет деньги.
+    """
     template_name = 'accounts/add_money.html'
 
     def form_valid(self, form):
@@ -214,6 +269,9 @@ class AddMoneyView(MoneyView):
 
 
 class RemoveMoneyView(MoneyView):
+    """
+    Модаль, которая отнимает деньги.
+    """
     template_name = 'accounts/remove_money.html'
 
     def form_valid(self, form):
@@ -232,6 +290,9 @@ class RemoveMoneyView(MoneyView):
 
 
 class ActivateView(SingleObjectMixin, LoginRequiredMixin, GroupRequiredMixin, View):
+    """
+    Действие, активирующее пользователя.
+    """
     model = User
     group_required = 'Ответственные за работу с пользователями'
     raise_exception = True
@@ -244,6 +305,9 @@ class ActivateView(SingleObjectMixin, LoginRequiredMixin, GroupRequiredMixin, Vi
 
 
 class MoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, ListView):
+    """
+    Модаль истории всех финансовых операций.
+    """
     model = MoneyOperation
     group_required = 'Ответственные за финансы'
     context_object_name = 'operations'
@@ -257,6 +321,9 @@ class MoneyHistoryView(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
 
 class UserMoneyHistoryView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """
+    Модаль истории финансовых операций конкретного пользователя.
+    """
     model = Profile
     context_object_name = 'profile'
     template_name = "accounts/money_history.html"
@@ -276,6 +343,9 @@ class UserMoneyHistoryView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
 
 class ChangePasswordView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin, UpdateView):
+    """
+    Страница изменения пароля.
+    """
     model = User
     form_class = ChangePasswordForm
     template_name = "accounts/change_password.html"
@@ -292,6 +362,9 @@ class ChangePasswordView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixi
 
 
 class ApproveMoneyView(LoginRequiredMixin, GroupRequiredMixin,  SingleObjectMixin, View):
+    """
+    Действие подтверждения финансовой операции.
+    """
     model = User
     group_required = 'Руководители финансов'
     raise_exception = True
@@ -305,6 +378,9 @@ class ApproveMoneyView(LoginRequiredMixin, GroupRequiredMixin,  SingleObjectMixi
 
 
 class KeyCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonErrorsMixin, FormView):
+    """
+    Модаль создания ключа.
+    """
     model = Key
     template_name = 'accounts/add_key.html'
     form_class = KeyCreateForm
@@ -320,6 +396,10 @@ class KeyCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonErrorsMixin, For
 
 
 class KeyUpdateView(LoginRequiredMixin, GroupRequiredMixin, JsonErrorsMixin, UpdateView):
+    """
+    Модаль передачи ключа
+    UpdateView для self.get_object()..
+    """
     model = Key
     template_name = 'accounts/update_key.html'
     form_class = KeyUpdateForm
@@ -337,6 +417,9 @@ class KeyUpdateView(LoginRequiredMixin, GroupRequiredMixin, JsonErrorsMixin, Upd
 
 
 class KeysView(LoginRequiredMixin, GroupRequiredMixin,  ListView):
+    """
+    Страница со всеми ключами.
+    """
     model = Key
     context_object_name = 'keys'
     template_name = 'accounts/keys.html'
@@ -345,6 +428,9 @@ class KeysView(LoginRequiredMixin, GroupRequiredMixin,  ListView):
 
 
 class KeyDeleteView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
+    """
+    Действие удаления ключа.
+    """
     model = Key
     group_required = 'Ответственные за стиралку'
     success_url = reverse_lazy('accounts:keys')

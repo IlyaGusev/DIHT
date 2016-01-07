@@ -1,12 +1,5 @@
 $(function() {
-    function view_modal_errors(form, request){
-        errors = JSON.parse(request.responseText);
-        $('.errorlist').remove();
-        for (var k in errors)
-            form.find('#id_'+k).after('<ul class="errorlist"><li>' + errors[k] + '</li></ul>');
-    }
-
-
+    // Загрузка аватарки
     $('#fileinput').on('change', function(event){
         var file = $('#fileinput').prop('files')[0];
         var data = new FormData();

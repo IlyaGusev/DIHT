@@ -1,11 +1,11 @@
-$(function() {
-    function view_modal_errors(form, request){
-        errors = JSON.parse(request.responseText);
-        $('.errorlist').remove();
-        for (var k in errors)
-            form.find('#id_'+k).after('<ul class="errorlist"><li>' + errors[k] + '</li></ul>');
-    }
+function view_modal_errors(form, request){
+    errors = JSON.parse(request.responseText);
+    $('.errorlist').remove();
+    for (var k in errors)
+        form.find('#id_'+k).after('<ul class="errorlist"><li>' + errors[k] + '</li></ul>');
+}
 
+$(function() {
     $("a[data-target=#form-modal],th[data-target=#form-modal]").click(function(ev) {
         ev.preventDefault();
         current_edit_span = $(this)[0];
@@ -48,7 +48,6 @@ $(function() {
         ev.preventDefault();
         var button = $(this);
         var URL = button.attr('href')
-        console.log(URL)
         $.ajax({type: "POST", url: URL, data: {}, dataType: "JSON"});
         window.location.reload()
     });

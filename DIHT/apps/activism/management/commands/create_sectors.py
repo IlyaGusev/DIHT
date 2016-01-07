@@ -16,6 +16,6 @@ class Command(BaseCommand):
                   "Кураторский сектор": "00e900",
                   "Отдел по работе с абитуриентами": "fa0000"}
 
-        for name, color in sectors.items():
+        for name, color in colors.items():
             Sector.objects.get_or_create(name=name, color=color)
         print("Done")

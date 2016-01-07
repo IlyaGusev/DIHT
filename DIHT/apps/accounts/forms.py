@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания: 22/07/2015
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Формы, связанные с профилями пользователей.
+"""
 import re
 import autocomplete_light
 from django.forms import ValidationError, ModelForm, Form, CharField, PasswordInput, TextInput, TypedChoiceField, IntegerField
@@ -11,7 +20,6 @@ class SignUpForm(ModelForm):
     """
     Регистрационная форма.
     """
-
     middle_name = CharField(label=_('Отчество'), widget=TextInput(attrs={'placeholder': _('Отчество')}))
     sex = TypedChoiceField(label=_("Пол"),
                            coerce=lambda x: x == 'Женский',
@@ -103,6 +111,9 @@ class SignUpForm(ModelForm):
 
 
 class ProfileForm(ModelForm):
+    """
+    Форма изменения профиля.
+    """
     class Meta:
         model = Profile
         fields = ('group_number', 'hostel', 'room_number', 'mobile', )
@@ -137,6 +148,9 @@ class ProfileForm(ModelForm):
 
 
 class ResetPasswordForm(Form):
+    """
+    Форма сброса пароля.
+    """
     username = CharField(max_length=255, required=True, label='Логин', widget=TextInput(attrs={'placeholder': _('Логин')}))
 
     def clean_username(self):
@@ -151,9 +165,8 @@ class ResetPasswordForm(Form):
 
 class ChangePasswordForm(ModelForm):
     """
-    Форма изменения данных.
+    Форма изменения пароля.
     """
-
     old_password = CharField(widget=PasswordInput(), label="Старый пароль")
     password = CharField(widget=PasswordInput(), label="Новый пароль")
     password_repeat = CharField(widget=PasswordInput(), label="Повторите новый пароль")
@@ -183,10 +196,16 @@ class ChangePasswordForm(ModelForm):
 
 
 class FindForm(Form):
+    """
+    Форма поиска пользователя с автодополнением.
+    """
     user = autocomplete_light.ModelChoiceField('ProfileAutocomplete', label="Пользователь")
 
 
 class MoneyForm(ModelForm):
+    """
+    Форма для ввода количества денег. Пустое поле fields и ModelForm - хак для использования UpdateView.
+    """
     amount = IntegerField(min_value=0, max_value=10000, label="Количество")
 
     class Meta:
@@ -195,6 +214,9 @@ class MoneyForm(ModelForm):
 
 
 class KeyCreateForm(autocomplete_light.ModelForm):
+    """
+    Форма для создания ключа.
+    """
     owner_autocomplete = autocomplete_light.ModelChoiceField('ProfileAutocomplete',required=True, label=_('Владелец'))
 
     class Meta:
@@ -206,6 +228,9 @@ class KeyCreateForm(autocomplete_light.ModelForm):
 
 
 class KeyUpdateForm(autocomplete_light.ModelForm):
+    """
+    Форма для перемещения ключа. Пустое поле fields и ModelForm - хак для использования UpdateView.
+    """
     second_owner_autocomplete = autocomplete_light.ModelChoiceField('ProfileAutocomplete', required=True, label=_('Кому'))
 
     class Meta:

@@ -1,11 +1,4 @@
 $(function() {
-    function view_modal_errors(form, request){
-        errors = JSON.parse(request.responseText);
-        $('.errorlist').remove();
-        for (var k in errors)
-            form.find('#id_'+k).after('<ul class="errorlist"><li>' + errors[k] + '</li></ul>');
-    }
-
     $('#form-modal').on('shown.bs.modal', function () {
         if ($(this).find('form').hasClass('task-create-form'))
             if ($('.event-name').text() != ""){

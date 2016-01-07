@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from django import template
 from math import ceil
 register = template.Library()
 
 
+# Деление списка на n частей
 @register.filter
 def partition(thelist, n):
     try:

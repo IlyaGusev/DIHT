@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания: 22/07/2015
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Модели, связанные с профилями пользователей.
+"""
 from django.db.models import Model, OneToOneField, BooleanField, CharField, \
     IntegerField, ForeignKey, DateTimeField, ImageField
 from django.contrib.auth.models import User
@@ -7,6 +16,9 @@ import hashlib
 
 
 class Profile(Model):
+    """
+    Модель профиля.
+    """
     user = OneToOneField(User)
     sex = BooleanField("Пол", default=False)
     hostel = CharField("Общежитие", max_length=30, blank=True)
@@ -26,10 +38,14 @@ class Profile(Model):
 
 
 def upload_to(instance, filename):
+    # Хэш для того, чтобы корректно обрабатывать аватарки с кириллическими именами
     return 'avatars/%s/%s' % (instance.user.username, hashlib.md5(filename.encode()).hexdigest()+filename[-4:])
 
 
 class Avatar(Model):
+    """
+    Модель аватарок.
+    """
     user = OneToOneField(User)
     img = ImageField(max_length=1024, blank=True, upload_to=upload_to)
     date_uploaded = DateTimeField(default=timezone.now)
@@ -43,6 +59,10 @@ class Avatar(Model):
 
 
 class MoneyOperation(Model):
+    """
+    Модель денежных операций. Изначально планировалась неизменяемой, но для флага подтверждения
+    пришлось убрать это свойство. Поддерживает отмену операции с возвращением денег.
+    """
     user = ForeignKey(User, null=False, blank=False, related_name='operations', verbose_name="Юзер")
     amount = IntegerField("Количество", null=False, default=0)
     timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)
@@ -76,6 +96,9 @@ class MoneyOperation(Model):
 
 
 class Key(Model):
+    """
+    Модель ключа. Требовалась ребятам, которые заведуют стиралкой.
+    """
     name = CharField("Описание", max_length=150)
     owner = ForeignKey(User, null=False, blank=False, related_name='keys', verbose_name="Владелец")
 
@@ -88,6 +111,9 @@ class Key(Model):
 
 
 class KeyTransfer(Model):
+    """
+    Модель передачи ключа.
+    """
     key = ForeignKey(Key, null=False, blank=False, related_name='transfers', verbose_name="Передачи")
     first_owner = ForeignKey(User, null=False, blank=False, related_name='keys_first', verbose_name="От кого")
     second_owner = ForeignKey(User, null=False, blank=False, related_name='keys_second', verbose_name="К кому")

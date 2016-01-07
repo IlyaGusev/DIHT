@@ -1,13 +1,4 @@
 $(function() {
-    function view_modal_errors(form, request){
-        errors = JSON.parse(request.responseText);
-        $('.errorlist').remove();
-        for (var k in errors){
-            console.log(form.find('#id_'+k))
-            form.find('#id_'+k).after('<ul class="errorlist" style="color:red;"><li>' + errors[k] + '</li></ul>');
-        }
-    }
-
     $('#form-modal').on('submit', '#create-record-form,#cancel-record-form', function (ev) {
         ev.preventDefault();
         var form = $(this);

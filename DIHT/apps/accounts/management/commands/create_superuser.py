@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания: 22/07/2015
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Команда для создания суперпользователя со всеми правами при первом запуске.
+        Использование: python3 manage.py create_superuser --username <username> --password <password>
+"""
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from optparse import make_option
