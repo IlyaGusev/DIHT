@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания:
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Настройка автодополнения по имени и фамилии в autocomplete_light в модуле активистов.
+"""
 import autocomplete_light
 from django.contrib.auth.models import User
 from django.utils.encoding import force_text

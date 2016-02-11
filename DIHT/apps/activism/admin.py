@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания:
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Интерфейсы админки модуля активистов.
+"""
 import reversion
 from django.contrib import admin
 from activism.models import Task, Event, AssigneeTask, Sector, PointOperation, ResponsibleEvent

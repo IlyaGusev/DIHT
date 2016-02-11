@@ -1,8 +1,21 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания:
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Глобальные функции для работы с моделем активстов.
+"""
 from django.contrib.auth.models import Group
 from activism.models import Task
 
 
 def global_checks(user, obj=None):
+    """
+    Функция, проверяющая права пользователя user для объекта obj.
+    Возвращает словарь вида {"право": True/False, ...}.
+    """
     context = dict()
     context['is_superuser'] = user.is_superuser
     context['is_charge'] = Group.objects.get(name="Ответственные за активистов") in user.groups.all()
@@ -28,6 +41,9 @@ def global_checks(user, obj=None):
 
 
 def get_level(user):
+    """
+    Функция, рассчитывающая текущий уровень активиста user.
+    """
     if Group.objects.get(name="Руководящая группа") in user.groups.all():
         return {'sign': 'Руководящая группа', 'coef': 0}
 

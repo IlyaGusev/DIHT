@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания:
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Самый главный файл - логика, связанная с активистами.
+        Клиентская часть в activism.js и activism/*.js
+        3 вида views - страница, действие, модаль (всплывающее окно).
+        Все модали работают с common.js. Если видишь JSON - это туда.
+"""
 import datetime as dt
 from itertools import chain
 from collections import OrderedDict
@@ -24,6 +36,9 @@ from activism.utils import global_checks, get_level
 
 
 class PostAccessMixin(SingleObjectMixin):
+    """
+    Mixin для проверки прав. От UserPassesTestMixin отличается тем, что работает только с POST частью.
+    """
     def post(self, request, *args, **kwargs):
         checks = global_checks(request.user, self.get_object())
         if checks['is_responsible'] or checks['can_all'] or checks['is_main']:
@@ -33,6 +48,9 @@ class PostAccessMixin(SingleObjectMixin):
 
 
 class DefaultContextMixin(object):
+    """
+    Mixin для введения общего конекста.
+    """
     def get_context_data(self, **kwargs):
         context = super(DefaultContextMixin, self).get_context_data(**kwargs)
         user = self.request.user
@@ -45,6 +63,10 @@ class DefaultContextMixin(object):
 
 
 class JsonCreateMixin(object):
+    """
+    Mixin для внедрения при создании объекта.
+    Автоматически назначает текущего пользователя ответственным и возвращает JSON.
+    """
     def form_valid(self, form):
         result = super(JsonCreateMixin, self).form_valid(form)
         if not isinstance(form.instance, Event):
@@ -55,6 +77,10 @@ class JsonCreateMixin(object):
 
 
 class JsonErrorsMixin(object):
+    """
+    Mixin для правильной обработки ошибок в модальных формах.
+    Клентская часть в common.js, функция view_modal_errors.
+    """
     def form_invalid(self, form):
         super(JsonErrorsMixin, self).form_invalid(form)
         return JsonResponse(form.errors, status=400)
@@ -66,6 +92,9 @@ class JsonErrorsMixin(object):
 
 
 class UnlockView(LoginRequiredMixin, View):
+    """
+    Действие для открытия доступа к модулю.
+    """
     raise_exception = True
 
     def get(self, request, *args, **kwargs):
@@ -75,6 +104,9 @@ class UnlockView(LoginRequiredMixin, View):
 
 
 class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonCreateMixin, JsonErrorsMixin, CreateView):
+    """
+    Модаль для создания мероприятия.
+    """
     model = Event
     template_name = 'activism/event_create.html'
     fields = ('name', 'sector')
@@ -83,6 +115,13 @@ class EventCreateView(LoginRequiredMixin, GroupRequiredMixin, JsonCreateMixin, J
 
 
 # EventClosingView  - begin
+"""
+    Действие закрытия мероприятия.
+    Такая сложная логика из-за требования руководителей секторов назначать ОР по завершении мероприятия
+    и разрешать конфликты.
+    Из-за большого объёма разбито на методы.
+"""
+
 
 def get_event_assignees(event):
     assignees = set()
@@ -148,6 +187,7 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
         user = self.request.user
         gps = {}
         assignees = get_event_assignees(event)
+        # Заполняем таблицу ОР назначенных и вливаем её в контекст
         for assignee in assignees:
             op = assignee.point_operations.filter(description="За "+event.name, moderator=user)
             if op.exists():
@@ -155,11 +195,14 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
         context['assignees'] = assignees
         context['gps'] = gps
 
+        # Если юзер ответственный за активистов или суперюзер,
+        # он может видеть всю таблицу от всех ответственных с конфликтами
         if context['can_all']:
             gp_table = OrderedDict()
             ordered_assignees = OrderedDict()
             for responsible in event.responsible.all():
                 ordered_assignees[responsible] = 0
+            # Заполняем gp_table
             for assignee in assignees:
                 gp_table[assignee] = deepcopy(ordered_assignees)
                 for responsible in event.responsible.all():
@@ -172,6 +215,7 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
                                                    .annotate(Count('id')).order_by()\
                                                    .filter(id__count__gt=1)\
                                                    .values_list('user', flat=True)
+            #
             not_main_users = []
             for assignee in assignees:
                 op = PointOperation.objects.filter(user=assignee, description="За " + event.name)
@@ -454,7 +498,9 @@ class TaskView(LoginRequiredMixin, GroupRequiredMixin, PostAccessMixin, DefaultC
         user = self.request.user
         task = context['task']
         if not context['is_main'] and not context['can_all']:
-            context['events'] = user.event_responsible.filter(event__status='open')
+            context['events'] = Event.objects.filter(pk__in=user.event_responsible
+                                                                .filter(event__status='open')
+                                                                .values_list('event', flat=True))
         context['can_edit'] = context['can_manage'] and task.status != 'closed'
         context['can_close'] = ((context['can_manage']) and (context['is_main'] or context['can_all']) and
                                 (task.status == 'resolved' or task.status == 'in_progress')) or \

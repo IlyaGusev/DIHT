@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания:
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        URL resolver модуля activism.
+"""
 from django.conf.urls import url
 from activism.views import EventView, TaskView, IndexView, TaskCreateView, \
     EventsView, EventCreateView, TaskActionView, EventCloseView, UnlockView, \

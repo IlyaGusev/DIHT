@@ -1,20 +1,34 @@
+# -*- coding: utf-8 -*-
+"""
+    Авторы: Гусев Илья
+    Дата создания:
+    Версия Python: 3.4
+    Версия Django: 1.8.5
+    Описание:
+        Модели, связанные модулем активистов.
+"""
+import hashlib
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db.models import \
     PositiveSmallIntegerField, ForeignKey, DateTimeField, \
-    DateField, BooleanField, OneToOneField, FloatField, \
-    Model, CharField, ManyToManyField, TextField, ImageField
+    DateField, BooleanField, FloatField, Model, CharField, \
+    ManyToManyField, TextField, ImageField
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase
 from django.core.urlresolvers import reverse
 
 
 def upload_to_sector(instance, filename):
-    return 'sectors/%s' % filename
+    # Хэш для того, чтобы корректно обрабатывать картинки с кириллическими именами
+    return 'sectors/%s' % hashlib.md5(filename.encode()).hexdigest()+filename[-4:]
 
 
 class Sector(Model):
+    """
+    Модель сектора.
+    """
     name = CharField("Название", max_length=50)
     description = TextField("Описание", blank=True)
     main = ForeignKey(User, verbose_name="Руководитель", blank=True, null=True)
@@ -31,6 +45,9 @@ class Sector(Model):
 
 
 class Event(Model):
+    """
+    Модель мероприятия.
+    """
     STATUS_CHOICES = (
         ('closed', 'Проведено'),
         ('open', 'Готовится'),
@@ -55,10 +72,16 @@ class Event(Model):
 
 
 class TaggedTask(TaggedItemBase):
+    """
+    Модель для поддержки тегов на задачах с помощью taggit
+    """
     content_object = ForeignKey('Task')
 
 
 class Task(Model):
+    """
+    Модель задачи.
+    """
     STATUS_CHOICES = (
         ('closed', 'Закрыто'),
         ('resolved', 'Готово'),
@@ -104,6 +127,9 @@ class Task(Model):
 
 
 class AssigneeTask(Model):
+    """
+    Промежуточная модель задачи и назначанного юзера.
+    """
     user = ForeignKey(User, verbose_name="Назначенный", related_name='participated')
     task = ForeignKey(Task, verbose_name="Задача", related_name='participants')
     hours = FloatField("Реальные часы", default=0.0,
@@ -116,6 +142,10 @@ class AssigneeTask(Model):
 
 
 class ResponsibleEvent(Model):
+    """
+    Промежуточная модель мероприятия и ответственного юзера.
+    Для поддержки назанчения очков роста главами секторов по завершении мероприятия.
+    """
     user = ForeignKey(User, verbose_name="Ответственный", related_name='event_responsible')
     event = ForeignKey(Event, verbose_name="Мероприятие", related_name='responsibles')
     done = BooleanField("Готово", default=False)
@@ -125,6 +155,9 @@ class ResponsibleEvent(Model):
 
 
 class PointOperation(Model):
+    """
+    Модель очков роста
+    """
     user = ForeignKey(User, null=False, blank=False, related_name='point_operations', verbose_name="Юзер")
     amount = FloatField("Количество", null=False, default=0)
     timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)

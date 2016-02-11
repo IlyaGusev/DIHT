@@ -38,7 +38,7 @@ class IndexView(TemplateView):
         context['current'] = day
         for i in range(7):
             schedule[day] = OrderedDict()
-            can_show = False
+            can_show = True
             for machine in machines:
                 machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
                 if machine_params.exists():
@@ -64,7 +64,6 @@ class IndexView(TemplateView):
                             status = 'DISABLE'
                         if machine.records.filter(datetime_from=d).exists():
                             if machine.records.get(datetime_from=d).user == self.request.user:
-                                can_show = True
                                 status = "YOURS"
                             else:
                                 status = "BUSY"
