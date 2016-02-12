@@ -17,7 +17,7 @@
 <div class = "row pagezone">
     
     <div class="row month-selector">
-        <div class="col-md-4 col-lg-4 col-sm-6 col-xs-10 col-xs-offset-1">
+        <div class="col-md-4 col-md-offset-4 col-lg-4 col-lg-offset-4  col-sm-6 col-sm-offset-3 col-xs-10 col-xs-offset-1">
             <select class="form-control month-select">
                 <option>Сентябрь 2015</option>
                 <option>Октябрь 2015</option>
@@ -30,127 +30,56 @@
     <div class="table-responsive div-rating col-md-10 col-md-offset-1">
     <table class="table table-hover table-rating">
         <tr class="rating1">
-            <td class="table-rating-avatar">
+            <td class="table-rating-avatar hidden-xs">
                 <img class="round" src="{% static 'img/samples/1.jpg' %}" width = '48' height = '48'></img>
+            </td>
+            <td class="table-rating-avatar visible-xs-inline">
+                <img class="round" src="{% static 'img/samples/1.jpg' %}" width = '36' height = '36'></img>
             </td>
             <td>Збс активист</td>
             <td class="table-rating-rate">100</td>
         </tr>
         <tr class="rating2">
-            <td class="table-rating-avatar">
+            <td class="table-rating-avatar hidden-xs">
                 <img class="round" src="{% static 'img/samples/2.jpg' %}" width = '48' height = '48'></img>
+            </td>
+            <td class="table-rating-avatar visible-xs-inline">
+                <img class="round" src="{% static 'img/samples/2.jpg' %}" width = '36' height = '36'></img>
             </td>
             <td>Красава активист</td>
             <td class="table-rating-rate">70</td>
         </tr>
         <tr class="rating3">
-            <td class="table-rating-avatar">
+            <td class="table-rating-avatar hidden-xs">
                 <img class="round" src="{% static 'img/samples/3.jpg' %}" width = '48' height = '48'></img>
+            </td>
+            <td class="table-rating-avatar visible-xs-inline">
+                <img class="round" src="{% static 'img/samples/3.jpg' %}" width = '36' height = '36'></img>
             </td>
             <td>Норм активист</td>
             <td class="table-rating-rate">50</td>
         </tr>
         <tr class="rating_noob">
-            <td class="table-rating-avatar">
+            <td class="table-rating-avatar hidden-xs">
                 <img class="round" src="{% static 'img/samples/4.jpg' %}" width = '48' height = '48'></img>
+            </td>
+            <td class="table-rating-avatar visible-xs-inline">
+                <img class="round" src="{% static 'img/samples/4.jpg' %}" width = '36' height = '36'></img>
             </td>
             <td>Лох активист</td>
             <td class="table-rating-rate">40</td>
         </tr>
         <tr class="rating_noob">
-            <td class="table-rating-avatar">
+            <td class="table-rating-avatar hidden-xs">
                 <img class="round" src="{% static 'img/standart_avatar.png' %}" width = '48' height = '48'></img>
+            </td>
+            <td class="table-rating-avatar visible-xs-inline">
+                <img class="round" src="{% static 'img/standart_avatar.png' %}" width = '36' height = '36'></img>
             </td>
             <td>Другой лох активист</td>
             <td class="table-rating-rate">35</td>
         </tr>
     </table>
     </div>
-    
-    {% comment %}
-    <div class="table-responsive">
-    <table class="table table-bordered">
-        <tr>
-            <th class="text-center">Активист</th>
-             {% if can_all %}
-            <th class="text-center">ЧРА</th>
-            <th class="text-center">Другие ОР</th>
-            {% endif %}
-            <th class="text-center">Суммарные ОР</th>
-        </tr>
-    {% for record in records %}
-        <tr>
-            <td style = "padding: 1px 10px;">
-                {% if record.user.avatar.img %}
-                    {% thumbnail record.user.avatar.img "25x25" crop="center" as pic %}
-                    <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}"><img src="{{ pic.url }}" class="avatar"></a>
-                    {% endthumbnail %}
-                {% endif %}
-
-                <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}">{{record.user.last_name}} {{record.user.first_name}} {{record.user.profile.middle_name}}</a>
-            </td>
-
-            {% if can_all %}
-            <td>
-                <table width="100%">
-                {% for through in record.throughs %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'activism:task' pk=through.task.pk %}">{{through.task.name}}</a>
-                            </td>
-                            <td align="right">
-                                <span>{{ through.hours|stringformat:'.2f' }}</span>
-                                <span style="font-size:10px;">ЧРА</span>
-                            </td>
-                        </tr>
-                {% endfor %}
-                    <tr><td>Итог: </td><td align="right">
-                        <span class="big-letters blue">{{record.sum_hours|stringformat:'.2f'}}</span>
-                        <span style="font-size:10px;">ЧРА</span>
-                    </td></tr>
-                 </table>
-            </td>
-            <td>
-                <table width="100%">
-                    {% for operation in record.operations %}
-                        <tr>
-                            <td>
-                                {{operation.description}}
-                            </td>
-                            <td align="right">{{operation.amount|stringformat:'.0f' }}
-                                <span style="font-size:10px;">ОР </span><a href="{% url 'activism:delete_points' pk=operation.pk %}" class="delete-view"><i class="fa fa-close red"></i></a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    <tr><td>Итог: </td><td align="right">
-                        <span class="big-letters blue">{{record.sum_og|stringformat:'.0f'}}</span>
-                        <span style="font-size:10px;">ОР</span>
-                    </td></tr>
-                    <tr><td align="right" colspan="2">
-                        <a href="{% url 'activism:add_points' pk=record.user.pk %}"
-                           data-target="#form-modal">
-                            <i class="fa fa-plus green"></i>
-                        </a>
-                    </td></tr>
-                </table>
-            </td>
-            {% endif %}
-
-
-            <td><table width="100%">
-                <tr><td align="center">
-                    <span class="big-letters blue">{{record.sum_all|stringformat:'.0f'}}</span>
-                    <span style="font-size:10px;">ОР</span>
-                </td></tr>
-                <tr><td align="center">
-                    <span style="font-size:12px;">{{record.level}}</span>
-                </td></tr>
-                </table>
-            </td>
-        </tr>
-    {% endfor %}
-    </table>
-    </div>
-    {% endcomment %}
 </div>
 {% endblock %}

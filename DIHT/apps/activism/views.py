@@ -573,7 +573,7 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
 
 class RatingView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, TemplateView):
     template_name = 'activism/rating.html'
-    group_required = "Ответственные за работу с пользователями"
+    group_required = "Активисты"
     raise_exception = True
 
     def get_context_data(self, **kwargs):

@@ -36,6 +36,7 @@ html {
     padding-bottom: 30px;
     padding-left:15px;
     padding-right:15px;
+    min-height: 80%;
 }
 
 .nametext {
@@ -88,8 +89,8 @@ body {
     .pagezone {
         padding-top:15px;
         padding-bottom: 30px;
-        padding-left:0px;
-        padding-right:0px;
+        padding-left:2px;
+        padding-right:2px;
         border: none;
     }
 }

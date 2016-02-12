@@ -151,16 +151,7 @@
             {% endif %}
         </div>
         <div class="col-md-8">
-            <div class="row">
-                <span class="pull-right" style="margin-right:20px"><a class="btn btn-default robotobold" href="{% url 'activism:activists' %}">
-                <i class="fa fa-bar-chart fa-lg" style="margin-right:4px"></i>Список активистов</a>
-                </span>
-                {% if is_charge or is_superuser %}
-                <span class="pull-right" style="margin-right:5px"><a class="btn btn-default robotobold" href="{% url 'activism:payments' %}">
-                <i class="fa fa-money fa-lg" style="margin-right:4px"></i>Выплаты</a>
-                </span>
-                {% endif %}
-            </div>
+            <div class="labor-border">
             <center><h4>Биржа задач</h4></center>
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                 {% for task in labor %}
@@ -176,7 +167,7 @@
                             <tbody>
                             <tr>
                                 <td valign="middle" width="30">
-					<span class="sector-label" style="color: #{{ task.sector.color|default:"aaaaaa" }}"><i class='fa fa-lg fa-circle'></i></span>
+                                    <span class="sector-label" style="color: #{{ task.sector.color|default:"aaaaaa" }}"><i class='fa fa-lg fa-circle'></i></span>
                                 </td>
                                 <td align="left"><span class="bigger-letters">{{ task.name }}
                                     {% if user in task.responsible.all and task.candidates.all|length > 0 %}
@@ -229,6 +220,23 @@
                 </center>
                 {% endif %}
             </div>
+            </div>
+            <center>
+                <div class="btn-group">
+                    <button type="button" style="margin-right:40px;" class="btn btn-default robotobold dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-bar-chart fa-lg" style="margin-right:4px"></i>Рейтинг&nbsp;<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'activism:rating' %}">За месяц</a></li>
+                        <li><a href="{% url 'activism:activists' %}">За все время</a></li>
+                    </ul>
+                {% if is_charge or is_superuser %}
+                    <a class="btn btn-default robotobold" href="{% url 'activism:payments' %}">
+                        <i class="fa fa-money fa-lg" style="margin-right:4px"></i>Выплаты
+                    </a>
+                {% endif %}
+                </div>
+            </center>
         </div>
     </div>
 </div>
