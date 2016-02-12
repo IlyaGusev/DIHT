@@ -83,3 +83,14 @@ body {
 .container .credit {
     margin: 10px 0;
 }
+
+@media (max-width: 767px) {
+    .pagezone {
+        padding-top:15px;
+        padding-bottom: 30px;
+        padding-left:0px;
+        padding-right:0px;
+        border: none;
+    }
+}
+

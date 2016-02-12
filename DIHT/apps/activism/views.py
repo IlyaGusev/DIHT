@@ -571,6 +571,18 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
         return context
 
 
+class RatingView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, TemplateView):
+    template_name = 'activism/rating.html'
+    group_required = "Ответственные за работу с пользователями"
+    raise_exception = True
+
+    def get_context_data(self, **kwargs):
+        context = super(RatingView, self).get_context_data(**kwargs)
+        activists = sorted(Group.objects.get(name='Активисты').user_set.all(),
+                           key=lambda u: u.last_name)
+        return context
+
+
 # TaskLog - begin
 
 def dict_diff(first, second):

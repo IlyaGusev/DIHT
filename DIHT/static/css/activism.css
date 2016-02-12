@@ -73,3 +73,68 @@
     margin-left: 3px;
     margin-right: 6px;
 }
+
+/* Ratings */
+
+.month-select {
+    margin-bottom: 30px;
+}
+
+div.div-rating {
+    border: none;
+}
+
+@media (max-width: 767px)  {
+    div.div-rating {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+}
+
+table.table-rating  > tbody > tr > td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+table.table-rating > tbody > tr > td {
+    vertical-align: middle;
+    
+}
+
+table.table-rating  > tbody > tr > td.table-rating-avatar {
+    padding: 4px;
+    padding-left: 20px;
+    width: 90px;
+}
+
+table.table-rating  > tbody > tr > td.table-rating-rate {
+    width: 90px;
+    text-align: center;
+}
+
+table.table-rating  > tbody > tr.rating1 {
+    background-color: #F4DD93;
+    font-size: 30px;
+}
+
+table.table-rating  > tbody > tr.rating1:hover {
+    background-color: #FFE877;
+}
+
+table.table-rating  > tbody >  tr.rating2 {
+    background-color: #eee;
+    font-size: 25px;
+}
+
+table.table-rating  > tbody > tr.rating2:hover {
+    background-color: #ddd;
+}
+
+table.table-rating  > tbody > tr.rating3 {
+    background-color: #E2B392;
+    font-size: 22px;
+}
+
+table.table-rating  > tbody > tr.rating3:hover {
+    background-color: #E0A073;
+}

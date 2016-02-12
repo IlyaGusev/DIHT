@@ -11,7 +11,7 @@ from django.conf.urls import url
 from activism.views import EventView, TaskView, IndexView, TaskCreateView, \
     EventsView, EventCreateView, TaskActionView, EventCloseView, UnlockView, \
     SectorView, ActivistsView, TaskLogView, AddPointsView, DeletePointsView, \
-    PaymentsView
+    PaymentsView, RatingView
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
@@ -33,5 +33,6 @@ urlpatterns = [
     url(r'^activists/(?P<pk>[0-9]*)/add_points/$', AddPointsView.as_view(), name='add_points'),
     url(r'^activists/(?P<pk>[0-9]*)/delete_points/$', DeletePointsView.as_view(), name='delete_points'),
 
-    url(r'^payments/$', PaymentsView.as_view(), name='payments'),
+    url(r'^payments/$', PaymentsView.as_view(), name='payments'), 
+    url(r'^rating/$', RatingView.as_view(), name='rating'),
 ]
