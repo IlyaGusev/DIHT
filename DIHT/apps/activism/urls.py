@@ -11,7 +11,8 @@ from django.conf.urls import url
 from activism.views import EventView, TaskView, IndexView, TaskCreateView, \
     EventsView, EventCreateView, TaskActionView, EventCloseView, UnlockView, \
     SectorView, ActivistsView, TaskLogView, AddPointsView, DeletePointsView, \
-    PaymentsView, RatingView
+    PaymentsView, RatingView, TaskCommentCreateView, TaskCommentUpdateView, \
+    TaskCommentDeleteView
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
@@ -28,6 +29,12 @@ urlpatterns = [
     url(r'^tasks/(?P<pk>[0-9]*)/log/$', TaskLogView.as_view(), name='task_log'),
     url(r'^tasks/(?P<pk>[0-9]*)/(?P<action>[0-9_a-z]+)/$', TaskActionView.as_view(), name='task_action'),
     url(r'^tasks/create/$', TaskCreateView.as_view(), name='create_task'),
+    url(r'^tasks/(?P<task_pk>[0-9]*)/comments/create/$',
+        TaskCommentCreateView.as_view(), name='create_task_comment'),
+    url(r'^tasks/(?P<task_pk>[0-9]*)/comments/(?P<pk>[0-9]*)/update/$',
+        TaskCommentUpdateView.as_view(), name='update_task_comment'),
+    url(r'^tasks/(?P<task_pk>[0-9]*)/comments/(?P<pk>[0-9]*)/delete/$',
+        TaskCommentDeleteView.as_view(), name='delete_task_comment'),
 
     url(r'^activists/$', ActivistsView.as_view(), name='activists'),
     url(r'^activists/(?P<pk>[0-9]*)/add_points/$', AddPointsView.as_view(), name='add_points'),

@@ -175,3 +175,28 @@ class PointOperation(Model):
 
     def __str__(self):
         return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)
+
+
+class TaskComment(Model):
+    """
+    Модель комментария для задач
+    """
+    user = ForeignKey(User, null=False, blank=False, related_name='task_comments', verbose_name="Юзер")
+    task = ForeignKey(Task, related_name="comments", verbose_name="Задача", blank=False, null=False)
+    datetime_created = DateTimeField("Время создания", default=timezone.now)
+    datetime_last_modified = DateTimeField("Время последнего изменения", default=timezone.now)
+    text = TextField("Текст комментария", blank=False)
+
+    class Meta:
+        verbose_name = "Комментарий к задаче"
+        verbose_name_plural = "Комментарии к задаче"
+
+    def get_absolute_url(self):
+        return reverse('activism:task', kwargs={'pk': self.task.pk})
+
+    def save(self, *args, **kwargs):
+        self.datetime_last_modified = timezone.now()
+        return super(TaskComment, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.user.last_name) + ': ' + str(self.task.name) + ' ' + str(self.datetime_created)

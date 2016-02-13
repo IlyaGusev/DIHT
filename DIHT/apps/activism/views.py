@@ -25,8 +25,8 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.utils import timezone
 from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
 from reversion import get_for_object
-from activism.models import Event, Task, AssigneeTask, Sector, PointOperation, ResponsibleEvent
-from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm
+from activism.models import Event, Task, AssigneeTask, Sector, PointOperation, ResponsibleEvent, TaskComment
+from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm, TaskCommentForm
 from activism.utils import global_checks, get_level
 
 
@@ -427,6 +427,43 @@ class DeletePointsView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
     success_url = reverse_lazy('activism:activists')
     raise_exception = True
 
+
+class TaskCommentCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
+    """
+    Действие создания комментария
+    """
+    model = TaskComment
+    group_required = 'Активисты'
+    form_class = TaskCommentForm
+    raise_exception = True
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.task = Task.objects.get(pk=self.kwargs['task_pk'])
+        return super(TaskCommentCreateView, self).form_valid(form)
+
+
+class TaskCommentUpdateView(LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin, UpdateView):
+    """
+    Действие редактирования комментария
+    """
+    model = TaskComment
+    group_required = 'Активисты'
+    form_class = TaskCommentForm
+    raise_exception = True
+
+    def test_func(self, user):
+        return self.get_object().user == user
+
+
+class TaskCommentDeleteView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
+    """
+    Действие удаления комментария
+    """
+    model = TaskComment
+    group_required = 'Ответственные за активистов'
+    success_url = reverse_lazy('activism:activists')
+    raise_exception = True
 
 """
     Show views

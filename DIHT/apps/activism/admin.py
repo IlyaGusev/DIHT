@@ -9,7 +9,7 @@
 """
 import reversion
 from django.contrib import admin
-from activism.models import Task, Event, AssigneeTask, Sector, PointOperation, ResponsibleEvent
+from activism.models import Task, Event, AssigneeTask, Sector, PointOperation, ResponsibleEvent, TaskComment
 
 
 class AssigneeTaskInline(admin.StackedInline):
@@ -29,4 +29,5 @@ admin.site.register(Sector)
 admin.site.register(ResponsibleEvent)
 admin.site.register(AssigneeTask, AssigneeTaskAdmin)
 admin.site.register(Task, TaskAdmin, follow=["assignees"])
+admin.site.register(TaskComment)
 admin.site.register(PointOperation)

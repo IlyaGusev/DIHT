@@ -173,4 +173,50 @@ $(function() {
         else
             $(this).find('#id_is_urgent').prop('checked', false);
     });
+
+    $("#comment-create").on('click', function(event){
+        event.preventDefault();
+        var href = $(this)[0].href;
+        var text = $("#comment-field-new").val();
+        if (text != "")
+            $.ajax({
+                type: 'POST',
+                url: href,
+                data: {'text': text},
+                success: function(response) {
+                    window.location.reload();
+                },
+                error: function(request, status, error) {
+                    console.log(error)
+                }
+            });
+    });
+
+    $('.comment-pencil').click(function(event) {
+        event.preventDefault();
+        var comment_current = $(this).parents('.comment-current')
+        var comment_edit = comment_current.siblings('.comment-edit')
+        transfer_class('hidden', comment_edit, comment_current);
+        comment_edit.find('.comment-field').focus();
+    });
+
+    $('.comment-field').blur(function() {
+        var text = $(this).val();
+        var id = $(this)[0].id;
+        var comment_edit = $(this).parents('.comment-edit');
+        var comment_current = comment_edit.siblings('.comment-current');
+        var href = comment_current.find(".light")[0].href
+        $.ajax({
+            type: 'POST',
+            url: href,
+            data: {'text': text},
+            success: function(response) {
+                window.location.reload();
+            },
+            error: function(request, status, error) {
+                console.log(error)
+            }
+        });
+        transfer_class('hidden', comment_current, comment_edit);
+    });
 });

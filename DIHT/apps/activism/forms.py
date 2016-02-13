@@ -12,7 +12,7 @@ from django.contrib.auth.models import Group, User
 from django.shortcuts import get_object_or_404
 from autocomplete_light import ModelForm, ModelChoiceField
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
-from activism.models import Task, Event, AssigneeTask, ResponsibleEvent
+from activism.models import Task, Event, AssigneeTask, ResponsibleEvent, TaskComment
 from activism.utils import global_checks
 
 
@@ -164,3 +164,12 @@ class PointForm(ModelForm):
     class Meta:
         model = User
         fields = []
+
+
+class TaskCommentForm(ModelForm):
+    """
+    Форма для создания и редактирования комментариев.
+    """
+    class Meta:
+        model = TaskComment
+        fields = ['text', ]
