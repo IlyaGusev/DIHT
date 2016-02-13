@@ -54,6 +54,7 @@
             </td>
             {% if can_all %}
             <td class="td-small">
+                {{record.sum_hours|stringformat:'.2f'}} <a class="expand"><i class="fa fa-caret-down fa-lg hidden-xs"></i></a>
                 <table width="100%" class="hidden td-small" style="font-size: 14px;">
                 {% for through in record.throughs %}
                         <tr>
@@ -66,9 +67,9 @@
                         </tr>
                 {% endfor %}
                  </table>
-                {{record.sum_hours|stringformat:'.2f'}} <a class="expand"><i class="fa fa-caret-down fa-lg hidden-xs"></i></a>
             </td>
             <td class="td-small">
+                {{record.sum_og|stringformat:'.0f'}}<span style="font-size:10px;">ОР</span> <a class="expand"><i class="fa fa-caret-down fa-lg hidden-xs"></i></a>
                 <table width="100%" class="hidden td-small" style="font-size: 14px;">
                     {% for operation in record.operations %}
                         <tr>
@@ -87,7 +88,6 @@
                         </a>
                     </td></tr>
                 </table>
-                {{record.sum_og|stringformat:'.0f'}}<span style="font-size:10px;">ОР</span> <a class="expand"><i class="fa fa-caret-down fa-lg hidden-xs"></i></a>
             </td>
             {% endif %}
 

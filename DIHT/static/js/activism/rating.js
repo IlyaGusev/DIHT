@@ -12,8 +12,9 @@ $(function(){
     });
 
     $('.expand').on('click', function(event){
-       arrow = $($(this).children("i")[0])
-       table = $($(this).siblings()[0])
+       arrow = $(this).children("i")
+       table = $(this).siblings("table")
+       console.log ($(this).siblings("table"))
         if (arrow.hasClass("fa-caret-down")) {
             arrow.removeClass("fa-caret-down")
             arrow.addClass("fa-caret-up")
