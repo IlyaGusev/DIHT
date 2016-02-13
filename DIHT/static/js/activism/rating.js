@@ -1,5 +1,13 @@
 $(function(){
     $('.month-selector').on('change',function(event){
-        /* Here is something that happens after month changing */ 
+        event.preventDefault();
+        $(".div-rating").addClass("hidden");
+        var option =  $(".month-selector option:selected").val()
+        $("#"+option).removeClass("hidden");
     })
+
+    $(document).ready(function() {
+        var option =  $(".month-selector option:selected").val()
+	    $("#"+option).removeClass("hidden");
+    });
 });

@@ -580,6 +580,36 @@ class RatingView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin, Te
         context = super(RatingView, self).get_context_data(**kwargs)
         activists = sorted(Group.objects.get(name='Активисты').user_set.all(),
                            key=lambda u: u.last_name)
+        records = {}
+        dates = []
+        context['records'] = OrderedDict()
+        current_date = (timezone.now().year, timezone.now().month)
+        for i in range(6):
+            month = current_date[1] - i
+            year = current_date[0]
+            if month < 1:
+                month += 12
+                year -= 1
+            dates.append((year, month))
+        for date in dates:
+            date_str = dt.datetime(year=date[0], month=date[1], day=1)
+            records[date_str] = []
+            for user in activists:
+                if Group.objects.get(name="Руководящая группа") not in user.groups.all() and \
+                   Group.objects.get(name="Ответственные за активистов") not in user.groups.all():
+                    throughs = user.participated.filter(task__status__in=['closed'],
+                                                        task__datetime_closed__year=date[0],
+                                                        task__datetime_closed__month=date[1])
+                    sum_hours = sum(throughs.values_list('hours', flat=True))
+                    if sum_hours != 0:
+                        records[date_str].append({'user': user,
+                                                  'sum_hours': sum_hours})
+
+            context['records'][date_str] = list(
+                reversed(sorted(
+                    reversed(sorted(records[date_str],
+                             key=lambda record: record['user'].last_name)),
+                         key=lambda record: record['sum_hours'])))
         return context
 
 
