@@ -6,6 +6,7 @@
 {% block activism_table_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
     <script src="{% static 'js/activism.js' %}"></script>
+    <script src="{% static 'js/activism/rating.js' %}"></script>
 	<link rel="stylesheet" href="{% static 'css/activism.css' %}">
 {% endblock %}
 
@@ -14,10 +15,10 @@
     <h3 class="task-name nametext"> Список активистов </h3>
 </div>
 <div class = "row pagezone">
-    <div class="table-responsive">
-    <table class="table table-bordered">
+    <div class="table-responsive div-rating col-md-10 col-md-offset-1">
+    <table class="table table-hover table-rating">
         <tr>
-            <th class="text-center">Активист</th>
+            <th class="text-center" colspan="2" >Активист</th>
              {% if can_all %}
             <th class="text-center">ЧРА</th>
             <th class="text-center">Другие ОР</th>
@@ -25,20 +26,35 @@
             <th class="text-center">Суммарные ОР</th>
         </tr>
     {% for record in records %}
-        <tr>
-            <td style = "padding: 1px 10px;">
+        {% if forloop.counter == 1 %}
+        <tr class="rating1">
+        {% elif forloop.counter == 2 %}
+        <tr class="rating2">
+        {% elif forloop.counter == 3 %}
+        <tr class="rating3">
+        {% else %}
+        <tr class="rating_noob">
+        {% endif %}
+            <td class="table-rating-avatar hidden-xs">
                 {% if record.user.avatar.img %}
-                    {% thumbnail record.user.avatar.img "25x25" crop="center" as pic %}
-                    <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}"><img src="{{ pic.url }}" class="avatar"></a>
+                    {% thumbnail record.user.avatar.img "48x48" crop="center" as pic %}
+                    <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}"><img src="{{ pic.url }}" class="round"></a>
                     {% endthumbnail %}
                 {% endif %}
-
-                <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}">{{record.user.last_name}} {{record.user.first_name}} {{record.user.profile.middle_name}}</a>
             </td>
-
+            <td class="table-rating-avatar visible-xs-inline">
+                {% if record.user.avatar.img %}
+                    {% thumbnail record.user.avatar.img "30x30" crop="center" as pic %}
+                    <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}"><img src="{{ pic.url }}" class="round"></a>
+                    {% endthumbnail %}
+                {% endif %}
+            </td>
+            <td nowrap >
+                <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}">{{record.user.last_name}} {{record.user.first_name}}</a>
+            </td>
             {% if can_all %}
-            <td>
-                <table width="100%">
+            <td class="td-small">
+                <table width="100%" class="hidden td-small" style="font-size: 14px;">
                 {% for through in record.throughs %}
                         <tr>
                             <td>
@@ -46,18 +62,14 @@
                             </td>
                             <td align="right">
                                 <span>{{ through.hours|stringformat:'.2f' }}</span>
-                                <span style="font-size:10px;">ЧРА</span>
                             </td>
                         </tr>
                 {% endfor %}
-                    <tr><td>Итог: </td><td align="right">
-                        <span class="big-letters blue">{{record.sum_hours|stringformat:'.2f'}}</span>
-                        <span style="font-size:10px;">ЧРА</span>
-                    </td></tr>
                  </table>
+                {{record.sum_hours|stringformat:'.2f'}} <a class="expand"><i class="fa fa-caret-down fa-lg hidden-xs"></i></a>
             </td>
-            <td>
-                <table width="100%">
+            <td class="td-small">
+                <table width="100%" class="hidden td-small" style="font-size: 14px;">
                     {% for operation in record.operations %}
                         <tr>
                             <td>
@@ -68,10 +80,6 @@
                             </td>
                         </tr>
                     {% endfor %}
-                    <tr><td>Итог: </td><td align="right">
-                        <span class="big-letters blue">{{record.sum_og|stringformat:'.0f'}}</span>
-                        <span style="font-size:10px;">ОР</span>
-                    </td></tr>
                     <tr><td align="right" colspan="2">
                         <a href="{% url 'activism:add_points' pk=record.user.pk %}"
                            data-target="#form-modal">
@@ -79,18 +87,27 @@
                         </a>
                     </td></tr>
                 </table>
+                {{record.sum_og|stringformat:'.0f'}}<span style="font-size:10px;">ОР</span> <a class="expand"><i class="fa fa-caret-down fa-lg hidden-xs"></i></a>
             </td>
             {% endif %}
 
 
             <td><table width="100%">
                 <tr><td align="center">
-                    <span class="big-letters blue">{{record.sum_all|stringformat:'.0f'}}</span>
+                    {% if forloop.counter == 1 %}
+                    <span class="rate1">
+                    {% elif forloop.counter == 2 %}
+                    <span class="rate2">
+                    {% elif forloop.counter == 3 %}
+                    <span class="rate3">
+                    {% else %}
+                    {% endif %}
+                    {{record.sum_all|stringformat:'.0f'}}</span>
                     <span style="font-size:10px;">ОР</span>
                 </td></tr>
-                <tr><td align="center">
-                    <span style="font-size:12px;">{{record.level}}</span>
-                </td></tr>
+                <!--tr><td align="center">
+                    <span style="font-size:12px;">({{record.level}})</span>
+                </td></tr-->
                 </table>
             </td>
         </tr>
