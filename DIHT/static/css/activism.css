@@ -99,7 +99,12 @@
 table.table-rating  > tbody > tr.rating1 {
     background-color: #F4DD93;
 }
+
 table.table-rating  > tbody > tr.rating1 > td {
+    border-top: none;
+}
+
+table.table-rating  > tbody > tr > th {
     border-top: none;
 }
 
@@ -127,11 +132,23 @@ table.table-rating > tbody > tr > td {
     vertical-align: middle;
 }
 
+table.table-rating > tbody > tr > td.td-small {
+    font-size: 16px;
+    text-align: center;
+}
+
+table.table-rating   a {
+    color: #555555;
+}
+
+.expand  {
+    cursor:pointer;
+}
+
 @media (min-width: 768px) {
     table.table-rating  > tbody > tr.rating1 {  
         font-size: 30px;
     }
-    
     table.table-rating  > tbody > tr.rating2 {
         font-size: 25px;
     }
@@ -140,6 +157,16 @@ table.table-rating > tbody > tr > td {
     }
     div.div-rating {
         border: none;
+    }
+    
+    .rate1 {
+        font-size: 25px;
+    }
+    .rate2 {
+        font-size: 22px;
+    }
+    .rate3 {
+        font-size: 20px;
     }
     
     table.table-rating  > tbody > tr > td {
