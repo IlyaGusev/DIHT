@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load add_class %}
+{% load thumbnail %}
+{% load list_utils %}
+{% block title %} Закрыть мероприятие {% endblock %}
+{% block custom_scripts %}
+    <script src="{% static 'js/activism.js' %}"></script>
+    <script src="{% static 'js/activism/event_best.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/activism.css' %}">{% endblock %}
+{% block content %}
+<div class="row well namezone">
+    <h3>Лучшие активисты в <span class="event-name">{{event.name}}</span></h3>
+</div>
+<div class = "row pagezone">
+    <div class="col-md-10 col-md-offset-1">
+    <table class="table">
+        {% for assignee, operation in star_table.items%}
+        <tr>
+            <th width="50%" style="text-align: center;"> {{ assignee.get_full_name }}</th>
+            <td width="50%" style="text-align: center;">
+                {% if operation %}
+                <a href="{% url 'activism:delete_points' pk=operation.pk %}" class="delete-view">
+                    <i class="fa fa-star yellow fa-lg"></i>
+                </a>
+                {% else %}
+                <a href="{% url 'activism:add_points' pk=assignee.pk %}" class="event-best-on">
+                    <i class="fa fa-star-o fa-lg"></i>
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+</div>
+{% endblock %}

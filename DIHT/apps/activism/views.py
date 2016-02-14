@@ -276,6 +276,36 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
 # EventClosingView  - end
 
 
+class EventBestView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin, DetailView):
+    model = Event
+    group_required = 'Ответственные за активистов'
+    template_name = "activism/event_best.html"
+    raise_exception = True
+
+    def get_context_data(self, **kwargs):
+        context = super(EventBestView, self).get_context_data(**kwargs)
+        event = self.get_object()
+        assignees = get_event_assignees(event)
+        context['assignees'] = assignees
+
+        star_table = OrderedDict()
+        for assignee in assignees:
+            op = PointOperation.objects.filter(user=assignee, description="Лучший активист " + event.name)
+            if op.count() == 1:
+                star_table[assignee] = list(op)[0]
+            elif op.count() == 0:
+                star_table[assignee] = False
+        context['star_table'] = star_table
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if self.get_object().status == 'closed':
+            return super(EventBestView, self).get(request, args, kwargs)
+        else:
+            raise PermissionDenied
+
+
 class TaskCreateView(LoginRequiredMixin, UserPassesTestMixin, JsonCreateMixin, JsonErrorsMixin, CreateView):
     model = Task
     template_name = 'activism/task_create.html'

@@ -225,7 +225,6 @@ $(function() {
         var comment_edit = $(this).parents('.comment-edit');
         var comment_current = comment_edit.siblings('.comment-current');
         var href = comment_current.find(".comment-pencil")[0].href
-        console.log(href)
         $.ajax({
             type: 'POST',
             url: href,

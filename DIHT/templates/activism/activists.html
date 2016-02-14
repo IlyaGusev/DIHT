@@ -77,7 +77,10 @@
                                 {{operation.description}}
                             </td>
                             <td align="right">{{operation.amount|stringformat:'.0f' }}
-                                <span style="font-size:10px;">ОР </span><a href="{% url 'activism:delete_points' pk=operation.pk %}" class="delete-view"><i class="fa fa-close red"></i></a>
+                                <span style="font-size:10px;">ОР </span>
+                                <a href="{% url 'activism:delete_points' pk=operation.pk %}" class="delete-view">
+                                    <i class="fa fa-close red"></i>
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}

@@ -47,7 +47,7 @@
                 {% endif %}
             </td>
             <td>{{ record.user.get_full_name }}</td>
-            <td class="table-rating-rate">{{ record.sum_hours }}</td>
+            <td class="table-rating-rate">{{ record.sum_hours|stringformat:'.2f' }}</td>
         </tr>
         {% endfor %}
     </table>
