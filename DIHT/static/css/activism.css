@@ -239,3 +239,15 @@ div.comment .comment-field {
     min-width: 300px;
     margin-top: 5px;
 }
+
+#comment-field-new {
+    margin-bottom: 10px;
+}
+
+#description-pencil {
+    display: none;
+}
+
+.descr-section:hover #description-pencil {
+    display: inline;
+}

@@ -191,7 +191,26 @@ $(function() {
                 }
             });
     });
+    
+    $("#comment-field-new").on('submit', function(event){
+        event.preventDefault();
+        var href = $(this)[0].href;
+        var text = $("#comment-field-new").val();
+        if (text != "")
+            $.ajax({
+                type: 'POST',
+                url: href,
+                data: {'text': text},
+                success: function(response) {
+                    window.location.reload();
+                },
+                error: function(request, status, error) {
+                    console.log(error)
+                }
+            });
+    });
 
+    
     $('.comment-pencil').click(function(event) {
         event.preventDefault();
         var comment_current = $(this).parents('.comment-current')

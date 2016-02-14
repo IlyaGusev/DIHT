@@ -388,7 +388,7 @@
                 </div>
             </div>
         </div>
-        <div class="section">
+        <div class="section descr-section">
             <h5 class="section-name">Описание <a href="#" class="light">
                 {% if can_edit %}<i class="fa fa-pencil" id="description-pencil"></i>{% endif %}
             </a></h5>
@@ -400,7 +400,7 @@
             </span>
             {% endif %}
         </div>
-        <div class="section">
+        <div class="section hidden">
             {% if can_edit %}
             <span>
                 <span id="tags">
@@ -465,32 +465,13 @@
                         <textarea class="form-control comment-field" id="{{comment.pk}}" rows="2">{{comment.text}}</textarea>
                     </div>
                 </div>
-                <!--
-                <span class="comment-current">
-                    <p><b></b> - {{comment.text}}
-                    {% if comment.user == user %}
-                    <a href="{% url 'activism:update_task_comment' task_pk=task.pk pk=comment.pk %}" class="light">
-                        <i class="fa fa-pencil comment-pencil"></i>
-                    </a>
-                    {% endif %}
-                    {% if can_all %}
-                    <a href="{% url 'activism:delete_task_comment' task_pk=task.pk pk=comment.pk %}" class="delete-view">
-                        <i class="fa fa-close red"></i>
-                    </a>
-                    {% endif%}
-                    </p>
-                </span>
-                <span class="hidden comment-edit">
-                    <textarea class="form-control comment-field" id="{{comment.pk}}" rows="4">{{comment.text}}</textarea>
-                </span>
-                -->
             </div>
             <hr class="just-a-line">
             {% endfor %}
             {% endif %}
             <textarea class="form-control" id="comment-field-new" rows="4"></textarea>
             <a href="{% url 'activism:create_task_comment' task_pk=task.pk %}"
-               class="btn btn-warning" id="comment-create">Отправить</a>
+               class="btn btn-primary" id="comment-create">Отправить</a>
         </div>
     </div>
     <div class = "col-md-4">
