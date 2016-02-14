@@ -192,3 +192,50 @@ table.table-rating   a {
         padding-right: 0px;
     }
 }
+
+
+/* Comments for task */
+
+div.comment {
+    position: relative;
+    min-height: 50px;
+}
+
+div.comment > div {
+}
+
+div.comment > div.comment-avatar {
+    left:0;
+    width: 50px;
+    min-height: 50px;
+    /*background-color: #77e;*/
+    position: absolute;
+    text-align: center;
+    padding-top: 7px;
+}
+
+div.comment > div.comment-zone {
+    position: relative;
+    display: inline-block;
+    left: 50px;
+    right: 50px;    
+    min-height: 50px;
+    /*background-color: #e77;*/
+    padding: 2px 0px 2px 10px;
+}
+
+div.comment  div.comment-date {
+    /*color: #aaa;*/
+    font-size: 12px;
+}
+div.comment .comment-pencil, div.comment .comment-delete {
+    display: none;
+}
+div.comment:hover .comment-pencil, div.comment:hover .comment-delete {
+    display: inline;
+}
+
+div.comment .comment-field {
+    min-width: 300px;
+    margin-top: 5px;
+}

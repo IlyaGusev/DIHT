@@ -425,13 +425,49 @@
         </div>
         <br>
         <div class="section">
-            <h5 class="section-name">Комементарии</h5>
+            <h5 class="section-name">Комментарии</h5>
             <hr class="just-a-line">
             {% if task.comments %}
             {% for comment in task.comments.all %}
-            <span class="comment">
+            <div class="comment">
+                <div class="comment-avatar">
+                    <a href="{% url 'accounts:profile' pk=comment.user.profile.pk %}">
+                        {% if comment.user.avatar.img %}
+                            {% thumbnail comment.user.avatar.img "36x36" crop="center" as pic %}
+                            <img src="{{ pic.url }}" class="avatar">
+                            {% endthumbnail %}
+                        {% endif %}
+                    </a>
+                </div>
+                <div class="comment-zone">
+                    <div class="comment-author">
+                        <a href="{% url 'accounts:profile' pk=comment.user.profile.pk %}">
+                            {{comment.user.get_full_name}}
+                        </a>
+                    </div>
+                    <div class="comment-current">
+                        <div class="comment-text">{{comment.text}}</div>
+                        <div class="comment-date light" >
+                            {{comment.datetime_created}} 
+                            {% if comment.user == user %}
+                            <a href="{% url 'activism:update_task_comment' task_pk=task.pk pk=comment.pk %}" class="lblue comment-pencil">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+                            {% endif %}
+                            {% if can_all %}
+                            <a href="{% url 'activism:delete_task_comment' task_pk=task.pk pk=comment.pk %}" class="delete-view lblue comment-delete">
+                                <i class="fa fa-close"></i>
+                            </a>                            
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="hidden comment-edit">
+                        <textarea class="form-control comment-field" id="{{comment.pk}}" rows="2">{{comment.text}}</textarea>
+                    </div>
+                </div>
+                <!--
                 <span class="comment-current">
-                    <p><b>{{comment.user.get_full_name}}</b> - {{comment.text}}
+                    <p><b></b> - {{comment.text}}
                     {% if comment.user == user %}
                     <a href="{% url 'activism:update_task_comment' task_pk=task.pk pk=comment.pk %}" class="light">
                         <i class="fa fa-pencil comment-pencil"></i>
@@ -447,7 +483,9 @@
                 <span class="hidden comment-edit">
                     <textarea class="form-control comment-field" id="{{comment.pk}}" rows="4">{{comment.text}}</textarea>
                 </span>
-            </span>
+                -->
+            </div>
+            <hr class="just-a-line">
             {% endfor %}
             {% endif %}
             <textarea class="form-control" id="comment-field-new" rows="4"></textarea>

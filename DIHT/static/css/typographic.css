@@ -36,7 +36,6 @@ a.grey:hover {
     color:#555555;
 }
 
-
 .bgrey {
 	color: #333;
 }
@@ -46,12 +45,22 @@ a.bgrey:hover {
 }
 
 .light {
-	color: #cccccc;
+	color: #aaa;
 }
 
 a.light:hover {
-	color: #aaaaaa;
+	color: #888;
 }
+
+.lblue {
+	color: #c9d8e6;
+}
+
+a.lblue:hover {
+	color: #6b8db1;
+}
+
+
 
 .btn-diht {
     color: #fff;
