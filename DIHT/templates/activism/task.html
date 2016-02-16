@@ -446,7 +446,7 @@
                         </a>
                     </div>
                     <div class="comment-current">
-                        <div class="comment-text">{{comment.text}}</div>
+                        <div class="comment-text">{{comment.text|linebreaksbr }}</div>
                         <div class="comment-date light" >
                             {{comment.datetime_created}} 
                             {% if comment.user == user %}

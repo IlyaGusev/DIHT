@@ -223,7 +223,7 @@
             </div>
             <center>
                 <div class="btn-group">
-                    <button type="button" style="margin-right:40px;" class="btn btn-default robotobold dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button type="button" class="btn btn-default robotobold dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fa fa-bar-chart fa-lg" style="margin-right:4px"></i>Рейтинг&nbsp;<span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
@@ -231,7 +231,7 @@
                         <li><a href="{% url 'activism:activists' %}">За все время</a></li>
                     </ul>
                 {% if is_charge or is_superuser %}
-                    <a class="btn btn-default robotobold" href="{% url 'activism:payments' %}">
+                    <a class="btn btn-default robotobold" style="margin-left:40px;" href="{% url 'activism:payments' %}">
                         <i class="fa fa-money fa-lg" style="margin-right:4px"></i>Выплаты
                     </a>
                 {% endif %}

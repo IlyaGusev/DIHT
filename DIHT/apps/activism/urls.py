@@ -12,7 +12,7 @@ from activism.views import EventView, TaskView, IndexView, TaskCreateView, \
     EventsView, EventCreateView, TaskActionView, EventCloseView, UnlockView, \
     SectorView, ActivistsView, TaskLogView, AddPointsView, DeletePointsView, \
     PaymentsView, RatingView, TaskCommentCreateView, TaskCommentUpdateView, \
-    TaskCommentDeleteView
+    TaskCommentDeleteView, EventBestView
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^events/create/$', EventCreateView.as_view(), name='create_event'),
     url(r'^events/(?P<pk>[0-9]*)/$', EventView.as_view(), name='event'),
     url(r'^events/(?P<pk>[0-9]*)/close/$', EventCloseView.as_view(), name='event_close'),
+    url(r'^events/(?P<pk>[0-9]*)/best/$', EventBestView.as_view(), name='event_best'),
 
     url(r'^sectors/(?P<pk>[0-9]*)/$', SectorView.as_view(), name='sector'),
 

@@ -32,6 +32,9 @@
                        href="{% url 'activism:event_close' pk=event.pk %}"
                        id="close">
                         <i class="fa fa-lg fa-check green"></i> Переназначить ОР</a>
+                    <a class="btn btn-default"
+                       href="{% url 'activism:event_best' pk=event.pk %}" style="margin-left: 5px;">
+                        <i class="fa fa-lg fa-star yellow"></i> Отметить лучших </a>
                 </div>
             </div>
             {% endif %}
