@@ -53,6 +53,7 @@
                         <li {% block activism_active %} {% endblock %}>
                             <a href="{% url 'activism:index' %}">Актив</a>
                         </li>
+                        <li {% block poll_active %}{% endblock %}> <a href="{% url 'main:poll' %}">Опрос</a></li>
 
                         {% comment %}
                         <li class="dropdown">

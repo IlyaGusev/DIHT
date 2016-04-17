@@ -454,7 +454,7 @@
                                 <i class="fa fa-pencil"></i>
                             </a>
                             {% endif %}
-                            {% if can_all %}
+                            {% if can_all or comment.user == user %}
                             <a href="{% url 'activism:delete_task_comment' task_pk=task.pk pk=comment.pk %}" class="delete-view lblue comment-delete">
                                 <i class="fa fa-close"></i>
                             </a>                            
