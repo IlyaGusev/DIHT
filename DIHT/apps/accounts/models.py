@@ -80,7 +80,6 @@ class MoneyOperation(Model):
         else:
             super(MoneyOperation, self).save(*args, **kwargs)
 
-
     @transaction.atomic
     def cancel(self):
         self.user.profile.money -= self.amount

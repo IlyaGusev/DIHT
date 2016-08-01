@@ -11,6 +11,7 @@
         Все модали работают с common.js. Если видишь JSON - это туда.
 """
 import os
+import json
 from DIHT.settings import BASE_DIR
 from django.core.files import File
 from django.views.generic.edit import FormView, UpdateView, DeleteView
@@ -123,6 +124,24 @@ class CheckUniqueView(View):
         return JsonResponse(result, status=200)
 
 
+def get_plan_room(user):
+    with open("plan.json", 'r') as f:
+        content = f.read()
+        plan = json.loads(content)
+        room = ""
+        neighbours = []
+        for key, value in plan.items():
+            if key.find(user.last_name+" ") != -1 and key[key.find(".")-1] == user.first_name[0]:
+                room = value
+                break
+        if room == "":
+            return -1, neighbours
+        for key, value in plan.items():
+            if value == room and not (key.find(user.last_name+" ") != -1 and key[key.find(".")-1] == user.first_name[0]):
+                neighbours.append(key)
+        return room, neighbours
+
+
 class ProfileView(LoginRequiredMixin, DetailView):
     """
     Страница для отображения профиля
@@ -157,6 +176,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context['op_for_hours'] = int(sum(user.participated.filter(task__status__in=['closed'])
                                               .values_list('hours', flat=True)) // 10)
         context['level'] = get_level(user)
+        context['plan_room'], context['neighbours'] = get_plan_room(user)
         return context
 
 

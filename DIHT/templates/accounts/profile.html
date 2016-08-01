@@ -131,6 +131,18 @@
                 <span class="param">Общежитие:</span>  <span class="pull-right">{{ profile.hostel }}</span><br>
                 <span class="param">Комната:</span>  <span class="pull-right">{{ profile.room_number }}</span><br>
                 <span class="param">Телефон:</span> <span class="pull-right"> {{ profile.mobile }}</span> <br>
+                {% if profile.user == request.user %}
+                {% if plan_room == -1 %}
+                <span class="param">План поселения:</span> <span class="pull-right"> Нет в базе </span> <br>
+                {% else %}
+                <span class="param">Планируемая комната:</span> <span class="pull-right"> {{ plan_room }} </span> <br>
+                <span class="param">Планируемые соседи:</span>
+                {% for name in neighbours %}
+                    <span class="pull-right"> {{name}} </span> <br>
+                {% endfor %}
+                {% endif %}
+                {% endif %}
+
                 {% if vk %}
                 <span class="param">VK:</span> <span class="pull-right"> <a href="http://vk.com/id{{ vk }}">{{ vk }} </a></span> <br>
                 {% endif %}
