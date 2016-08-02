@@ -124,6 +124,12 @@ class CheckUniqueView(View):
         return JsonResponse(result, status=200)
 
 
+def is_user_key(user, key):
+    return key.find(user.last_name + " ") != -1 and \
+           key[key.find(".") - 1] == user.first_name[0] and \
+           (key[key.rfind(".") - 1] == user.profile.middle_name[0] or key[key.rfind(".") - 1] == ".")
+
+
 def get_plan_room(user):
     with open("plan.json", 'r') as f:
         content = f.read()
@@ -131,13 +137,13 @@ def get_plan_room(user):
         room = ""
         neighbours = []
         for key, value in plan.items():
-            if key.find(user.last_name+" ") != -1 and key[key.find(".")-1] == user.first_name[0]:
+            if is_user_key(user, key):
                 room = value
                 break
         if room == "":
             return -1, neighbours
         for key, value in plan.items():
-            if value == room and not (key.find(user.last_name+" ") != -1 and key[key.find(".")-1] == user.first_name[0]):
+            if value == room and not is_user_key(user, key):
                 neighbours.append(key)
         return room, neighbours
 
