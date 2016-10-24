@@ -1,14 +1,16 @@
 import datetime as dt
 import logging
 from collections import OrderedDict
-from django.views.generic import TemplateView
+from django.views.generic import View, TemplateView
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
 from django.db import transaction
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.conf import settings
 from washing.models import WashingMachine, WashingMachineRecord, RegularNonWorkingDay, NonWorkingDay, Parameters
-from accounts.models import MoneyOperation
+from accounts.models import Profile, MoneyOperation
 from braces.views import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
 
 logger = logging.getLogger('DIHT.custom')
@@ -97,6 +99,7 @@ def parse_record(request):
     return {'machine': machine, 'datetime_from': datetime_from, 'datetime_to': datetime_to}
 
 
+# TODO: validate datetime_to
 class CreateRecordView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "washing/create_record.html"
     raise_exception = True
@@ -180,3 +183,25 @@ class UnblockDayView(VirtualBlockDayView):
         for machine in machines:
             NonWorkingDay.objects.filter(date=dt.datetime.strptime(date, '%d.%m.%Y').date(), machine=machine).delete()
         return super(UnblockDayView, self).get(request, *args, **kwargs)
+
+class CheckAccessView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(CheckAccessView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request, uid, *args, **kwargs):
+        takeaway_time = dt.timedelta(1) # one day to take away clothes
+
+        if "secret" not in request.POST or request.POST['secret'] != settings.ACCESS_SECRET:
+            return HttpResponseForbidden()
+
+        now = dt.datetime.now()
+        user_query = Profile.objects.filter(pass_id=int(uid, 16))
+        if user_query.exists() and WashingMachineRecord.objects.filter(
+                datetime_from__lte=now,
+                datetime_to__gte=now - takeaway_time,
+                user=user_query.get(pass_id=int(uid, 16)).user
+                ).exists():
+            return HttpResponse("GRANTED")
+        else:
+            return HttpResponse("DENIED")
