@@ -1,4 +1,4 @@
-Django == 1.8.5
+django == 1.10.2
 Pillow == 2.9.0
 oauthlib == 1.0.1
 requests == 2.7.0

@@ -24,6 +24,8 @@ sys.path.insert(0, os.path.join(PROJECT_DIR, 'apps'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '^32k)pxbf1n_o_@13p&wj0kl-&!)1saw_txy5q5-2=rt7ivf3+'
 
+ACCESS_SECRET = '42'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOSTS = []

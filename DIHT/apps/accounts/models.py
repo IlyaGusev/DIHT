@@ -8,7 +8,7 @@
         Модели, связанные с профилями пользователей.
 """
 from django.db.models import Model, OneToOneField, BooleanField, CharField, \
-    IntegerField, ForeignKey, DateTimeField, ImageField
+    IntegerField, ForeignKey, DateTimeField, ImageField, PositiveIntegerField
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils import timezone
@@ -28,6 +28,7 @@ class Profile(Model):
     mobile = CharField("Мобильный телефон", max_length=30, blank=True)
     middle_name = CharField("Отчество", max_length=30, blank=True)
     sign = CharField("Подпись", max_length=255, blank=True, null=True, default='')
+    pass_id = PositiveIntegerField("ID пропуска", blank=True, null=True, default=None, unique=True)
 
     def __str__(self):
         return 'Профиль пользвателя: %s' % self.user.username
@@ -35,6 +36,9 @@ class Profile(Model):
     class Meta:
         verbose_name = "Профиль"
         verbose_name_plural = "Профили"
+        permissions = (
+            ("change_profile_pass_id", "Can change profile pass id"),
+        )
 
 
 def upload_to(instance, filename):
