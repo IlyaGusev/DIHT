@@ -248,4 +248,4 @@ class ChangePassIdForm(ModelForm):
 
     def clean_pass_id(self):
         data = self.cleaned_data['pass_id']
-        return data.lower() if len(data) > 0 else None
+        return data.lower().replace(' ', '')
