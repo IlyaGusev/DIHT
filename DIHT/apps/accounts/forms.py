@@ -236,3 +236,16 @@ class KeyUpdateForm(autocomplete_light.ModelForm):
     class Meta:
         model = Key
         fields = []
+
+
+class ChangePassIdForm(ModelForm):
+    """
+    Форма изменения UID пропуска.
+    """
+    class Meta:
+        model = Profile
+        fields = ('pass_id',)
+
+    def clean_pass_id(self):
+        data = self.cleaned_data['pass_id']
+        return data.lower().replace(' ', '')

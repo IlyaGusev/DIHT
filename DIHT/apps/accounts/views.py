@@ -28,7 +28,7 @@ from braces.views import LoginRequiredMixin, UserPassesTestMixin, GroupRequiredM
 from django.utils import timezone
 from itertools import chain
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, \
-    MoneyForm, ChangePasswordForm, KeyCreateForm, KeyUpdateForm
+    MoneyForm, ChangePasswordForm, KeyCreateForm, KeyUpdateForm, ChangePassIdForm
 from accounts.models import Profile, Avatar, MoneyOperation, Key, KeyTransfer
 from washing.models import BlackListRecord
 from activism.views import get_level
@@ -461,3 +461,23 @@ class KeyDeleteView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
     group_required = 'Ответственные за стиралку'
     success_url = reverse_lazy('accounts:keys')
     raise_exception = True
+
+
+class ChangePassIdView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin, UpdateView):
+    """
+    Модаль, которая добавляет деньги.
+    """
+    model = Profile
+    form_class = ChangePassIdForm    
+    template_name = 'accounts/change_pass_id.html'
+    success_url = reverse_lazy("main:home")
+    raise_exception = True
+
+    def test_func(self, user):
+        return user.has_perm("accounts.change_pass_id")  or user.is_superuser
+
+    def form_valid(self, form):
+        super(ChangePassIdView, self).form_valid(form)
+        return JsonResponse({'url': reverse('accounts:profile',
+                                            kwargs={'pk': self.get_object().pk})},
+                            status=200)
