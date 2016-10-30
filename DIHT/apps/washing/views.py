@@ -184,6 +184,7 @@ class UnblockDayView(VirtualBlockDayView):
             NonWorkingDay.objects.filter(date=dt.datetime.strptime(date, '%d.%m.%Y').date(), machine=machine).delete()
         return super(UnblockDayView, self).get(request, *args, **kwargs)
 
+#TODO: Использовать class-based method_decorator из Django 1.9, чтобы не переопределять dispatch
 class CheckAccessView(View):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -200,7 +201,7 @@ class CheckAccessView(View):
         if user_query.exists() and WashingMachineRecord.objects.filter(
                 datetime_from__lte=now,
                 datetime_to__gte=now - takeaway_time,
-                user=user_query.get(pass_id=int(uid, 16)).user
+                user=user_query.get(pass_id=uid.lower()).user
                 ).exists():
             return HttpResponse("GRANTED")
         else:

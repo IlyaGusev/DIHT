@@ -25,7 +25,8 @@ $(function() {
                                    .task-create-form, \
                                    .event-create-form, \
                                    .key-update-form, \
-                                   .key-create-form',
+                                   .key-create-form, \
+                                   .change-pass-id-form',
                                    function(ev) {
         ev.preventDefault();
         var form = $(this);

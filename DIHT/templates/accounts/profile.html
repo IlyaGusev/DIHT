@@ -86,6 +86,16 @@
         {% endif %}
     </div>
 </div>
+{% if perms.profile.change_profile_pass_id %}
+<div class="row">
+    <div class = "col-md-offset-3 col-md-6">
+        <span class="param">Пропуск:</span> {{profile.pass_id|default:"Не указан"}}
+        <span>
+            <a href="{% url 'accounts:change_pass_id' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-edit"></i></a>
+        </span>
+    </div>
+</div>
+{% endif %}
 <br>
 {% if user|has_group:'Ответственные за финансы' or user.is_superuser %}
 {% if profile.user|has_group:'Ответственные за финансы' or profile.user.is_superuser %}
