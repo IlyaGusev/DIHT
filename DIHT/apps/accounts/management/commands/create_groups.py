@@ -18,12 +18,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         washing_cts = ContentType.objects.filter(app_label='washing')
-        washing_perms = Permission.objects.filter(content_type__in=washing_cts).all()
+        washing_perms = Permission.objects.filter(content_type__in=washing_cts)
+        change_profile_pass_id_perm = Permission.objects.filter(content_type__app_label='accounts',
+                                                             codename='change_profile_pass_id')
 
         groups = [('Активисты', []),
                   ('Руководящая группа', []),
                   ('Ответственные за активистов', []),
-                  ('Ответственные за стиралку', washing_perms),
+                  ('Ответственные за стиралку', washing_perms | change_profile_pass_id_perm),
                   ('Ответственные за работу с пользователями', []),
                   ('Ответственные за финансы', []),
                   ('Ответственные за качалку', []),

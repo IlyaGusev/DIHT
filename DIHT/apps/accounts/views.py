@@ -465,7 +465,7 @@ class KeyDeleteView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
 
 class ChangePassIdView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin, UpdateView):
     """
-    Модаль, которая добавляет деньги.
+    Изменение ID пропуска пользователя.
     """
     model = Profile
     form_class = ChangePassIdForm    
@@ -474,7 +474,7 @@ class ChangePassIdView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin,
     raise_exception = True
 
     def test_func(self, user):
-        return user.has_perm("accounts.change_pass_id")  or user.is_superuser
+        return user.has_perm("accounts.change_profile_pass_id")  or user.is_superuser
 
     def form_valid(self, form):
         super(ChangePassIdView, self).form_valid(form)
