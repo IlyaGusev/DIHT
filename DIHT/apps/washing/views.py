@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group
 from django.utils.decorators import method_decorator
 from django.db import transaction
 from django.utils import timezone
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
 from django.conf import settings
 from washing.models import WashingMachine, WashingMachineRecord, RegularNonWorkingDay, NonWorkingDay, Parameters
 from accounts.models import Profile, MoneyOperation
@@ -197,11 +197,11 @@ class CheckAccessView(View):
             return HttpResponseForbidden()
 
         now = dt.datetime.now()
-        user_query = Profile.objects.filter(pass_id=int(uid, 16))
+        user_query = Profile.objects.filter(pass_id=uid.lower())
         if user_query.exists() and WashingMachineRecord.objects.filter(
                 datetime_from__lte=now,
                 datetime_to__gte=now - takeaway_time,
-                user=user_query.get(pass_id=uid.lower()).user
+                user=user_query.get().user
                 ).exists():
             return HttpResponse("GRANTED")
         else:
