@@ -59,3 +59,10 @@ $(function() {
         return false;
     });
 });
+
+$(document).ready(function(){
+     $('.spoiler_links').click(function(){
+      $(this).parent().parent().children('div.washing_instruction').toggle('normal');
+      return false;
+     });
+    });
