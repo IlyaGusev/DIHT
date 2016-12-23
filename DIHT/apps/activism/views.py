@@ -409,6 +409,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         # Transition
         if table.get(action) is not None:
             init = table[action]
+
             status = 'any' if (init.get('any') is not None) else task.status
             if init.get(status) is not None:
                 if init[status][1]:
@@ -774,11 +775,8 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
                                                                       task__datetime_closed__gte=begin,
                                                                       task__datetime_closed__lte=end)
                                                               .values_list('hours', flat=True))})
-        norm = max([record['hours'] for record in records])
-        if norm == 0:
-            norm = 1
         for record in records:
             record['coef'] = get_level(record['user'])['coef']
-            record['payment'] = (const*record['hours']/norm)*record['coef']
+            record['payment'] = const*record['hours']*record['coef']
         context['records'] = sorted(records, key=lambda record: record['payment'], reverse=True)
         return context
