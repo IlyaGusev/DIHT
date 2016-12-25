@@ -6,6 +6,7 @@
 {% block activism_table_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
     <script src="{% static 'js/activism.js' %}"></script>
+    <script src="{% static 'js/activism/payments.js' %}"></script>
 	<link rel="stylesheet" href="{% static 'css/activism.css' %}">
 {% endblock %}
 
@@ -17,15 +18,12 @@
     <div class="col-sm-3">
         <form class="form" method="get" action="./" name="filter">
             <label class="control-label" for="const">Константа: </label>
-            <input id="const" type="number" class="form-control" name="const" min="0" max="100000" value="{{const}}">
+            <input id="const" type="number" class="form-control" name="const" step="any" min="0" max="100000" value="{{const|stringformat:'.10g'}}">
             <br>
-            <label class="control-label" for="begin">Начало отчётного периода: </label>
-            <input id="begin" type="date" class="form-control" name="begin" value="{{begin|date:'Y-m-d'}}">
-            <br>
-            <label class="control-label" for="end">Конец отчётного периода: </label>
-            <input id="end" type="date" class="form-control" name="end" value="{{end|date:'Y-m-d'}}">
-            <br>
-            <center><button class="btn btn-primary" type="submit">Посчитать</button></center>
+            <center>
+                <button class="btn btn-primary" type="submit">Посчитать</button>
+                <button id="payments_apply" class="btn btn-danger action confirm" type="submit">Утвердить</button>
+            </center>
         </form>
     </div>
 
@@ -33,15 +31,23 @@
     <table class="table table-bordered">
         <tr>
             <th class="text-center">Активист</th>
+            <th class="text-center">Управление</th>
             <th class="text-center">Группа</th>
             <th class="text-center">Часы</th>
             <th class="text-center">Коэффициент</th>
-            <th class="text-center">Деньги</th>
+            <th class="text-center">Невыплаченно ранее</th>
+            <th class="text-center">Деньги за период</th>
         </tr>
     {% for record in records %}
         <tr>
             <td style = "padding: 1px 10px;">
                 <a href = "{% url 'accounts:profile' pk=record.user.profile.pk %}">{{record.user.last_name}} {{record.user.first_name}} {{record.user.profile.middle_name}}</a>
+            </td>
+            <td class="">
+                <span>
+                    <a href="{% url 'accounts:add_payments' pk=record.user.profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-plus green"></i></a>
+                    <a href="{% url 'accounts:remove_payments' pk=record.user.profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-minus red"></i></a>
+                </span>
             </td>
             <td class="">
                 {{record.user.profile.group_number}}
@@ -51,13 +57,34 @@
             </td>
             <td class="">
                 {{record.coef}}
+            </td><td class="">
+                {{record.holded_payment|stringformat:'.0f'}}
             </td>
             <td>
                 {{record.payment|stringformat:'.0f'}}
             </td>
         </tr>
     {% endfor %}
+        <tr>
+            <td class="">
+                Сумма
+            </td>
+            <td class="">
+            </td>
+            <td class="">
+            </td>
+            <td class="">
+            </td>
+            <td class="">
+            </td><td class="">
+                {{holded_payment_sum|stringformat:'.0f'}}
+            </td>
+            <td>
+                {{payment_sum|stringformat:'.0f'}}
+            </td>
+        </tr>
     </table>
     </div>
 </div>
+{% include "activism/confirm_modal.html" %}
 {% endblock %}

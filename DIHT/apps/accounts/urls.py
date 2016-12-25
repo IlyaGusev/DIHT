@@ -11,7 +11,7 @@ from django.conf.urls import url, include
 from django.views.generic import TemplateView
 from accounts.views import SignUpView, ResetPasswordView, ProfileView, ProfileUpdateView, \
     CheckUniqueView, AvatarUpdateView, SignUpOkView, FindView, AddMoneyView, RemoveMoneyView, \
-    ActivateView, MoneyHistoryView, UserMoneyHistoryView, ChangePasswordView, \
+    ActivateView, MoneyHistoryView, UserMoneyHistoryView, AddPaymentsView, RemovePaymentsView, ChangePasswordView, \
     ApproveMoneyView, KeysView, KeyCreateView, KeyUpdateView, KeyDeleteView, ChargeView, ChangePassIdView
 
 urlpatterns = [
@@ -30,6 +30,8 @@ urlpatterns = [
     url(r'^profile/add_money/(?P<pk>[0-9]*)/$', AddMoneyView.as_view(), name='add_money'),
     url(r'^profile/remove_money/(?P<pk>[0-9]*)/$', RemoveMoneyView.as_view(), name='remove_money'),
     url(r'^profile/history_money/(?P<pk>[0-9]*)/$', UserMoneyHistoryView.as_view(), name='history_money'),
+    url(r'^profile/add_payments/(?P<pk>[0-9]*)/$', AddPaymentsView.as_view(), name='add_payments'),
+    url(r'^profile/remove_payments/(?P<pk>[0-9]*)/$', RemovePaymentsView.as_view(), name='remove_payments'),
     url(r'^profile/find/$', FindView.as_view(), name='find'),
     url(r'^profile/approve_money/(?P<pk>[0-9]*)/$', ApproveMoneyView.as_view(), name='approve_money'),
 

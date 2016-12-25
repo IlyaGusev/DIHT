@@ -1,3 +1,18 @@
+ // Task actions
+function post_action(url, data){
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: data,
+        success: function(response) {
+            window.location.replace(response.url)
+        },
+        error: function(request, status, error) {
+            console.log(error)
+        }
+    });
+}
+
 $(function() {
     $('#form-modal').on('shown.bs.modal', function () {
         if ($(this).find('form').hasClass('task-create-form'))
@@ -7,20 +22,9 @@ $(function() {
             }
     });
 
-     // Task actions
-    function post_action(url, data){
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: data,
-            success: function(response) {
-                window.location.replace(response.url)
-            },
-            error: function(request, status, error) {
-                console.log(error)
-            }
-        });
-    }
+    $('#confirm-modal').on('hide.bs.modal', function() {
+        $('#submit-modal').off('click');
+    });
 
 	$('.action').click(function(ev){
 	    ev.preventDefault();
@@ -30,7 +34,9 @@ $(function() {
 	        $('#confirm-modal').modal('show');
             $('#submit-modal').click(function(ev){
                 $('#confirm-modal').modal('hide');
-                post_action(btn_href)
+                if (btn_href) {
+                    post_action(btn_href);
+                }
             })
 	    }
 	    else{

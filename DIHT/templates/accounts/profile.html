@@ -65,6 +65,7 @@
             <a href="{% url 'accounts:remove_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-minus red"></i></a>
         </span>
         {% endif %}
+
         <span class="param">
             <a href="{% url 'accounts:history_money' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-book blue"></i></a>
         </span>
@@ -86,6 +87,17 @@
         {% endif %}
     </div>
 </div>
+{% if user|has_group:'Ответственные за активистов' or user.is_superuser %}
+<div class="row">
+        <div class = "col-md-offset-3 col-md-6">
+            <span class="param">Отложенные поощрения: <span class="blue">{{profile.payments}}</span></span>
+            <span>
+                <a href="{% url 'accounts:add_payments' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-plus green"></i></a>
+                <a href="{% url 'accounts:remove_payments' pk=profile.pk %}" class="btn btn-sm btn-default" data-target="#form-modal"><i class="fa fa-minus red"></i></a>
+            </span>
+        </div>
+</div>
+{% endif %}
 {% if perms.accounts.change_profile_pass_id %}
 <div class="row">
     <div class = "col-md-offset-3 col-md-6">

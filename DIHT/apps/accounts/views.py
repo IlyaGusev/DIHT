@@ -29,7 +29,7 @@ from django.utils import timezone
 from itertools import chain
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, \
     MoneyForm, ChangePasswordForm, KeyCreateForm, KeyUpdateForm, ChangePassIdForm
-from accounts.models import Profile, Avatar, MoneyOperation, Key, KeyTransfer
+from accounts.models import Profile, Avatar, MoneyOperation, PaymentsOperation, Key, KeyTransfer
 from washing.models import BlackListRecord
 from activism.views import get_level
 
@@ -176,7 +176,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
             else:
                 context['grade'] = str(grade) + ' курс'
         context['can_view_tasks'] = (self.request.user == user and is_activist) or self.request.user.is_superuser or is_charge
-        context['moderated_money'] = sum(user.moderated_operations.filter(is_approved=False, amount__gte=0)
+        context['moderated_money'] = sum(user.moneyoperation_moderated_operations.filter(is_approved=False, amount__gte=0)
                                                                   .values_list('amount', flat=True))
         context['operations'] = user.point_operations.all()
         context['op_for_hours'] = int(sum(user.participated.filter(task__status__in=['closed'])
@@ -276,7 +276,6 @@ class MoneyView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
     def form_invalid(self, form):
         return JsonResponse(form.errors, status=400)
 
-
 class AddMoneyView(MoneyView):
     """
     Модаль, которая добавляет деньги.
@@ -292,7 +291,6 @@ class AddMoneyView(MoneyView):
         return JsonResponse({'url': reverse('accounts:profile',
                                             kwargs={'pk': self.get_object().pk})},
                             status=200)
-
 
 class RemoveMoneyView(MoneyView):
     """
@@ -312,6 +310,48 @@ class RemoveMoneyView(MoneyView):
             return super(RemoveMoneyView, self).form_invalid(form)
         return JsonResponse({'url': reverse('accounts:profile',
                                             kwargs={'pk': self.get_object().pk})},
+                            status=200)
+
+
+class PaymentsView(MoneyView):
+    """
+        Модификация MoneyView для поощрений
+    """
+    group_required = "Ответственные за активистов"
+
+
+class AddPaymentsView(PaymentsView):
+    """
+    Модаль, которая увеличивает награду активиста.
+    """
+
+    template_name = 'accounts/add_payments.html'
+
+    def form_valid(self, form):
+        PaymentsOperation.objects.create(user=self.get_object().user,
+                                         amount=form.cleaned_data['amount'],
+                                         timestamp=timezone.now(),
+                                         description="Увеличение",
+                                         moderator=self.request.user)
+        return JsonResponse({'url': './'},
+                            status=200)
+
+
+
+
+class RemovePaymentsView(MoneyView):
+    """
+    Модаль, которая уменьшает награду активиста.
+    """
+    template_name = 'accounts/remove_payments.html'
+
+    def form_valid(self, form):
+        PaymentsOperation.objects.create(user=self.get_object().user,
+                                      amount=-form.cleaned_data['amount'],
+                                      timestamp=timezone.now(),
+                                      description="Уменьшение",
+                                      moderator=self.request.user)
+        return JsonResponse({'url': './'},
                             status=200)
 
 
@@ -362,8 +402,8 @@ class UserMoneyHistoryView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserMoneyHistoryView, self).get_context_data(**kwargs)
         context['operations'] = \
-            sorted(chain(self.get_object().user.operations.exclude(moderator=self.get_object().user.pk),
-                         self.get_object().user.moderated_operations.all()),
+            sorted(chain(self.get_object().user.moneyoperation_operations.exclude(moderator=self.get_object().user.pk),
+                         self.get_object().user.moneyoperation_moderated_operations.all()),
                    key=lambda instance: instance.timestamp, reverse=True)
         return context
 
@@ -397,7 +437,7 @@ class ApproveMoneyView(LoginRequiredMixin, GroupRequiredMixin,  SingleObjectMixi
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()
-        for op in user.moderated_operations.filter(amount__gte=0, is_approved=False):
+        for op in user.moneyoperation_moderated_operations.filter(amount__gte=0, is_approved=False):
             op.is_approved = True
             op.save()
         return HttpResponseRedirect(reverse('accounts:profile', kwargs={'pk': user.profile.pk}))
