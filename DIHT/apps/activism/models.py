@@ -136,6 +136,7 @@ class AssigneeTask(Model):
                        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
     approved = BooleanField("Подтверждено", default=False)
     done = BooleanField("Готово", default=False)
+    rewarded = BooleanField("Поощрено", default=False)
 
     def __str__(self):
         return str(self.user) + " in " + str(self.task)

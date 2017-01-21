@@ -10,7 +10,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User, Permission
 from django.utils import timezone
-from accounts.models import Profile, MoneyOperation
+from accounts.models import Profile, MoneyOperation, PaymentsOperation
 
 ''' models test'''
 
@@ -30,6 +30,22 @@ class MoneyOperationTestCase(TestCase):
         self.assertEqual(self.user.profile.money, op2.amount)
         op2.cancel()
         self.assertEqual(self.user.profile.money, 0)
+
+class PaymentsOperationTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='111', password='111', email='111@l.ru')
+        Profile.objects.create(user=self.user, payments=0)
+
+    def test_payments_operation(self):
+        op1 = PaymentsOperation.objects.create(user=self.user, amount=100, timestamp=timezone.now())
+        self.assertTrue(isinstance(op1, PaymentsOperation))
+        self.assertEqual(self.user.profile.payments, op1.amount)
+        op2 = PaymentsOperation.objects.create(user=self.user, amount=100, timestamp=timezone.now())
+        self.assertEqual(self.user.profile.payments, op1.amount + op2.amount)
+        op1.cancel()
+        self.assertEqual(self.user.profile.payments, op2.amount)
+        op2.cancel()
+        self.assertEqual(self.user.profile.payments, 0)
 
 
 ''' views test '''

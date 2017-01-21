@@ -26,6 +26,7 @@ class Profile(Model):
     room_number = CharField("Номер комнаты", max_length=30, blank=True)
     group_number = CharField("Номер группы", max_length=30, blank=True)
     money = IntegerField("Количество денег", blank=True, null=True, default=0)
+    payments = IntegerField("Невыплачено поощрений", blank=True, null=True, default=0)
     mobile = CharField("Мобильный телефон", max_length=30, blank=True)
     middle_name = CharField("Отчество", max_length=30, blank=True)
     sign = CharField("Подпись", max_length=255, blank=True, null=True, default='')
@@ -70,41 +71,64 @@ class Avatar(Model):
         verbose_name = "Аватар"
         verbose_name_plural = "Аватары"
 
-
-class MoneyOperation(Model):
+class GeneralMoneyOperation(Model):
     """
-    Модель денежных операций. Изначально планировалась неизменяемой, но для флага подтверждения
-    пришлось убрать это свойство. Поддерживает отмену операции с возвращением денег.
+        Обобщённая модель денежных операций. Поддерживает отмену операции с возвращением денег.
     """
-    user = ForeignKey(User, null=False, blank=False, related_name='operations', verbose_name="Юзер")
+    user = ForeignKey(User, null=False, blank=False, related_name='%(class)s_operations', verbose_name="Юзер")
     amount = IntegerField("Количество", null=False, default=0)
     timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)
     description = CharField("Описание", max_length=150, null=True, blank=True)
-    moderator = ForeignKey(User, related_name='moderated_operations',
+    moderator = ForeignKey(User, related_name='%(class)s_moderated_operations',
                            null=True, blank=True, verbose_name="Модератор")
     is_approved = BooleanField("Подтверждено", default=False)
+
+    field = ''
 
     @transaction.atomic
     def save(self, *args, **kwargs):
         if self.pk is None:
-            super(MoneyOperation, self).save(*args, **kwargs)
-            self.user.profile.money += self.amount
+            super(GeneralMoneyOperation, self).save(*args, **kwargs)
+            old_amount = getattr(self.user.profile, self.field)
+            setattr(self.user.profile, self.field, old_amount + self.amount)
             self.user.profile.save()
         else:
-            super(MoneyOperation, self).save(*args, **kwargs)
+            super(GeneralMoneyOperation, self).save(*args, **kwargs)
 
     @transaction.atomic
     def cancel(self):
-        self.user.profile.money -= self.amount
+        setattr(self.user.profile, self.field, getattr(self.user.profile, self.field) - self.amount)
         self.user.profile.save()
         self.delete()
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)
+
+
+class MoneyOperation(GeneralMoneyOperation):
+    """
+        Модель денежных операций. Изначально планировалась неизменяемой, но для флага подтверждения
+        пришлось убрать это свойство. Поддерживает отмену операции с возвращением денег.
+    """
+    field = 'money'
 
     class Meta:
         verbose_name = "Денежная операция"
         verbose_name_plural = "Денежные операции"
 
-    def __str__(self):
-        return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)
+
+class PaymentsOperation(GeneralMoneyOperation):
+    """
+        Модель денежных операций для поощрений
+    """
+    field = 'payments'
+
+    class Meta:
+        verbose_name = "Денежная операция поощрений"
+        verbose_name_plural = "Денежные операции поощрений"
 
 
 class Key(Model):

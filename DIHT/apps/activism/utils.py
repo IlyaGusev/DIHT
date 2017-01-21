@@ -39,6 +39,22 @@ def global_checks(user, obj=None):
             context['is_assignee'] = user in obj.assignees.all()
     return context
 
+def get_level_by_num(num):
+    """
+     Функция, рассчитывающая уровень по его номеру.
+    """
+    if num == 0:
+        return {'sign': 'Активист-новичок', 'coef': 1, 'is_beginner' : True, 'num' : 0}
+    elif num == 1:
+        return {'sign': 'Активист', 'coef': 1, 'is_beginner' : False, 'num' : 1}
+    elif num == 2:
+        return {'sign': 'Активист-организатор', 'coef': 1.7, 'is_beginner' : False, 'num' : 2}
+    elif num == 3:
+        return {'sign': 'Активист-лидер', 'coef': 2.4, 'is_beginner' : False, 'num' : 3}
+    elif num == 4:
+        return {'sign': 'Активист-руководитель', 'coef': 4, 'is_beginner' : False, 'num' : 4}
+    else:
+        return {'sign': 'Почётный активист студсовета ФИВТ', 'coef': 4, 'is_beginner' : False, 'num' : 5}
 
 def get_level(user):
     """
@@ -51,12 +67,12 @@ def get_level(user):
     gp = hours // 10 + sum(user.point_operations.all().values_list('amount', flat=True))
 
     if gp < 4:
-        return {'sign': 'Активист-новичок', 'coef': 0}
+        return get_level_by_num(0)
     elif gp < 16:
-        return {'sign': 'Активист', 'coef': 1}
+        return get_level_by_num(1)
     elif gp < 35:
-        return {'sign': 'Активист-организатор', 'coef': 1.7}
+        return get_level_by_num(2)
     elif gp < 70:
-        return {'sign': 'Активист-лидер', 'coef': 2.4}
+        return get_level_by_num(3)
     else:
-        return {'sign': 'Активист-руководитель', 'coef': 4}
+        return get_level_by_num(4)

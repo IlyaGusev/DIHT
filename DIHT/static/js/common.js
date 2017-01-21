@@ -22,6 +22,8 @@ $(function() {
                                    .profile-form, \
                                    .add-money-form, \
                                    .remove-money-form, \
+                                   .add-payments-form, \
+                                   .remove-payments-form, \
                                    .task-create-form, \
                                    .event-create-form, \
                                    .key-update-form, \

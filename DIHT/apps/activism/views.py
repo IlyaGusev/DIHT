@@ -28,7 +28,7 @@ from reversion import get_for_object
 from activism.models import Event, Task, AssigneeTask, Sector, PointOperation, ResponsibleEvent, TaskComment
 from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm, TaskCommentForm
 from activism.utils import global_checks, get_level
-
+from accounts.models import PaymentsOperation
 
 """
     Mixins
@@ -409,6 +409,7 @@ class TaskActionView(LoginRequiredMixin, GroupRequiredMixin, SingleObjectMixin, 
         # Transition
         if table.get(action) is not None:
             init = table[action]
+
             status = 'any' if (init.get('any') is not None) else task.status
             if init.get(status) is not None:
                 if init[status][1]:
@@ -740,45 +741,54 @@ class TaskLogView(LoginRequiredMixin, GroupRequiredMixin, DetailView):
 
 # TaskLog - end
 
+def get_valid_activists():
+    users = Group.objects.get(name='Активисты').user_set.all()
+    activists = []
+    for user in users:
+        if Group.objects.get(name="Руководящая группа") not in user.groups.all() and \
+                        Group.objects.get(name="Ответственные за активистов") not in user.groups.all() and \
+                        get_level(user)['num'] != 0:
+            activists.append(user)
+    activists.sort(key=lambda u: u.last_name)
+    return activists
 
 class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
     group_required = "Ответственные за активистов"
     template_name = 'activism/payments.html'
     raise_exception = True
 
+    def post(self, request, *args, **kwargs):
+        users = get_valid_activists()
+        const = float(request.POST['const'])
+        for user in users:
+            mult = get_level(user)['coef'] * const
+            total = 0
+            for task in user.participated.filter(task__status__in=['closed'], rewarded__exact=False):
+                task.rewarded = True
+                task.save()
+                total += task.hours * mult
+            po = PaymentsOperation.objects.create(user=user, amount = round(total), timestamp = timezone.now(),
+                                             description="За ЧРА " + timezone.now().ctime())
+        return JsonResponse({'url': reverse('activism:payments')}, status=200)
+
     def get_context_data(self, **kwargs):
         context = super(PaymentsView, self).get_context_data(**kwargs)
 
-        const = int(self.request.GET['const']) if 'const' in self.request.GET else 2000
+        const = float(self.request.GET['const']) if 'const' in self.request.GET else 2000
         context['const'] = const
 
-        begin = timezone.now()-dt.timedelta(days=30)
-        if 'begin' in self.request.GET:
-            begin = dt.datetime.strptime(self.request.GET['begin'], '%Y-%m-%d')
-        context['begin'] = begin
-
-        end = timezone.now()
-        if 'end' in self.request.GET:
-            end = dt.datetime.strptime(self.request.GET['end'], '%Y-%m-%d')
-        context['end'] = end
-
-        activists = []
         records = []
-        users = sorted(Group.objects.get(name='Активисты').user_set.all(), key=lambda u: u.last_name)
+        users = get_valid_activists()
         for user in users:
-            if Group.objects.get(name="Руководящая группа") not in user.groups.all() and \
-               Group.objects.get(name="Ответственные за активистов") not in user.groups.all():
-                activists.append(user)
-                records.append({'user': user,
-                                'hours': sum(user.participated.filter(task__status__in=['closed'],
-                                                                      task__datetime_closed__gte=begin,
-                                                                      task__datetime_closed__lte=end)
-                                                              .values_list('hours', flat=True))})
-        norm = max([record['hours'] for record in records])
-        if norm == 0:
-            norm = 1
+            records.append({'user': user,
+                            'hours': sum(user.participated.filter(task__status__in=['closed'],
+                                                                  rewarded__exact=False)
+                                                          .values_list('hours', flat=True)),
+                           'holded_payment': user.profile.payments})
         for record in records:
             record['coef'] = get_level(record['user'])['coef']
-            record['payment'] = (const*record['hours']/norm)*record['coef']
+            record['payment'] = const*record['hours']*record['coef']
+        context['payment_sum'] = sum(record['payment'] for record in records)
+        context['holded_payment_sum'] = sum(record['holded_payment'] for record in records)
         context['records'] = sorted(records, key=lambda record: record['payment'], reverse=True)
         return context
