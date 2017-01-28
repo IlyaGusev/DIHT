@@ -3,7 +3,9 @@ $(function() {
         ev.preventDefault();
         $("#submit-modal").click(function(ev) {
             post_action("./", {
-                    const: $('#const').val()
+                    const: $('#const').val(),
+                    begin: $('#begin').val(),
+                    end: $('#end').val(),
                 });
         });
     });

@@ -27,8 +27,9 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestM
 from reversion import get_for_object
 from activism.models import Event, Task, AssigneeTask, Sector, PointOperation, ResponsibleEvent, TaskComment
 from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm, TaskCommentForm
-from activism.utils import global_checks, get_level
+from activism.utils import global_checks, get_level, get_level_at_dates
 from accounts.models import PaymentsOperation
+from django.db.models import Sum
 
 """
     Mixins
@@ -760,13 +761,19 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         users = get_valid_activists()
         const = float(request.POST['const'])
+        begin = dt.datetime.strptime(request.POST['begin'], '%Y-%m-%d')
+        end = dt.datetime.strptime(request.POST['end'], '%Y-%m-%d')
         for user in users:
-            mult = get_level(user)['coef'] * const
             total = 0
-            for task in user.participated.filter(task__status__in=['closed'], rewarded__exact=False):
-                task.rewarded = True
-                task.save()
-                total += task.hours * mult
+            tasks = list(user.participated.filter(task__status__in=['closed'],
+                                                  task__datetime_closed__gte=begin,
+                                                  task__datetime_closed__lte=end,
+                                                  rewarded__exact=False).order_by('task__datetime_closed'))
+            levels = get_level_at_dates(user, list(item.task.datetime_closed for item in tasks))
+            for tp in zip(levels, tasks):
+                tp[1].rewarded = True
+                tp[1].save()
+                total += tp[1].hours * tp[0]['coef'] * const
             po = PaymentsOperation.objects.create(user=user, amount = round(total), timestamp = timezone.now(),
                                              description="За ЧРА " + timezone.now().ctime())
         return JsonResponse({'url': reverse('activism:payments')}, status=200)
@@ -777,17 +784,34 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
         const = float(self.request.GET['const']) if 'const' in self.request.GET else 2000
         context['const'] = const
 
+        begin = timezone.now() - dt.timedelta(days=30)
+        if 'begin' in self.request.GET:
+            begin = dt.datetime.strptime(self.request.GET['begin'], '%Y-%m-%d')
+        context['begin'] = begin
+
+        end = timezone.now()
+        if 'end' in self.request.GET:
+            end = dt.datetime.strptime(self.request.GET['end'], '%Y-%m-%d')
+
+        context['end'] = end
+
         records = []
         users = get_valid_activists()
         for user in users:
-            records.append({'user': user,
-                            'hours': sum(user.participated.filter(task__status__in=['closed'],
-                                                                  rewarded__exact=False)
-                                                          .values_list('hours', flat=True)),
-                           'holded_payment': user.profile.payments})
+            user_tasks = user.participated.filter(task__status__in=['closed'],
+                                                  task__datetime_closed__gte=begin,
+                                                  task__datetime_closed__lte=end)
+            pure_hours = user_tasks.aggregate(Sum('hours'))['hours__sum']
+            if user_tasks.count() > 0 and pure_hours > 0:
+                user_tasks = user_tasks.filter(rewarded__exact=False).order_by('task__datetime_closed')
+                tasks = list([user_task.task.datetime_closed, user_task.hours] for user_task in user_tasks)
+                levels = get_level_at_dates(user, list(item[0] for item in tasks))
+                records.append({'user': user,
+                                'effective_hours': sum(tp[0]['coef'] * tp[1][1] for tp in zip(levels, tasks)),
+                                'hours': pure_hours,
+                                'holded_payment': user.profile.payments})
         for record in records:
-            record['coef'] = get_level(record['user'])['coef']
-            record['payment'] = const*record['hours']*record['coef']
+            record['payment'] = const * record['effective_hours']
         context['payment_sum'] = sum(record['payment'] for record in records)
         context['holded_payment_sum'] = sum(record['holded_payment'] for record in records)
         context['records'] = sorted(records, key=lambda record: record['payment'], reverse=True)

@@ -43,7 +43,9 @@ def get_level_by_num(num):
     """
      Функция, рассчитывающая уровень по его номеру.
     """
-    if num == 0:
+    if num == -1:
+        return {'sign': 'Руководящая группа', 'coef': 0, 'is_beginner' : True, 'num' : -1}
+    elif num == 0:
         return {'sign': 'Активист-новичок', 'coef': 1, 'is_beginner' : True, 'num' : 0}
     elif num == 1:
         return {'sign': 'Активист', 'coef': 1, 'is_beginner' : False, 'num' : 1}
@@ -56,16 +58,7 @@ def get_level_by_num(num):
     else:
         return {'sign': 'Почётный активист студсовета ФИВТ', 'coef': 4, 'is_beginner' : False, 'num' : 5}
 
-def get_level(user):
-    """
-    Функция, рассчитывающая текущий уровень активиста user.
-    """
-    if Group.objects.get(name="Руководящая группа") in user.groups.all():
-        return {'sign': 'Руководящая группа', 'coef': 0}
-
-    hours = sum(user.participated.filter(task__status__in=['closed']).values_list('hours', flat=True))
-    gp = hours // 10 + sum(user.point_operations.all().values_list('amount', flat=True))
-
+def get_level_by_point_sum(gp):
     if gp < 4:
         return get_level_by_num(0)
     elif gp < 16:
@@ -76,3 +69,35 @@ def get_level(user):
         return get_level_by_num(3)
     else:
         return get_level_by_num(4)
+
+def get_level_at_dates(user, dates):
+    if Group.objects.get(name="Руководящая группа") in user.groups.all():
+        return [-1] * len(dates)
+
+    tasks = list([0, user_task.task.datetime_closed, user_task.hours] for user_task in user.participated.filter(task__status__in=['closed']))
+    point_operatons = list([1, operation.timestamp, operation.amount] for operation in user.point_operations.all())
+    dates = list(zip([2] * len(dates), dates))
+    point_sum = 0
+    hours_sum = 0
+    levels = []
+    for entry in sorted(tasks + point_operatons + dates, key = lambda x: (x[1], x[0])):
+        if entry[0] == 0:
+            hours_sum += entry[2]
+        elif entry[0] == 1:
+            point_sum += entry[2]
+        else:
+            levels.append(get_level_by_point_sum(hours_sum // 10 + point_sum))
+    return levels
+
+
+
+def get_level(user):
+    """
+    Функция, рассчитывающая текущий уровень активиста user.
+    """
+    if Group.objects.get(name="Руководящая группа") in user.groups.all():
+        return get_level_by_num(-1)
+
+    hours = sum(user.participated.filter(task__status__in=['closed']).values_list('hours', flat=True))
+    gp = hours // 10 + sum(user.point_operations.all().values_list('amount', flat=True))
+    return get_level_by_point_sum(gp)

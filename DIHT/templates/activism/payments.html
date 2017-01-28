@@ -20,6 +20,12 @@
             <label class="control-label" for="const">Константа: </label>
             <input id="const" type="number" class="form-control" name="const" step="any" min="0" max="100000" value="{{const|stringformat:'.10g'}}">
             <br>
+            <label class="control-label" for="begin">Начало отчётного периода: </label>
+            <input id="begin" type="date" class="form-control" name="begin" value="{{begin|date:'Y-m-d'}}">
+            <br>
+            <label class="control-label" for="end">Конец отчётного периода: </label>
+            <input id="end" type="date" class="form-control" name="end" value="{{end|date:'Y-m-d'}}">
+            <br>
             <center>
                 <button class="btn btn-primary" type="submit">Посчитать</button>
                 <button id="payments_apply" class="btn btn-danger action confirm" type="submit">Утвердить</button>
@@ -34,7 +40,7 @@
             <th class="text-center">Управление</th>
             <th class="text-center">Группа</th>
             <th class="text-center">Часы</th>
-            <th class="text-center">Коэффициент</th>
+            <th class="text-center">Эффективные часы</th>
             <th class="text-center">Невыплаченно ранее</th>
             <th class="text-center">Деньги за период</th>
         </tr>
@@ -56,8 +62,9 @@
                 {{record.hours}}
             </td>
             <td class="">
-                {{record.coef}}
-            </td><td class="">
+                {{record.effective_hours}}
+            </td>
+            <td class="">
                 {{record.holded_payment|stringformat:'.0f'}}
             </td>
             <td>
