@@ -760,6 +760,8 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         users = get_valid_activists()
+        if not {'const', 'begin', 'end'}.issubset(request.POST):
+            return JsonResponse(status=400)
         const = float(request.POST['const'])
         begin = dt.datetime.strptime(request.POST['begin'], '%Y-%m-%d')
         end = dt.datetime.strptime(request.POST['end'], '%Y-%m-%d')
@@ -769,13 +771,14 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
                                                   task__datetime_closed__gte=begin,
                                                   task__datetime_closed__lte=end,
                                                   rewarded__exact=False).order_by('task__datetime_closed'))
-            levels = get_level_at_dates(user, list(item.task.datetime_closed for item in tasks))
-            for tp in zip(levels, tasks):
-                tp[1].rewarded = True
-                tp[1].save()
-                total += tp[1].hours * tp[0]['coef'] * const
-            po = PaymentsOperation.objects.create(user=user, amount = round(total), timestamp = timezone.now(),
-                                             description="За ЧРА " + timezone.now().ctime())
+            if len(tasks) > 0:
+                levels = get_level_at_dates(user, list(item.task.datetime_closed for item in tasks))
+                for tp in zip(levels, tasks):
+                    tp[1].rewarded = True
+                    tp[1].save()
+                    total += tp[1].hours * tp[0]['coef'] * const
+                po = PaymentsOperation.objects.create(user=user, amount = round(total), timestamp = timezone.now(),
+                                                 description="За ЧРА " + timezone.now().ctime())
         return JsonResponse({'url': reverse('activism:payments')}, status=200)
 
     def get_context_data(self, **kwargs):
