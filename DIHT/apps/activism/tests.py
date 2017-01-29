@@ -90,4 +90,23 @@ class PaymentsTestCase(TestCase):
         self.pay(10, 23, 23)
         self.assertEqual(user.profile.payments, 39 * 10 + 120 * 10 + 190 * 17 + 350 * 24 + 10 * 4)
 
+    def test_timed_payments(self):
+        self.create_and_close_task(self.u[1], 40, 0)
+        self.pay(1, 10, 10)
+        self.assertEqual(self.u[1].profile.payments, 40)
+        self.create_and_close_task(self.u[1], 10, 1)
+        self.create_and_close_task(self.u[1], 20, 3)
+        self.create_and_close_task(self.u[1], 30, 5)
+        self.pay(5, 0, 4)
+        self.assertEqual(self.u[1].profile.payments, 40 + 150)
+        self.pay(5, 0, 4)
+        self.assertEqual(self.u[1].profile.payments, 40 + 150)
+        self.create_and_close_task(self.u[1], 30, 6)
+        self.create_and_close_task(self.u[1], 30, 7)
+        self.pay(10, -7, 8)
+        self.pay(1, -5, 6)
+        self.pay(2, 10, 10)
+        self.pay(1000, 100, -50)
+        self.assertEqual(self.u[1].profile.payments, 40 + 150 + 30 * 17 + 30 + 60)
+
 
