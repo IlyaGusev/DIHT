@@ -27,7 +27,7 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestM
 from reversion import get_for_object
 from activism.models import Event, Task, AssigneeTask, Sector, PointOperation, ResponsibleEvent, TaskComment
 from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm, TaskCommentForm
-from activism.utils import global_checks, get_level, get_level_at_dates
+from activism.utils import global_checks, get_level, get_level_by_num
 from accounts.models import PaymentsOperation
 from django.db.models import Sum
 
@@ -336,11 +336,18 @@ def table_actions(request, task, action):
                 through.save()
     elif action == 'close':
         table_actions(request, task, 'resolved')
+        task.datetime_closed = timezone.now()
         for u in task.assignees.all():
             through = task.participants.get(user=u)
             through.approved = True
+            po = PointOperation.objects.create(user=through.user,
+                                        amount=through.hours / 10,
+                                        timestamp=task.datetime_closed,
+                                        description='За ЧРА',
+                                        for_hours_of_work=True)
+            po.save()
+            through.level_at_completion = get_level(User.objects.get(pk=through.user.pk))['num']
             through.save()
-        task.datetime_closed = timezone.now()
         task.save()
     elif action == 'in_progress' or action == 'open':
         if task.candidates.count() != 0:
@@ -623,8 +630,8 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
                Group.objects.get(name="Ответственные за активистов") not in user.groups.all():
                 throughs = user.participated.filter(task__status__in=['closed'])
                 sum_hours = sum(throughs.values_list('hours', flat=True))
-                operations = user.pointoperations.all()
-                sum_og = sum(user.pointoperations.all().values_list('amount', flat=True))
+                operations = user.pointoperations.filter(for_hours_of_work=False)
+                sum_og = sum(user.pointoperations.filter(for_hours_of_work=False).values_list('amount', flat=True))
                 sum_all = sum_og + int(sum_hours // 10)
                 level = get_level(user)
                 records.append({'user': user,
@@ -753,6 +760,20 @@ def get_valid_activists():
     activists.sort(key=lambda u: u.last_name)
     return activists
 
+def get_affected_tasks(user, begin, end):
+    user_tasks = user.participated.filter(task__status__in=['closed']).order_by('task__datetime_closed')
+    time = None
+    if get_level(user)['num'] > 0:
+        for task in user_tasks:
+            if task.level_at_completion > 0:
+                time = task.task.datetime_closed
+                break
+    if not time or time < begin or time > end:
+        user_tasks = user_tasks.filter(task__datetime_closed__gte=begin, task__datetime_closed__lte=end, rewarded=False)
+    else:
+        user_tasks = user_tasks.filter(task__datetime_closed__lte=end, rewarded=False)
+    return user_tasks
+
 class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
     group_required = "Ответственные за активистов"
     template_name = 'activism/payments.html'
@@ -766,19 +787,17 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
         begin = dt.datetime.strptime(request.POST['begin'], '%Y-%m-%d')
         end = dt.datetime.strptime(request.POST['end'], '%Y-%m-%d')
         for user in users:
-            total = 0
-            tasks = list(user.participated.filter(task__status__in=['closed'],
-                                                  task__datetime_closed__gte=begin,
-                                                  task__datetime_closed__lte=end,
-                                                  rewarded__exact=False).order_by('task__datetime_closed'))
+            tasks = get_affected_tasks(user, begin, end)
             if len(tasks) > 0:
-                levels = get_level_at_dates(user, list(item.task.datetime_closed for item in tasks))
-                for tp in zip(levels, tasks):
-                    tp[1].rewarded = True
-                    tp[1].save()
-                    total += tp[1].hours * tp[0]['coef'] * const
+                total = 0
+                for task in tasks:
+                    task.rewarded = True
+                    total += task.hours * get_level_by_num(task.level_at_completion)['coef']
+                    task.save()
+                total *= const
                 po = PaymentsOperation.objects.create(user=user, amount = round(total), timestamp = timezone.now(),
                                                  description="За ЧРА " + timezone.now().ctime())
+                po.save()
         return JsonResponse({'url': reverse('activism:payments')}, status=200)
 
     def get_context_data(self, **kwargs):
@@ -787,12 +806,12 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
         const = float(self.request.GET['const']) if 'const' in self.request.GET else 2000
         context['const'] = const
 
-        begin = timezone.now() - dt.timedelta(days=30)
+        begin = dt.datetime.combine(timezone.now().date(), dt.time(0)) - dt.timedelta(days=30)
         if 'begin' in self.request.GET:
             begin = dt.datetime.strptime(self.request.GET['begin'], '%Y-%m-%d')
         context['begin'] = begin
 
-        end = timezone.now()
+        end = dt.datetime.combine(timezone.now().date(), dt.time(0))
         if 'end' in self.request.GET:
             end = dt.datetime.strptime(self.request.GET['end'], '%Y-%m-%d')
 
@@ -800,17 +819,16 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
 
         records = []
         users = get_valid_activists()
+        print(users)
         for user in users:
-            user_tasks = user.participated.filter(task__status__in=['closed'],
+            pure_hours = user.participated.filter(task__status__in=['closed'],
                                                   task__datetime_closed__gte=begin,
-                                                  task__datetime_closed__lte=end)
-            pure_hours = user_tasks.aggregate(Sum('hours'))['hours__sum']
-            if user_tasks.count() > 0 and pure_hours > 0:
-                user_tasks = user_tasks.filter(rewarded__exact=False).order_by('task__datetime_closed')
-                tasks = list([user_task.task.datetime_closed, user_task.hours] for user_task in user_tasks)
-                levels = get_level_at_dates(user, list(item[0] for item in tasks))
+                                                  task__datetime_closed__lte=end).aggregate(Sum('hours'))['hours__sum']
+            print(pure_hours)
+            if pure_hours:
+                user_tasks = get_affected_tasks(user, begin, end)
                 records.append({'user': user,
-                                'effective_hours': sum(tp[0]['coef'] * tp[1][1] for tp in zip(levels, tasks)),
+                                'effective_hours': sum(task.hours * get_level_by_num(task.level_at_completion)['coef'] for task in user_tasks),
                                 'hours': pure_hours,
                                 'holded_payment': user.profile.payments})
         for record in records:

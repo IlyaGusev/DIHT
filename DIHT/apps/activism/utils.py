@@ -71,26 +71,6 @@ def get_level_by_point_sum(gp):
     else:
         return get_level_by_num(4)
 
-def get_level_at_dates(user, dates):
-    if Group.objects.get(name="Руководящая группа") in user.groups.all():
-        return [-1] * len(dates)
-
-    tasks = list([0, user_task.task.datetime_closed, user_task.hours] for user_task in user.participated.filter(task__status__in=['closed']))
-    point_operatons = list([1, operation.timestamp, operation.amount] for operation in user.pointoperations.all())
-    dates = list(zip([2] * len(dates), dates))
-    point_sum = 0
-    hours_sum = 0
-    levels = []
-    for entry in sorted(tasks + point_operatons + dates, key = lambda x: (x[1], x[0])):
-        if entry[0] == 0:
-            hours_sum += entry[2]
-        elif entry[0] == 1:
-            point_sum += entry[2]
-        else:
-            levels.append(get_level_by_point_sum(hours_sum // 10 + point_sum))
-    return levels
-
-
 
 def get_level(user):
     """

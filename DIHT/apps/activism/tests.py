@@ -27,6 +27,10 @@ class PaymentsTestCase(TestCase):
         self.client.login(username='admin', password='admin')
         self.numt = 0
 
+    def updateUsers(self):
+        for i in range(len(self.u)):
+            self.u[i] = User.objects.get(pk=self.u[i].pk)
+
     def create_and_close_task(self, user, time, offset=0):
         r = self.client.post("/activism/tasks/create/", {'name': 'test' + str(self.numt), 'number_of_assignees': 1, 'hours_predict': time})
         t = Task.objects.get(name='test' + str(self.numt))
@@ -37,13 +41,13 @@ class PaymentsTestCase(TestCase):
         t.datetime_closed = t.datetime_closed + dt.timedelta(offset)
         t.save()
         self.numt += 1
+        self.updateUsers()
 
     def pay(self, const, begin_offset, end_offset):
         end = (timezone.now() + dt.timedelta(end_offset)).strftime('%Y-%m-%d')
         begin = (timezone.now() - dt.timedelta(begin_offset)).strftime('%Y-%m-%d')
         self.client.post("/activism/payments/", {'const' : const, 'begin' : begin, 'end' : end})
-        for i in range(len(self.u)):
-            self.u[i] = User.objects.get(pk=self.u[i].pk)
+        self.updateUsers()
 
 
     def test_payments_1(self):
@@ -62,33 +66,32 @@ class PaymentsTestCase(TestCase):
         self.assertEqual(self.u[0].profile.payments, 80)
 
     def test_level_up(self):
-        user = self.u[1]
-        self.create_and_close_task(user, 39, 1)
-        self.assertEqual(get_level(user)['num'], 0)
-        self.create_and_close_task(user, 1, 2)
-        self.assertEqual(get_level(user)['num'], 1)
+        self.create_and_close_task(self.u[1], 39, 1)
+        self.assertEqual(get_level(self.u[1])['num'], 0)
+        self.create_and_close_task(self.u[1], 1, 2)
+        self.assertEqual(get_level(self.u[1])['num'], 1)
 
-        self.create_and_close_task(user, 100, 3)
-        self.create_and_close_task(user, 19, 4)
-        self.assertEqual(get_level(user)['num'], 1)
-        self.create_and_close_task(user, 1, 5)
-        self.assertEqual(get_level(user)['num'], 2)
+        self.create_and_close_task(self.u[1], 100, 3)
+        self.create_and_close_task(self.u[1], 19, 4)
+        self.assertEqual(get_level(self.u[1])['num'], 1)
+        self.create_and_close_task(self.u[1], 1, 5)
+        self.assertEqual(get_level(self.u[1])['num'], 2)
 
-        self.create_and_close_task(user, 100, 6)
-        self.create_and_close_task(user, 89, 7)
-        self.assertEqual(get_level(user)['num'], 2)
-        self.create_and_close_task(user, 1, 8)
-        self.assertEqual(get_level(user)['num'], 3)
+        self.create_and_close_task(self.u[1], 100, 6)
+        self.create_and_close_task(self.u[1], 89, 7)
+        self.assertEqual(get_level(self.u[1])['num'], 2)
+        self.create_and_close_task(self.u[1], 1, 8)
+        self.assertEqual(get_level(self.u[1])['num'], 3)
 
-        self.create_and_close_task(user, 100, 9)
-        self.create_and_close_task(user, 100, 10)
-        self.create_and_close_task(user, 100, 11)
-        self.create_and_close_task(user, 49, 12)
-        self.assertEqual(get_level(user)['num'], 3)
-        self.create_and_close_task(user, 1, 13)
-        self.assertEqual(get_level(user)['num'], 4)
+        self.create_and_close_task(self.u[1], 100, 9)
+        self.create_and_close_task(self.u[1], 100, 10)
+        self.create_and_close_task(self.u[1], 100, 11)
+        self.create_and_close_task(self.u[1], 49, 12)
+        self.assertEqual(get_level(self.u[1])['num'], 3)
+        self.create_and_close_task(self.u[1], 1, 13)
+        self.assertEqual(get_level(self.u[1])['num'], 4)
         self.pay(10, 23, 23)
-        self.assertEqual(user.profile.payments, 39 * 10 + 120 * 10 + 190 * 17 + 350 * 24 + 10 * 4)
+        self.assertEqual(self.u[1].profile.payments, 39 * 10 + 120 * 10 + 190 * 17 + 350 * 24 + 10 * 4)
 
     def test_timed_payments(self):
         self.create_and_close_task(self.u[1], 40, 0)
@@ -109,4 +112,25 @@ class PaymentsTestCase(TestCase):
         self.pay(1000, 100, -50)
         self.assertEqual(self.u[1].profile.payments, 40 + 150 + 30 * 17 + 30 + 60)
 
+    def test_beginners_1(self):
+        self.create_and_close_task(self.u[0], 10, 0)
+        self.create_and_close_task(self.u[0], 10, 1)
+        self.create_and_close_task(self.u[0], 10, 2)
+        self.create_and_close_task(self.u[0], 10, 3)
+        self.pay(1, 0, 1)
+        self.pay(2, 1, 2)
+        self.pay(3, 2, 3)
+        self.pay(4, 3, 4)
+        self.assertEqual(self.u[0].profile.payments, 100)
 
+
+    def test_beginners_2(self):
+        self.create_and_close_task(self.u[0], 10, 0)
+        self.pay(1, 0, 1)
+        self.create_and_close_task(self.u[0], 10, 1)
+        self.pay(2, 1, 2)
+        self.create_and_close_task(self.u[0], 10, 2)
+        self.pay(3, 2, 3)
+        self.create_and_close_task(self.u[0], 10, 3)
+        self.pay(4, 3, 4)
+        self.assertEqual(self.u[0].profile.payments, 160)

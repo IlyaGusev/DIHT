@@ -59,10 +59,10 @@
                 {{record.user.profile.group_number}}
             </td>
             <td class="">
-                {{record.hours}}
+                {{record.hours|stringformat:'.2f'}}
             </td>
             <td class="">
-                {{record.effective_hours}}
+                {{record.effective_hours|stringformat:'.2f'}}
             </td>
             <td class="">
                 {{record.holded_payment|stringformat:'.0f'}}
