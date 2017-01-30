@@ -21,8 +21,8 @@ class Migration(migrations.Migration):
                 ('amount', models.FloatField(verbose_name='Количество', default=0)),
                 ('timestamp', models.DateTimeField(verbose_name='Дата', default=django.utils.timezone.now)),
                 ('description', models.CharField(max_length=150, verbose_name='Описание', blank=True, null=True)),
-                ('moderator', models.ForeignKey(verbose_name='Ответственный', related_name='moderated_point_operations', null=True, to=settings.AUTH_USER_MODEL, blank=True)),
-                ('user', models.ForeignKey(verbose_name='Юзер', related_name='point_operations', to=settings.AUTH_USER_MODEL)),
+                ('moderator', models.ForeignKey(verbose_name='Ответственный', related_name='moderated_pointoperations', null=True, to=settings.AUTH_USER_MODEL, blank=True)),
+                ('user', models.ForeignKey(verbose_name='Юзер', related_name='pointoperations', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Операция очков роста',

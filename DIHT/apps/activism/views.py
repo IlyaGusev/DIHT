@@ -190,7 +190,7 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
         assignees = get_event_assignees(event)
         # Заполняем таблицу ОР назначенных и вливаем её в контекст
         for assignee in assignees:
-            op = assignee.point_operations.filter(description="За "+event.name, moderator=user)
+            op = assignee.pointoperations.filter(description="За "+event.name, moderator=user)
             if op.exists():
                 gps[assignee.pk] = op[0]
         context['assignees'] = assignees
@@ -623,8 +623,8 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
                Group.objects.get(name="Ответственные за активистов") not in user.groups.all():
                 throughs = user.participated.filter(task__status__in=['closed'])
                 sum_hours = sum(throughs.values_list('hours', flat=True))
-                operations = user.point_operations.all()
-                sum_og = sum(user.point_operations.all().values_list('amount', flat=True))
+                operations = user.pointoperations.all()
+                sum_og = sum(user.pointoperations.all().values_list('amount', flat=True))
                 sum_all = sum_og + int(sum_hours // 10)
                 level = get_level(user)
                 records.append({'user': user,

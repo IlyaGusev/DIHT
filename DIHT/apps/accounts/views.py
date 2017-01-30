@@ -176,9 +176,9 @@ class ProfileView(LoginRequiredMixin, DetailView):
             else:
                 context['grade'] = str(grade) + ' курс'
         context['can_view_tasks'] = (self.request.user == user and is_activist) or self.request.user.is_superuser or is_charge
-        context['moderated_money'] = sum(user.moneyoperation_moderated_operations.filter(is_approved=False, amount__gte=0)
+        context['moderated_money'] = sum(user.moderated_moneyoperations.filter(is_approved=False, amount__gte=0)
                                                                   .values_list('amount', flat=True))
-        context['operations'] = user.point_operations.all()
+        context['operations'] = user.pointoperations.all()
         context['op_for_hours'] = int(sum(user.participated.filter(task__status__in=['closed'])
                                               .values_list('hours', flat=True)) // 10)
         context['level'] = get_level(user)
@@ -402,8 +402,8 @@ class UserMoneyHistoryView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserMoneyHistoryView, self).get_context_data(**kwargs)
         context['operations'] = \
-            sorted(chain(self.get_object().user.moneyoperation_operations.exclude(moderator=self.get_object().user.pk),
-                         self.get_object().user.moneyoperation_moderated_operations.all()),
+            sorted(chain(self.get_object().user.moneyoperations.exclude(moderator=self.get_object().user.pk),
+                         self.get_object().user.moderated_moneyoperations.all()),
                    key=lambda instance: instance.timestamp, reverse=True)
         return context
 
@@ -437,7 +437,7 @@ class ApproveMoneyView(LoginRequiredMixin, GroupRequiredMixin,  SingleObjectMixi
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()
-        for op in user.moneyoperation_moderated_operations.filter(amount__gte=0, is_approved=False):
+        for op in user.moderated_moneyoperations.filter(amount__gte=0, is_approved=False):
             op.is_approved = True
             op.save()
         return HttpResponseRedirect(reverse('accounts:profile', kwargs={'pk': user.profile.pk}))

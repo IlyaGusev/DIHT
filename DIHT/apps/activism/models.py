@@ -18,6 +18,7 @@ from django.db.models import \
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase
 from django.core.urlresolvers import reverse
+from accounts.models import PersistentFloatNumberOperation
 
 
 def upload_to_sector(instance, filename):
@@ -155,27 +156,15 @@ class ResponsibleEvent(Model):
         return str(self.user) + " in " + str(self.event)
 
 
-class PointOperation(Model):
+class PointOperation(PersistentFloatNumberOperation):
     """
     Модель очков роста
     """
-    user = ForeignKey(User, null=False, blank=False, related_name='point_operations', verbose_name="Юзер")
-    amount = FloatField("Количество", null=False, default=0)
-    timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)
-    description = CharField("Описание", max_length=150, null=True, blank=True)
-    moderator = ForeignKey(User, related_name='moderated_point_operations',
-                           null=True, blank=True, verbose_name="Ответственный")
-
-    def save(self, *args, **kwargs):
-        if self.pk is None:
-            super(PointOperation, self).save(*args, **kwargs)
+    field='experience'
 
     class Meta:
         verbose_name = "Операция очков роста"
         verbose_name_plural = "Операции очков роста"
-
-    def __str__(self):
-        return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)
 
 
 class TaskComment(Model):

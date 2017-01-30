@@ -59,6 +59,7 @@ def get_level_by_num(num):
         return {'sign': 'Почётный активист студсовета ФИВТ', 'coef': 4, 'is_beginner' : False, 'num' : 5}
 
 def get_level_by_point_sum(gp):
+    gp += 1e-4
     if gp < 4:
         return get_level_by_num(0)
     elif gp < 16:
@@ -75,7 +76,7 @@ def get_level_at_dates(user, dates):
         return [-1] * len(dates)
 
     tasks = list([0, user_task.task.datetime_closed, user_task.hours] for user_task in user.participated.filter(task__status__in=['closed']))
-    point_operatons = list([1, operation.timestamp, operation.amount] for operation in user.point_operations.all())
+    point_operatons = list([1, operation.timestamp, operation.amount] for operation in user.pointoperations.all())
     dates = list(zip([2] * len(dates), dates))
     point_sum = 0
     hours_sum = 0
@@ -98,6 +99,4 @@ def get_level(user):
     if Group.objects.get(name="Руководящая группа") in user.groups.all():
         return get_level_by_num(-1)
 
-    hours = sum(user.participated.filter(task__status__in=['closed']).values_list('hours', flat=True))
-    gp = hours // 10 + sum(user.point_operations.all().values_list('amount', flat=True))
-    return get_level_by_point_sum(gp)
+    return get_level_by_point_sum(user.profile.experience)

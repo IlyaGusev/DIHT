@@ -8,7 +8,8 @@
         Модели, связанные с профилями пользователей.
 """
 from django.db.models import Model, OneToOneField, BooleanField, CharField, \
-    IntegerField, ForeignKey, DateTimeField, ImageField, PositiveIntegerField
+    FloatField, IntegerField, ForeignKey, DateTimeField, ImageField, \
+    PositiveIntegerField
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils import timezone
@@ -27,6 +28,7 @@ class Profile(Model):
     group_number = CharField("Номер группы", max_length=30, blank=True)
     money = IntegerField("Количество денег", blank=True, null=True, default=0)
     payments = IntegerField("Невыплачено поощрений", blank=True, null=True, default=0)
+    experience = FloatField("Опыт работы активиста", blank=True, null=True, default=0)
     mobile = CharField("Мобильный телефон", max_length=30, blank=True)
     middle_name = CharField("Отчество", max_length=30, blank=True)
     sign = CharField("Подпись", max_length=255, blank=True, null=True, default='')
@@ -71,29 +73,28 @@ class Avatar(Model):
         verbose_name = "Аватар"
         verbose_name_plural = "Аватары"
 
-class GeneralMoneyOperation(Model):
+class PersistentAbstractNumberOperation(Model):
     """
-        Обобщённая модель денежных операций. Поддерживает отмену операции с возвращением денег.
+        Обобщённая модель операций c числом, привязанным к аккаунту.
+        Поддерживает отмену операции.
     """
-    user = ForeignKey(User, null=False, blank=False, related_name='%(class)s_operations', verbose_name="Юзер")
-    amount = IntegerField("Количество", null=False, default=0)
+    user = ForeignKey(User, null=False, blank=False, related_name='%(class)ss', verbose_name="Юзер")
+    amount = None
     timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)
     description = CharField("Описание", max_length=150, null=True, blank=True)
-    moderator = ForeignKey(User, related_name='%(class)s_moderated_operations',
+    moderator = ForeignKey(User, related_name='moderated_%(class)ss',
                            null=True, blank=True, verbose_name="Модератор")
-    is_approved = BooleanField("Подтверждено", default=False)
-
     field = ''
 
     @transaction.atomic
     def save(self, *args, **kwargs):
         if self.pk is None:
-            super(GeneralMoneyOperation, self).save(*args, **kwargs)
+            super(PersistentAbstractNumberOperation, self).save(*args, **kwargs)
             old_amount = getattr(self.user.profile, self.field)
             setattr(self.user.profile, self.field, old_amount + self.amount)
             self.user.profile.save()
         else:
-            super(GeneralMoneyOperation, self).save(*args, **kwargs)
+            super(PersistentAbstractNumberOperation, self).save(*args, **kwargs)
 
     @transaction.atomic
     def cancel(self):
@@ -107,12 +108,24 @@ class GeneralMoneyOperation(Model):
     def __str__(self):
         return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)
 
+class PersistentNumberOperation(PersistentAbstractNumberOperation):
+    amount = IntegerField("Количество", null=False, default=0)
 
-class MoneyOperation(GeneralMoneyOperation):
+    class Meta:
+        abstract = True
+
+class PersistentFloatNumberOperation(PersistentAbstractNumberOperation):
+    amount = FloatField("Количество", null=False, default=0)
+
+    class Meta:
+        abstract = True
+
+class MoneyOperation(PersistentNumberOperation):
     """
         Модель денежных операций. Изначально планировалась неизменяемой, но для флага подтверждения
         пришлось убрать это свойство. Поддерживает отмену операции с возвращением денег.
     """
+    is_approved = BooleanField("Подтверждено", default=False)
     field = 'money'
 
     class Meta:
@@ -120,10 +133,11 @@ class MoneyOperation(GeneralMoneyOperation):
         verbose_name_plural = "Денежные операции"
 
 
-class PaymentsOperation(GeneralMoneyOperation):
+class PaymentsOperation(PersistentNumberOperation):
     """
-        Модель денежных операций для поощрений
+        Модель денежных операций для поощрений.
     """
+    is_approved = BooleanField("Подтверждено", default=False)
     field = 'payments'
 
     class Meta:
