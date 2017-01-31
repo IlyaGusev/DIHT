@@ -333,7 +333,7 @@ class AddPaymentsView(PaymentsView):
                                          timestamp=timezone.now(),
                                          description="Увеличение",
                                          moderator=self.request.user)
-        return JsonResponse({'url': './'},
+        return JsonResponse({'action' : 'refresh'},
                             status=200)
 
 
@@ -351,7 +351,7 @@ class RemovePaymentsView(MoneyView):
                                       timestamp=timezone.now(),
                                       description="Уменьшение",
                                       moderator=self.request.user)
-        return JsonResponse({'url': './'},
+        return JsonResponse({'action' : 'refresh'},
                             status=200)
 
 

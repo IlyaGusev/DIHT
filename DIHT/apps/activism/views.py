@@ -798,7 +798,7 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
                 po = PaymentsOperation.objects.create(user=user, amount = round(total), timestamp = timezone.now(),
                                                  description="За ЧРА " + timezone.now().ctime())
                 po.save()
-        return JsonResponse({'url': reverse('activism:payments')}, status=200)
+        return JsonResponse({'action' : 'refresh'}, status=200)
 
     def get_context_data(self, **kwargs):
         context = super(PaymentsView, self).get_context_data(**kwargs)
@@ -824,8 +824,9 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
             pure_hours = user.participated.filter(task__status__in=['closed'],
                                                   task__datetime_closed__gte=begin,
                                                   task__datetime_closed__lte=end).aggregate(Sum('hours'))['hours__sum']
-            print(pure_hours)
-            if pure_hours:
+            if not pure_hours:
+                pure_hours = 0
+            if pure_hours > 0 or user.profile.payments > 0:
                 user_tasks = get_affected_tasks(user, begin, end)
                 records.append({'user': user,
                                 'effective_hours': sum(task.hours * get_level_by_num(task.level_at_completion)['coef'] for task in user_tasks),
