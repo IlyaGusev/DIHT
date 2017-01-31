@@ -13,7 +13,7 @@ from activism.views import EventView, TaskView, IndexView, TaskCreateView, \
     EventsView, EventCreateView, TaskActionView, EventCloseView, UnlockView, \
     SectorView, ActivistsView, TaskLogView, AddPointsView, DeletePointsView, \
     PaymentsView, RatingView, TaskCommentCreateView, TaskCommentUpdateView, \
-    TaskCommentDeleteView, EventBestView
+    TaskCommentDeleteView, EventBestView, ExportPaymentsTableView
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
@@ -43,5 +43,6 @@ urlpatterns = [
     url(r'^activists/(?P<pk>[0-9]*)/delete_points/$', DeletePointsView.as_view(), name='delete_points'),
 
     url(r'^payments/$', PaymentsView.as_view(), name='payments'), 
+    url(r'^payments/as_csv/$', ExportPaymentsTableView.as_view(), name='download_csv'),
     url(r'^rating/$', RatingView.as_view(), name='rating'),
 ]
