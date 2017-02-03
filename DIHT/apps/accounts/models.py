@@ -77,6 +77,7 @@ class PersistentAbstractNumberOperation(Model):
     """
         Обобщённая модель операций c числом, привязанным к аккаунту.
         Поддерживает отмену операции.
+        Некорректно работает (в силу особенностей django) при массовом удалении/создании экземпляров.
     """
     user = ForeignKey(User, null=False, blank=False, related_name='%(class)ss', verbose_name="Юзер")
     amount = None
@@ -98,9 +99,13 @@ class PersistentAbstractNumberOperation(Model):
 
     @transaction.atomic
     def cancel(self):
+        self.delete()
+
+    @transaction.atomic
+    def delete(self, *args, **kwargs):
         setattr(self.user.profile, self.field, getattr(self.user.profile, self.field) - self.amount)
         self.user.profile.save()
-        self.delete()
+        super(PersistentAbstractNumberOperation, self).delete(*args, **kwargs)
 
     class Meta:
         abstract = True

@@ -626,25 +626,30 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
                            key=lambda u: u.last_name)
 
         records = []
+        show_all = global_checks(self.request.user)['can_all']
         for user in activists:
             if Group.objects.get(name="Руководящая группа") not in user.groups.all() and \
                Group.objects.get(name="Ответственные за активистов") not in user.groups.all():
-                throughs = user.participated.filter(task__status__in=['closed'])
-                sum_hours = sum(throughs.values_list('hours', flat=True))
-                operations = user.pointoperations.filter(for_hours_of_work=False)
-                sum_og = sum(user.pointoperations.filter(for_hours_of_work=False).values_list('amount', flat=True))
-                sum_all = sum_og + int(sum_hours // 10)
                 level = get_level(user)
-                records.append({'user': user,
-                                'throughs': throughs,
-                                'sum_hours': sum_hours,
-                                'operations': operations,
-                                'sum_og': sum_og,
-                                'sum_all': sum_all,
-                                'level': level['sign']})
-        context['records'] = list(reversed(sorted(sorted(reversed(sorted(records, key=lambda record: record['user'].last_name)),
-                                                         key=lambda record: record['sum_hours']),
-                                                  key=lambda record: record['sum_all'])))
+                if show_all:
+                    throughs = user.participated.filter(task__status__in=['closed'])
+                    sum_hours = sum(throughs.values_list('hours', flat=True))
+                    operations = user.pointoperations.filter(for_hours_of_work=False)
+                    sum_og = sum(user.pointoperations.filter(for_hours_of_work=False).values_list('amount', flat=True))
+                    sum_all = sum_og + int(sum_hours // 10)
+                    records.append({'user': user,
+                                    'throughs': throughs,
+                                    'sum_hours': sum_hours,
+                                    'operations': operations,
+                                    'sum_og': sum_og,
+                                    'sum_all': sum_all,
+                                    'level': level['sign']})
+                else:
+                    records.append({'user': user,
+                                    'sum_all': user.profile.experience,
+                                    'level': level['sign']})
+
+        context['records'] = list(sorted(records, key=lambda record: (-record['sum_all'], record['user'].last_name)))
         return context
 
 
