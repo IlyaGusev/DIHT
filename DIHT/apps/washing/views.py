@@ -1,9 +1,11 @@
 import datetime as dt
 import logging
 from collections import OrderedDict
+
+from django.shortcuts import render
 from django.views.generic import View, TemplateView
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.utils.decorators import method_decorator
 from django.db import transaction
 from django.utils import timezone
@@ -12,6 +14,7 @@ from django.conf import settings
 from washing.models import WashingMachine, WashingMachineRecord, RegularNonWorkingDay, NonWorkingDay, Parameters
 from accounts.models import Profile, MoneyOperation
 from braces.views import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
+from activism.models import PointOperation
 
 logger = logging.getLogger('DIHT.custom')
 
@@ -28,34 +31,73 @@ class IndexView(TemplateView):
     template_name = 'washing/washing.html'
 
     def get_context_data(self, **kwargs):
+        activist = False
+        OPcount = 0
+        if not self.request.user.is_anonymous():
+            for x in PointOperation.objects.filter(user=self.request.user):
+                OPcount += x.amount
+        if self.request.POST:
+            if self.request.POST.get('activist') and OPcount >= 16:
+                activist = True
+            elif self.request.POST.get('nonactivist'):
+                activist = False
+
         context = super(IndexView, self).get_context_data(**kwargs)
         if Group.objects.filter(name='Ответственные за стиралку').exists():
             context['charge_washing'] = Group.objects.get(name='Ответственные за стиралку').user_set.all()
-        machines = WashingMachine.objects.filter(is_active=True)
+        if not activist:
+            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=False)
+        else:
+            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=True)
         current = timezone.now()
 
         schedule = OrderedDict()
 
         day = current.date()
         context['current'] = day
-        for i in range(7):
-            schedule[day] = OrderedDict()
+
+        if activist:
+            working = True
             can_show = True
-            for machine in machines:
-                machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
+            machine = machines[0]
+            machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
+            while day.weekday() != int(machine_params[0].activist_days):
+                day += dt.timedelta(days=1)
+            #context['current'] = day
+            end_work_day = day + dt.timedelta(hours=machine_params[0].activist_hours + machine_params[0].start_hour,
+                                              minutes=machine_params[0].activist_minutes+machine_params[0].start_minute)
+            end_work_hour = (machine_params[0].start_hour + machine_params[0].activist_hours) % 24
+            end_work_minute = (machine_params[0].start_minute + machine_params[0].activist_minutes) % 60
+            if end_work_minute < machine_params[0].start_minute:
+                end_work_hour += 1
+            firstday = day
+            while working:
+                schedule[day] = OrderedDict()
                 if machine_params.exists():
                     params = machine_params[0]
 
                     times = (24 * 60 - params.start_minute - params.start_hour * 60) // \
                             (params.delta_minute + params.delta_hour * 60)
+                    if day == end_work_day:
+                        times = (end_work_hour * 60 + end_work_minute) // \
+                            (params.delta_minute + params.delta_hour * 60)
+                    elif day != firstday:
+                        times = 24 * 60 // ((params.delta_minute + params.delta_hour * 60))
 
                     start = params.start_hour * 60 + params.start_minute
                     delta = params.delta_hour * 60 + params.delta_minute
+                    if day != firstday:
+                        start = 0
+
                     for j in range(times):
                         start_hour = start // 60
                         start_minute = start - start_hour * 60
                         end_hour = (start + delta) // 60
                         end_minute = start + delta - end_hour * 60
+
+                        if end_hour == 24:
+                            end_hour = 23
+                            end_minute = 59
                         d = dt.datetime.combine(day, dt.time(start_hour, start_minute, 0))
 
                         status = 'OK'
@@ -77,16 +119,89 @@ class IndexView(TemplateView):
                             schedule[day][interval] = OrderedDict()
                         schedule[day][interval][machine] = [status, params.price, user, False]
                         start += delta
-            if can_show:
-                for machine in machines:
+                if can_show:
                     for interval in schedule[day].values():
                         interval[machine][3] = True
+                if day == end_work_day:
+                    working = False
+                else:
+                    day += dt.timedelta(days=1)
+        else:
+            for i in range(7):
+                schedule[day] = OrderedDict()
+                can_show = True
+                for machine in machines:
+                    machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
+                    if machine_params.exists():
+                        params = machine_params[0]
 
-            day += dt.timedelta(days=1)
+                        times = (24 * 60 - params.start_minute - params.start_hour * 60) // \
+                                (params.delta_minute + params.delta_hour * 60)
+
+                        start = params.start_hour * 60 + params.start_minute
+                        delta = params.delta_hour * 60 + params.delta_minute
+
+                        for j in range(times):
+                            start_hour = start // 60
+                            start_minute = start - start_hour * 60
+                            end_hour = (start + delta) // 60
+                            end_minute = start + delta - end_hour * 60
+                            d = dt.datetime.combine(day, dt.time(start_hour, start_minute, 0))
+
+                            status = 'OK'
+                            user = self.request.user
+                            if machine.regular_non_working_days.filter(day_of_week=day.weekday()).exists():
+                                status = 'DISABLE'
+                            if machine.non_working_days.filter(date=day).exists():
+                                status = 'DISABLE'
+                            if machine.records.filter(datetime_from=d).exists():
+                                if machine.records.get(datetime_from=d).user == self.request.user:
+                                    status = "YOURS"
+                                else:
+                                    status = "BUSY"
+                                user = machine.records.get(datetime_from=d).user
+
+                            interval = (dt.time(start_hour, start_minute, 0),
+                                        dt.time(end_hour, end_minute, 0))
+                            if schedule[day].get(interval) is None:
+                                schedule[day][interval] = OrderedDict()
+                            schedule[day][interval][machine] = [status, params.price, user, False]
+                            start += delta
+                if can_show:
+                    for machine in machines:
+                        for interval in schedule[day].values():
+                            interval[machine][3] = True
+
+                day += dt.timedelta(days=1)
         context['week'] = week
         context['schedule'] = schedule
         context['machines'] = machines
+        if self.request.POST:
+            return render(self.request, self.template_name, context)
         return context
+
+    def post(self, request, *args, **kwargs):
+        op = 0
+        if 'cancel_id' in self.request.POST:
+            user_id = self.request.POST.get("cancel_id")
+            record = parse_record(request)
+            record_obj = WashingMachineRecord.objects.get(machine=record['machine'],
+                                                          user=User.objects.get(id=int(user_id)),
+                                                          datetime_from=record['datetime_from'],
+                                                          datetime_to=record['datetime_to'])
+            if request.user.groups.filter(name__in=["Ответственные за активистов"]).exists():
+                record_obj.money_operation.cancel()
+                record_obj.delete()
+            return IndexView.get_context_data(self, **kwargs)
+        if 'check_op' in self.request.POST and self.request.POST.get('check_op'):
+            for x in PointOperation.objects.filter(user=self.request.user):
+                op += x.amount
+            if op < 16:
+                return HttpResponse("false")
+        if not ('check_op' in self.request.POST and self.request.POST.get('check_op') == 'continue'):
+            kwargs['op'] = op
+            return IndexView.get_context_data(self, **kwargs)
+        return HttpResponse("true")
 
 
 def parse_record(request):
@@ -206,3 +321,4 @@ class CheckAccessView(View):
             return HttpResponse("GRANTED")
         else:
             return HttpResponse("DENIED")
+

@@ -24,6 +24,24 @@
 	-webkit-padding-start: 15px;
 }
 
+.washing_instruction ul li{
+	list-style-type: none;
+}
 
+.washing_activist_check{
+	background:none!important;
+     border:none;
+     padding:0!important;
+
+    /*optional*/
+    font-family:arial,sans-serif; /*input has OS specific font-family*/
+     color:#069;
+     text-decoration:underline;
+     cursor:pointer;
+}
+
+.washing_activist_check:hover{
+	color: black;
+}
 
 
