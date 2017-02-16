@@ -5,7 +5,14 @@ function post_action(url, data){
         url: url,
         data: data,
         success: function(response) {
-            window.location.replace(response.url)
+            if (response.action)
+            {
+                if (response.action === 'refresh')
+                    window.location.reload()
+
+            } else {
+                window.location.replace(response.url)
+            }
         },
         error: function(request, status, error) {
             console.log(error)

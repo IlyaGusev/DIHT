@@ -5,6 +5,17 @@ function view_modal_errors(form, request){
         form.find('#id_'+k).after('<ul class="errorlist"><li>' + errors[k] + '</li></ul>');
 }
 
+function resolve_redirect(response) {
+    if (response.action)
+        {
+            if (response.action === 'refresh')
+                window.location.reload()
+
+        } else {
+            window.location.replace(response.url)
+        }
+}
+
 $(function() {
     $("a[data-target=#form-modal],th[data-target=#form-modal]").click(function(ev) {
         ev.preventDefault();
@@ -38,7 +49,7 @@ $(function() {
             data: form.serialize(),
             success: function(response) {
                 $("#form-modal").modal('hide');
-                window.location.replace(response.url)
+                resolve_redirect(response)
             },
             error: function(request, status, error) {
                 view_modal_errors(form, request)

@@ -21,14 +21,16 @@ from django.views.generic.edit import UpdateView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.models import User, Group
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.utils import timezone
 from braces.views import LoginRequiredMixin, GroupRequiredMixin, UserPassesTestMixin
 from reversion import get_for_object
 from activism.models import Event, Task, AssigneeTask, Sector, PointOperation, ResponsibleEvent, TaskComment
 from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm, TaskCommentForm
-from activism.utils import global_checks, get_level
+from activism.utils import global_checks, get_level, get_level_by_num
 from accounts.models import PaymentsOperation
+from django.db.models import Sum
+import csv
 
 """
     Mixins
@@ -189,7 +191,7 @@ class EventCloseView(GroupRequiredMixin, LoginRequiredMixin, DefaultContextMixin
         assignees = get_event_assignees(event)
         # Заполняем таблицу ОР назначенных и вливаем её в контекст
         for assignee in assignees:
-            op = assignee.point_operations.filter(description="За "+event.name, moderator=user)
+            op = assignee.pointoperations.filter(description="За "+event.name, moderator=user)
             if op.exists():
                 gps[assignee.pk] = op[0]
         context['assignees'] = assignees
@@ -335,11 +337,18 @@ def table_actions(request, task, action):
                 through.save()
     elif action == 'close':
         table_actions(request, task, 'resolved')
+        task.datetime_closed = timezone.now()
         for u in task.assignees.all():
             through = task.participants.get(user=u)
             through.approved = True
+            po = PointOperation.objects.create(user=through.user,
+                                        amount=through.hours / 10,
+                                        timestamp=task.datetime_closed,
+                                        description='За ЧРА',
+                                        for_hours_of_work=True)
+            po.save()
+            through.level_at_completion = get_level(User.objects.get(pk=through.user.pk))['num']
             through.save()
-        task.datetime_closed = timezone.now()
         task.save()
     elif action == 'in_progress' or action == 'open':
         if task.candidates.count() != 0:
@@ -617,25 +626,30 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
                            key=lambda u: u.last_name)
 
         records = []
+        show_all = global_checks(self.request.user)['can_all']
         for user in activists:
             if Group.objects.get(name="Руководящая группа") not in user.groups.all() and \
                Group.objects.get(name="Ответственные за активистов") not in user.groups.all():
-                throughs = user.participated.filter(task__status__in=['closed'])
-                sum_hours = sum(throughs.values_list('hours', flat=True))
-                operations = user.point_operations.all()
-                sum_og = sum(user.point_operations.all().values_list('amount', flat=True))
-                sum_all = sum_og + int(sum_hours // 10)
                 level = get_level(user)
-                records.append({'user': user,
-                                'throughs': throughs,
-                                'sum_hours': sum_hours,
-                                'operations': operations,
-                                'sum_og': sum_og,
-                                'sum_all': sum_all,
-                                'level': level['sign']})
-        context['records'] = list(reversed(sorted(sorted(reversed(sorted(records, key=lambda record: record['user'].last_name)),
-                                                         key=lambda record: record['sum_hours']),
-                                                  key=lambda record: record['sum_all'])))
+                if show_all:
+                    throughs = user.participated.filter(task__status__in=['closed'])
+                    sum_hours = sum(throughs.values_list('hours', flat=True))
+                    operations = user.pointoperations.filter(for_hours_of_work=False)
+                    sum_og = sum(user.pointoperations.filter(for_hours_of_work=False).values_list('amount', flat=True))
+                    sum_all = sum_og + int(sum_hours // 10)
+                    records.append({'user': user,
+                                    'throughs': throughs,
+                                    'sum_hours': sum_hours,
+                                    'operations': operations,
+                                    'sum_og': sum_og,
+                                    'sum_all': sum_all,
+                                    'level': level['sign']})
+                else:
+                    records.append({'user': user,
+                                    'sum_all': user.profile.experience,
+                                    'level': level['sign']})
+
+        context['records'] = list(sorted(records, key=lambda record: (-record['sum_all'], record['user'].last_name)))
         return context
 
 
@@ -752,6 +766,58 @@ def get_valid_activists():
     activists.sort(key=lambda u: u.last_name)
     return activists
 
+def get_affected_tasks(user, begin, end):
+    user_tasks = user.participated.filter(task__status__in=['closed']).order_by('task__datetime_closed')
+    time = None
+    if get_level(user)['num'] > 0:
+        for task in user_tasks:
+            if task.level_at_completion > 0:
+                time = task.task.datetime_closed
+                break
+    if not time or time < begin or time > end:
+        user_tasks = user_tasks.filter(task__datetime_closed__gte=begin, task__datetime_closed__lte=end, rewarded=False)
+    else:
+        user_tasks = user_tasks.filter(task__datetime_closed__lte=end, rewarded=False)
+    return user_tasks
+
+def generate_payments_table_context(valuedict):
+    const = float(valuedict['const']) if 'const' in valuedict else 2000
+
+    begin = dt.datetime.combine(timezone.now().date(), dt.time(0)) - dt.timedelta(days=30)
+    if 'begin' in valuedict:
+        begin = dt.datetime.strptime(valuedict['begin'], '%Y-%m-%d')
+
+    end = dt.datetime.combine(timezone.now().date(), dt.time(0))
+    if 'end' in valuedict:
+        end = dt.datetime.strptime(valuedict['end'], '%Y-%m-%d')
+
+    context = dict()
+    context['const'] = const
+    context['begin'] = begin
+    context['end'] = end
+
+    records = []
+    users = get_valid_activists()
+    for user in users:
+        pure_hours = user.participated.filter(task__status__in=['closed'],
+                                              task__datetime_closed__gte=begin,
+                                              task__datetime_closed__lte=end).aggregate(Sum('hours'))['hours__sum']
+        if not pure_hours:
+            pure_hours = 0
+        if pure_hours > 0 or user.profile.payments > 0:
+            user_tasks = get_affected_tasks(user, begin, end)
+            records.append({'user': user,
+                            'effective_hours': sum(
+                                task.hours * get_level_by_num(task.level_at_completion)['coef'] for task in user_tasks),
+                            'hours': pure_hours,
+                            'holded_payment': user.profile.payments})
+    for record in records:
+        record['payment'] = const * record['effective_hours']
+    context['payment_sum'] = sum(record['payment'] for record in records)
+    context['holded_payment_sum'] = sum(record['holded_payment'] for record in records)
+    context['records'] = sorted(records, key=lambda record: record['payment'], reverse=True)
+    return context
+
 class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
     group_required = "Ответственные за активистов"
     template_name = 'activism/payments.html'
@@ -759,36 +825,56 @@ class PaymentsView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         users = get_valid_activists()
+        if not {'const', 'begin', 'end'}.issubset(request.POST):
+            return JsonResponse(status=400)
         const = float(request.POST['const'])
+        begin = dt.datetime.strptime(request.POST['begin'], '%Y-%m-%d')
+        end = dt.datetime.strptime(request.POST['end'], '%Y-%m-%d')
         for user in users:
-            mult = get_level(user)['coef'] * const
-            total = 0
-            for task in user.participated.filter(task__status__in=['closed'], rewarded__exact=False):
-                task.rewarded = True
-                task.save()
-                total += task.hours * mult
-            po = PaymentsOperation.objects.create(user=user, amount = round(total), timestamp = timezone.now(),
-                                             description="За ЧРА " + timezone.now().ctime())
-        return JsonResponse({'url': reverse('activism:payments')}, status=200)
+            tasks = get_affected_tasks(user, begin, end)
+            if len(tasks) > 0:
+                total = 0
+                for task in tasks:
+                    task.rewarded = True
+                    total += task.hours * get_level_by_num(task.level_at_completion)['coef']
+                    task.save()
+                total *= const
+                po = PaymentsOperation.objects.create(user=user, amount = round(total), timestamp = timezone.now(),
+                                                 description="За ЧРА " + timezone.now().ctime())
+                po.save()
+        return JsonResponse({'action' : 'refresh'}, status=200)
 
     def get_context_data(self, **kwargs):
         context = super(PaymentsView, self).get_context_data(**kwargs)
-
-        const = float(self.request.GET['const']) if 'const' in self.request.GET else 2000
-        context['const'] = const
-
-        records = []
-        users = get_valid_activists()
-        for user in users:
-            records.append({'user': user,
-                            'hours': sum(user.participated.filter(task__status__in=['closed'],
-                                                                  rewarded__exact=False)
-                                                          .values_list('hours', flat=True)),
-                           'holded_payment': user.profile.payments})
-        for record in records:
-            record['coef'] = get_level(record['user'])['coef']
-            record['payment'] = const*record['hours']*record['coef']
-        context['payment_sum'] = sum(record['payment'] for record in records)
-        context['holded_payment_sum'] = sum(record['holded_payment'] for record in records)
-        context['records'] = sorted(records, key=lambda record: record['payment'], reverse=True)
+        context.update(generate_payments_table_context(self.request.GET))
         return context
+
+class ExportPaymentsTableView(LoginRequiredMixin, GroupRequiredMixin, View):
+    group_required = "Ответственные за активистов"
+    raise_exception = True
+
+    def get(self, request, *args, **kwargs):
+        context = generate_payments_table_context(request.GET)
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="table_'+\
+            context['begin'].strftime("%Y-%m-%d") + '_' +\
+            context['end'].strftime("%Y-%m-%d") + '.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['Константа', 'Начало', 'Конец'])
+        writer.writerow([context['const'], context['begin'], context['end']])
+        writer.writerow(['Активист',
+                        'Группа',
+                        'Часы',
+                        'Невыплаченно ранее',
+                        'Деньги за период',
+                        'Эффективные часы'])
+        for record in context['records']:
+            l = []
+            l.append(record['user'].last_name + ' ' + record['user'].first_name + ' ' + record['user'].profile.middle_name)
+            l.append(record['user'].profile.group_number)
+            l.append(record['hours'])
+            l.append(record['effective_hours'])
+            l.append(record['holded_payment'])
+            l.append(record['payment'])
+            writer.writerow(l)
+        return response

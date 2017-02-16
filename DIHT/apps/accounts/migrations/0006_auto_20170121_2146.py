@@ -23,8 +23,8 @@ class Migration(migrations.Migration):
                 ('timestamp', models.DateTimeField(verbose_name='Дата', default=django.utils.timezone.now)),
                 ('description', models.CharField(blank=True, null=True, max_length=150, verbose_name='Описание')),
                 ('is_approved', models.BooleanField(verbose_name='Подтверждено', default=False)),
-                ('moderator', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, related_name='paymentsoperation_moderated_operations', null=True, verbose_name='Модератор')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='paymentsoperation_operations', verbose_name='Юзер')),
+                ('moderator', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, related_name='moderated_paymentsoperations', null=True, verbose_name='Модератор')),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='paymentsoperations', verbose_name='Юзер')),
             ],
             options={
                 'verbose_name': 'Денежная операция поощрений',
@@ -39,12 +39,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='moneyoperation',
             name='moderator',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, related_name='moneyoperation_moderated_operations', null=True, verbose_name='Модератор'),
+            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, related_name='moderated_moneyoperations', null=True, verbose_name='Модератор'),
         ),
         migrations.AlterField(
             model_name='moneyoperation',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='moneyoperation_operations', verbose_name='Юзер'),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='moneyoperations', verbose_name='Юзер'),
         ),
         migrations.AlterField(
             model_name='profile',

@@ -12,12 +12,13 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db.models import \
-    PositiveSmallIntegerField, ForeignKey, DateTimeField, \
+    PositiveSmallIntegerField, IntegerField, ForeignKey, DateTimeField, \
     DateField, BooleanField, FloatField, Model, CharField, \
     ManyToManyField, TextField, ImageField
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase
 from django.core.urlresolvers import reverse
+from accounts.models import PersistentFloatNumberOperation
 
 
 def upload_to_sector(instance, filename):
@@ -135,6 +136,7 @@ class AssigneeTask(Model):
     hours = FloatField("Реальные часы", default=0.0,
                        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
     approved = BooleanField("Подтверждено", default=False)
+    level_at_completion = IntegerField(verbose_name="Уровень на момент выполнения", blank=False, null=False, default=0)
     done = BooleanField("Готово", default=False)
     rewarded = BooleanField("Поощрено", default=False)
 
@@ -155,27 +157,17 @@ class ResponsibleEvent(Model):
         return str(self.user) + " in " + str(self.event)
 
 
-class PointOperation(Model):
+class PointOperation(PersistentFloatNumberOperation):
     """
     Модель очков роста
     """
-    user = ForeignKey(User, null=False, blank=False, related_name='point_operations', verbose_name="Юзер")
-    amount = FloatField("Количество", null=False, default=0)
-    timestamp = DateTimeField("Дата", null=False, blank=False, default=timezone.now)
-    description = CharField("Описание", max_length=150, null=True, blank=True)
-    moderator = ForeignKey(User, related_name='moderated_point_operations',
-                           null=True, blank=True, verbose_name="Ответственный")
+    field='experience'
 
-    def save(self, *args, **kwargs):
-        if self.pk is None:
-            super(PointOperation, self).save(*args, **kwargs)
+    for_hours_of_work = BooleanField(verbose_name="За часы работы активиста", null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = "Операция очков роста"
         verbose_name_plural = "Операции очков роста"
-
-    def __str__(self):
-        return str(self.timestamp) + ': ' + str(self.user.last_name) + '; ' + str(self.amount)
 
 
 class TaskComment(Model):
