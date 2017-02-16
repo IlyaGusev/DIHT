@@ -176,3 +176,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details'
 )
+
+YANDEX_MONEY_WALLET = ''
+YANDEX_MONEY_APP_ID = ''
+YANDEX_MONEY_REDIRECT_URL = ''
