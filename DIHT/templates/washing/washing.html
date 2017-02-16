@@ -1,26 +1,31 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
+{% load user_tags %}
 {% block title %} Стиралка {% endblock %}
 {% block washing_active %} class = "active" {% endblock %}
 {% block custom_scripts %}
-	<script src="{% static 'js/washing.js' %}"></script>
+    <script src="{% static 'js/washing.js' %}" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html"></script>
 	<link rel="stylesheet" href="{% static 'css/washing-gym.css' %}">
 {% endblock %}
 {% block content %}
     <style>
         td.status0{/*blocked (grey)*/
             background-color:#B4B4B4;
+            text-align: center;
         }
         td.status1{/*free (green)*/
             background-color: #59B259;
+            text-align: center;
             {% if user.is_authenticated and not user.black_list_record.is_blocked %}
                 cursor: pointer;
             {% endif %}
         }
         td.status2{/*bought (red)*/
+            text-align: center;
             background-color:#D14741;
         }
         td.status3{/*your (blue)*/
+            text-align: center;
             background-color:#44AAC8;
             {% if user.is_authenticated %}
                 cursor: pointer;
@@ -42,15 +47,29 @@
 }
 
     </style>
+    <form method="post" class="form-inline">
+    {% csrf_token %}
     <div class="col-md-10 col-md-offset-1 page-header">
-        <h3>Стиралка</h3>
+        <!--<input type="hidden" name="activist" value="true">-->
+        <h3 style="display:inline-block;">Стиралка</h3><div id="activist_tabs" style="display: none; margin-left: 30px;">
+              <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Выбрать стиралку
+              <span class="caret"></span></button>
+              <ul class="dropdown-menu">
+                <li><input type="submit" name="activist" value="Для активистов" id="activist_btn" class="btn btn-default" style="width: 100%"></li>
+                <li><input type="submit" name="nonactivist" value="Обычная" class="btn btn-default" style="width: 100%"></li>
+              </ul>
+            <!--<input type="submit" name="activist" value="Для активистов" id="activist_btn" class="washing_activist_check">
+            <input type="submit" name="nonactivist" value="Обычная" class="washing_activist_check">-->
+            <!--<a href="#" id="activist_washing_link">Для активистов</a>--> </div>
     </div>
+    </form>
 	<div class="col-md-10 col-md-offset-1">
     {% if user.is_authenticated and user.black_list_record.is_blocked%}
     <div class="alert alert-danger">
         <p>Вы в чёрном списке стиралки</p>
     </div>
     {% endif %}
+    <div id="usual_washing">
     <div class="row">
         <div class="table-responsive">
         <table class="table table-bordered">
@@ -91,25 +110,44 @@
                         {% if user.is_authenticated and not user.black_list_record.is_blocked%}
                         <td class="status1 btn-open-modal"
                             href="{% url 'washing:create_record'%}"
-                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}"></td>
+                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}">
+                            {% if machine.parameters.all.0.activist %}
+                            {{ interval.0|time:'H:i' }} - {{ interval.1|time:'H:i' }}{% endif %}
+                        </td>
                         {% else %}
-                        <td class="status1"></td>
+                        <td class="status1">{% if machine.parameters.all.0.activist %}
+                            {{ interval.0|time:'H:i' }} - {{ interval.1|time:'H:i' }}{% endif %}</td>
                         {% endif %}
                     {% elif record.0 == 'BUSY' %}
+                        <!--<td class="status2 btn-open-modal"
+                            href="{% url 'washing:cancel_record'%}"
+                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}">
+                        {% if machine.parameters.all.0.activist %}
+                            {{ interval.0|time:'H:i' }} - {{ interval.1|time:'H:i' }}{% endif %}
+                        </td>-->
                     <td class="status2">
                         {% if user in charge_washing or user.is_superuser or record.3 %}
                         <center><a class="bgrey" href="{% url 'accounts:profile' pk=record.2.profile.pk%}">{{ record.2.get_full_name }}</a></center>
                         {% endif %}
-                    </td>
+                    {% if machine.parameters.all.0.activist %}
+                            <div>{{ interval.0|time:'H:i' }} - {{ interval.1|time:'H:i' }}</div>{% endif %}
+                    {% if user.is_authenticated and user|has_group:"Ответственные за активистов" %}
+                    <input name="cancel_activ" id="cancel_activ_{{ record.2.profile.pk }} {{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}"
+                           class="btn btn-warning" style="width: 80px;" type="button" value="Отмена"/></td>
+                        {% endif %}
                     {% elif record.0 == 'DISABLE' %}
                     <td class="status0"></td>
                     {% elif record.0 == 'YOURS' %}
                         {% if user.is_authenticated and day != current %}
                         <td class="status3 btn-open-modal"
                             href="{% url 'washing:cancel_record'%}"
-                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}"></td>
+                            id="{{ machine.pk }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}">
+                        {% if machine.parameters.all.0.activist %}
+                            {{ interval.0|time:'H:i' }} - {{ interval.1|time:'H:i' }}{% endif %}
+                        </td>
                         {% else %}
-                        <td class="status3"></td>
+                        <td class="status3">{% if machine.parameters.all.0.activist %}
+                            {{ interval.0|time:'H:i' }} - {{ interval.1|time:'H:i' }}{% endif %}</td>
                         {% endif %}
                     {% endif %}
                     {% endfor %}
@@ -120,6 +158,8 @@
         </table>
         </div>
     </div>
+    </div>
+
 
     <center><a href="#" data-toggle="modal" data-target="#responsible-modal">Ответственные за стиралку</a></center><br>
     <div class="modal" id="responsible-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
