@@ -45,17 +45,18 @@ class IndexView(TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         if Group.objects.filter(name='Ответственные за стиралку').exists():
             context['charge_washing'] = Group.objects.get(name='Ответственные за стиралку').user_set.all()
-        if not activist:
+        """if not activist:
             machines = WashingMachine.objects.filter(is_active=True, parameters__activist=False)
         else:
-            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=True)
+            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=True)"""
+        machines = WashingMachine.objects.filter(is_active=True)
         current = timezone.now()
 
         schedule = OrderedDict()
 
         day = current.date()
         context['current'] = day
-
+        activist = False
         if activist:
             working = True
             can_show = True
@@ -176,11 +177,11 @@ class IndexView(TemplateView):
         context['week'] = week
         context['schedule'] = schedule
         context['machines'] = machines
-        if self.request.POST:
-            return render(self.request, self.template_name, context)
+        #if self.request.POST:
+         #   return render(self.request, self.template_name, context)
         return context
 
-    def post(self, request, *args, **kwargs):
+    """def post(self, request, *args, **kwargs):
         op = 0
         if 'cancel_id' in self.request.POST:
             user_id = self.request.POST.get("cancel_id")
@@ -201,7 +202,7 @@ class IndexView(TemplateView):
         if not ('check_op' in self.request.POST and self.request.POST.get('check_op') == 'continue'):
             kwargs['op'] = op
             return IndexView.get_context_data(self, **kwargs)
-        return HttpResponse("true")
+        return HttpResponse("true")"""
 
 
 def parse_record(request):
