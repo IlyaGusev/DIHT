@@ -8,7 +8,7 @@ from django.db import transaction
 
 
 class Parameters(Model):
-    """DAYS = (
+    DAYS = (
         ('0', 'Понедельник'),
         ('1', 'Вторник'),
         ('2', 'Среда'),
@@ -16,7 +16,7 @@ class Parameters(Model):
         ('4', 'Пятница'),
         ('5', 'Суббота'),
         ('6', 'Воскресенье')
-    )"""
+    )
 
     date = DateField("Дата начала действия")
     delta_hour = PositiveSmallIntegerField("Промежуток времени(часы)")
@@ -24,11 +24,11 @@ class Parameters(Model):
     start_hour = PositiveSmallIntegerField("Время начала отсчёта промежутков(часы)")
     start_minute = PositiveSmallIntegerField("Время начала отсчёта промежутков(минуты)")
     price = PositiveSmallIntegerField("Цена за промежуток")
-    #activist = BooleanField("Для активистов", default=False)
-    #activist_days = CharField("День начала работы стиралки(только для машинки на 1-м этаже)", max_length=2, choices=DAYS, null=True, blank=True)
-    #activist_hours = PositiveSmallIntegerField("Количество времени работы(часы, только для машинки на 1-м этаже", null=True, blank=True)
-    #activist_minutes = PositiveSmallIntegerField("Количество времени работы(минуты, только для машинки на 1-м этаже",
-    #                                           null=True, blank=True)
+    activist = BooleanField("Для активистов", default=False)
+    activist_days = CharField("День начала работы стиралки(только для машинки на 1-м этаже)", max_length=2, choices=DAYS, null=True, blank=True)
+    activist_hours = PositiveSmallIntegerField("Количество времени работы(часы, только для машинки на 1-м этаже", null=True, blank=True)
+    activist_minutes = PositiveSmallIntegerField("Количество времени работы(минуты, только для машинки на 1-м этаже",
+                                               null=True, blank=True)
 
 
     class Meta:
