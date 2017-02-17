@@ -9,6 +9,13 @@
 <div class=" row well namezone">
     <h3 class="profile-name nametext"> Профиль: <span class="grey">{{ profile.user.get_full_name }} </span> </h3>
 </div>
+{% if profile_message %}
+<div class="row" style="margin-top: 20px;">
+    <div class = "col-md-offset-3 col-md-6">
+    <div class="alert {% if profile_message_is_error %}alert-danger{% else %}alert-success{% endif %}" style="margin-bottom:0px">{{ profile_message }}</div>
+    </div>
+</div>
+{% endif %}
 
 <div class="row" style="margin-top: 20px;">
     <div class="col-md-offset-3 col-md-2">

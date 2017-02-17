@@ -186,6 +186,11 @@ class ProfileView(LoginRequiredMixin, DetailView):
                                               .values_list('hours', flat=True)) // 10)
         context['level'] = get_level(user)
         context['plan_room'], context['neighbours'] = get_plan_room(user)
+        if 'profile_message' in self.request.session:
+            context['profile_message'], context['profile_message_is_error'] = self.request.session['profile_message']
+            del self.request.session['profile_message']
+        else:
+            context['profile_message'], context['profile_message_is_error'] = '', False
         return context
 
 
@@ -525,6 +530,13 @@ class ChangePassIdView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin,
                                             kwargs={'pk': self.get_object().pk})},
                             status=200)
 
+def redirect_to_profile(request, message=None, is_error=True):
+    if message:
+        request.session['profile_message'] = (message, is_error)
+    elif 'profile_error' in request.session:
+        del request.session['profile_message']
+    return redirect(reverse_lazy('accounts:profile', args=(request.user.profile.pk,)))
+
 class YandexMoneyFormView(LoginRequiredMixin, FormView):
     """
     Форма оплаты через Яндекс в профиле
@@ -544,7 +556,7 @@ class YandexMoneyOauthView(LoginRequiredMixin, View):
     def get(self, request):
         amount = request.session.get('yandex_money_amount')
         if not amount:
-            return redirect('/')
+            return redirect_to_profile(request, 'Не указана сумма. Попробуйте еще раз.')
         scope = ['account-info payment.to-account("{}").limit(,{})'.format(settings.YANDEX_MONEY_WALLET, amount)]
         auth_url = Wallet.build_obtain_token_url(settings.YANDEX_MONEY_APP_ID,
                                                  settings.YANDEX_MONEY_REDIRECT_URL, scope)
@@ -557,8 +569,10 @@ class YandexMoneyRedirView(LoginRequiredMixin, View):
     """
     def get(self, request):
         amount = request.session.get('yandex_money_amount')
-        if not amount or 'code' not in request.GET:
-            return redirect('/')
+        if not amount:
+            return redirect_to_profile(request, 'Не указана сумма. Попробуйте еще раз.')
+        if 'code' not in request.GET:
+            return redirect_to_profile(request, 'Что-то пошло не так. Попробуйте еще раз.')
         del request.session['yandex_money_amount']  # на всякий случай
         code = request.GET['code']
         access_token = Wallet.get_access_token(settings.YANDEX_MONEY_APP_ID, code, settings.YANDEX_MONEY_REDIRECT_URL)
@@ -579,4 +593,6 @@ class YandexMoneyRedirView(LoginRequiredMixin, View):
                                     timestamp=timezone.now(),
                                     description="Пополнение через Яндекс",
                                     moderator=None)
-        return redirect('/')
+            return redirect_to_profile(request, 'Ваш счет пополнен на {} рублей.'.format(amount), False)
+        else:
+            return redirect_to_profile(request, 'Что-то пошло не так. Попробуйте еще раз.')

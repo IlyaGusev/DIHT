@@ -176,7 +176,8 @@ class YandexMoneyTestCase(TestCase):
     def test_oauth(self, settings, wallet):
         wallet.build_obtain_token_url = Mock(return_value='/?a')
         resp = self.client.get('/accounts/yandex_money_oauth')
-        self.assertRedirects(resp, '/')
+        self.assertRedirects(resp, '/accounts/profile/1/', fetch_redirect_response=False)
+        self.assertTrue(self.client.session['profile_message'][1])
         resp = self.client.post('/accounts/yandex_money_form', {'amount': '42'})
         self.assertEqual(self.client.session['yandex_money_amount'], 42)
         settings.YANDEX_MONEY_APP_ID = 'APP'
@@ -190,10 +191,12 @@ class YandexMoneyTestCase(TestCase):
     @patch('accounts.views.settings')
     def test_redir_invalid(self, settings, wallet):
         resp = self.client.get('/accounts/yandex_money_redir?code=123')
-        self.assertRedirects(resp, '/')
+        self.assertRedirects(resp, '/accounts/profile/1/', fetch_redirect_response=False)
+        self.assertTrue(self.client.session['profile_message'][1])
         resp = self.client.post('/accounts/yandex_money_form', {'amount': '42'})
         resp = self.client.get('/accounts/yandex_money_redir?')
-        self.assertRedirects(resp, '/')
+        self.assertRedirects(resp, '/accounts/profile/1/', fetch_redirect_response=False)
+        self.assertTrue(self.client.session['profile_message'][1])
 
     @patch('accounts.views.Wallet')
     @patch('accounts.views.settings')
@@ -216,6 +219,7 @@ class YandexMoneyTestCase(TestCase):
         wallet.get_access_token.assert_called_once_with('APP', '123', 'URL')
         wallet.return_value.process_payment.assert_called_once_with({"request_id": 'REQID'})
         self.assertEqual(Profile.objects.get(user=self.admin).money, 42)
+        self.assertFalse(self.client.session['profile_message'][1])
 
     @patch('accounts.views.Wallet')
     @patch('accounts.views.settings')
@@ -229,3 +233,4 @@ class YandexMoneyTestCase(TestCase):
         settings.YANDEX_MONEY_REDIRECT_URL = 'URL'
         resp = self.client.get('/accounts/yandex_money_redir?code=123')
         self.assertEqual(Profile.objects.get(user=self.admin).money, 0)
+        self.assertTrue(self.client.session['profile_message'][1])
