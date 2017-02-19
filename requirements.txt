@@ -8,3 +8,4 @@ django-taggit == 0.16.2
 django-autocomplete-light == 2.2.5
 sorl-thumbnail == 12.3
 django-reversion == 1.9.3
+yandex-money-sdk == 0.1.3

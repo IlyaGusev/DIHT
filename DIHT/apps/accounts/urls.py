@@ -12,7 +12,8 @@ from django.views.generic import TemplateView
 from accounts.views import SignUpView, ResetPasswordView, ProfileView, ProfileUpdateView, \
     CheckUniqueView, AvatarUpdateView, SignUpOkView, FindView, AddMoneyView, RemoveMoneyView, \
     ActivateView, MoneyHistoryView, UserMoneyHistoryView, AddPaymentsView, RemovePaymentsView, ChangePasswordView, \
-    ApproveMoneyView, KeysView, KeyCreateView, KeyUpdateView, KeyDeleteView, ChargeView, ChangePassIdView
+    ApproveMoneyView, KeysView, KeyCreateView, KeyUpdateView, KeyDeleteView, ChargeView, ChangePassIdView, \
+    YandexMoneyFormView, YandexMoneyOauthView, YandexMoneyRedirView
 
 urlpatterns = [
     url(r'^signup/$', SignUpView.as_view(), name='signup'),
@@ -48,4 +49,8 @@ urlpatterns = [
     url(r'^avatar/change/(?P<pk>[0-9]*)/$', AvatarUpdateView.as_view(), name='change_avatar'),
 
     url('', include('social.apps.django_app.urls', namespace='social')),
+
+    url(r'^yandex_money_form$', YandexMoneyFormView.as_view(), name='yandex_money_form'),
+    url(r'^yandex_money_oauth$', YandexMoneyOauthView.as_view(), name='yandex_money_oauth'),
+    url(r'^yandex_money_redir$', YandexMoneyRedirView.as_view(), name='yandex_money_redir'),
 ]

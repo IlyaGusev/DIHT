@@ -26,12 +26,15 @@ from django.views.generic.detail import SingleObjectMixin
 from django.http import HttpResponseRedirect
 from braces.views import LoginRequiredMixin, UserPassesTestMixin, GroupRequiredMixin
 from django.utils import timezone
+from django.shortcuts import redirect
+from django.conf import settings
 from itertools import chain
 from accounts.forms import ProfileForm, SignUpForm, ResetPasswordForm, FindForm, \
-    MoneyForm, ChangePasswordForm, KeyCreateForm, KeyUpdateForm, ChangePassIdForm
+    MoneyForm, ChangePasswordForm, KeyCreateForm, KeyUpdateForm, ChangePassIdForm, YandexMoneyForm
 from accounts.models import Profile, Avatar, MoneyOperation, PaymentsOperation, Key, KeyTransfer
 from washing.models import BlackListRecord
 from activism.views import get_level
+from yandex_money.api import Wallet, ExternalPayment
 
 import logging
 logger = logging.getLogger('DIHT.custom')
@@ -183,6 +186,11 @@ class ProfileView(LoginRequiredMixin, DetailView):
                                               .values_list('hours', flat=True)) // 10)
         context['level'] = get_level(user)
         context['plan_room'], context['neighbours'] = get_plan_room(user)
+        if 'profile_message' in self.request.session:
+            context['profile_message'], context['profile_message_is_error'] = self.request.session['profile_message']
+            del self.request.session['profile_message']
+        else:
+            context['profile_message'], context['profile_message_is_error'] = '', False
         return context
 
 
@@ -508,7 +516,7 @@ class ChangePassIdView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin,
     Изменение ID пропуска пользователя.
     """
     model = Profile
-    form_class = ChangePassIdForm    
+    form_class = ChangePassIdForm
     template_name = 'accounts/change_pass_id.html'
     success_url = reverse_lazy("main:home")
     raise_exception = True
@@ -521,3 +529,70 @@ class ChangePassIdView(LoginRequiredMixin, UserPassesTestMixin, JsonErrorsMixin,
         return JsonResponse({'url': reverse('accounts:profile',
                                             kwargs={'pk': self.get_object().pk})},
                             status=200)
+
+def redirect_to_profile(request, message=None, is_error=True):
+    if message:
+        request.session['profile_message'] = (message, is_error)
+    elif 'profile_error' in request.session:
+        del request.session['profile_message']
+    return redirect(reverse_lazy('accounts:profile', args=(request.user.profile.pk,)))
+
+class YandexMoneyFormView(LoginRequiredMixin, FormView):
+    """
+    Форма оплаты через Яндекс в профиле
+    """
+    form_class = YandexMoneyForm
+    template_name = 'accounts/yandex_money.html'
+    success_url = reverse_lazy('accounts:yandex_money_oauth')
+
+    def form_valid(self, form):
+        self.request.session['yandex_money_amount'] = int(form['amount'].value())
+        return super(YandexMoneyFormView, self).form_valid(form)
+
+class YandexMoneyOauthView(LoginRequiredMixin, View):
+    """
+    OAuth-аутентификация для Яндекс.Денег
+    """
+    def get(self, request):
+        amount = request.session.get('yandex_money_amount')
+        if not amount:
+            return redirect_to_profile(request, 'Не указана сумма. Попробуйте еще раз.')
+        scope = ['account-info payment.to-account("{}").limit(,{})'.format(settings.YANDEX_MONEY_WALLET, amount)]
+        auth_url = Wallet.build_obtain_token_url(settings.YANDEX_MONEY_APP_ID,
+                                                 settings.YANDEX_MONEY_REDIRECT_URL, scope)
+        auth_url += '&response_type=code'  # без этого Яндекс иногда возвращает invalid_request
+        return redirect(auth_url)
+
+class YandexMoneyRedirView(LoginRequiredMixin, View):
+    """
+    Непосредственно оплата
+    """
+    def get(self, request):
+        amount = request.session.get('yandex_money_amount')
+        if not amount:
+            return redirect_to_profile(request, 'Не указана сумма. Попробуйте еще раз.')
+        if 'code' not in request.GET:
+            return redirect_to_profile(request, 'Что-то пошло не так. Попробуйте еще раз.')
+        del request.session['yandex_money_amount']  # на всякий случай
+        code = request.GET['code']
+        access_token = Wallet.get_access_token(settings.YANDEX_MONEY_APP_ID, code, settings.YANDEX_MONEY_REDIRECT_URL)
+        access_token = access_token['access_token']
+        wallet = Wallet(access_token)
+
+        request_options = {
+            "pattern_id": "p2p",
+            "to": settings.YANDEX_MONEY_WALLET,
+            "amount": str(amount),
+        }
+
+        request_result = wallet.request_payment(options=request_options)
+        process_payment = wallet.process_payment({"request_id": request_result['request_id'],})
+        if process_payment['status'] == 'success':
+            MoneyOperation.objects.create(user=request.user,
+                                    amount=amount,
+                                    timestamp=timezone.now(),
+                                    description="Пополнение через Яндекс",
+                                    moderator=None)
+            return redirect_to_profile(request, 'Ваш счет пополнен на {} рублей.'.format(amount), False)
+        else:
+            return redirect_to_profile(request, 'Что-то пошло не так. Попробуйте еще раз.')
