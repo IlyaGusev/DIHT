@@ -9,7 +9,7 @@
 """
 import re
 import autocomplete_light
-from django.forms import ValidationError, ModelForm, Form, CharField, PasswordInput, TextInput, TypedChoiceField, IntegerField
+from django.forms import ValidationError, ModelForm, Form, CharField, PasswordInput, TextInput, TypedChoiceField, IntegerField, NumberInput
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -249,3 +249,9 @@ class ChangePassIdForm(ModelForm):
     def clean_pass_id(self):
         data = self.cleaned_data['pass_id']
         return data.lower().replace(' ', '')
+
+class YandexMoneyForm(Form):
+    """
+    Форма оплаты через Яндекс.
+    """
+    amount = IntegerField(min_value=1, max_value=1000, required=True, label='Сумма', widget=NumberInput(attrs={'value': _('100')}))

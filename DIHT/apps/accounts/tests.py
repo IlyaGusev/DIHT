@@ -7,6 +7,7 @@
     Описание:
         Тесты модуля accounts. Их недостаточно, нужно больше.
 """
+from unittest.mock import Mock, patch
 from django.test import TestCase, Client
 from django.contrib.auth.models import User, Permission
 from django.utils import timezone
@@ -162,3 +163,74 @@ class LoginTestCase(TestCase):
         self.assertFormError(response, 'form', None,
                              ['Пожалуйста, введите правильные имя пользователя и пароль. '
                               'Оба поля могут быть чувствительны к регистру.'])
+
+class YandexMoneyTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.admin = User.objects.create_superuser(username='admin', password='admin', email='admin@l.ru')
+        Profile.objects.create(user=self.admin)
+        self.client.login(username='admin', password='admin')
+
+    @patch('accounts.views.Wallet')
+    @patch('accounts.views.settings')
+    def test_oauth(self, settings, wallet):
+        wallet.build_obtain_token_url = Mock(return_value='/?a')
+        resp = self.client.get('/accounts/yandex_money_oauth')
+        self.assertRedirects(resp, '/accounts/profile/1/', fetch_redirect_response=False)
+        self.assertTrue(self.client.session['profile_message'][1])
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42'})
+        self.assertEqual(self.client.session['yandex_money_amount'], 42)
+        settings.YANDEX_MONEY_APP_ID = 'APP'
+        settings.YANDEX_MONEY_WALLET = 'WAL'
+        settings.YANDEX_MONEY_REDIRECT_URL = 'URL'
+        resp = self.client.get('/accounts/yandex_money_oauth')
+        self.assertRedirects(resp, '/?a&response_type=code')
+        wallet.build_obtain_token_url.assert_called_once_with('APP', 'URL', ['account-info payment.to-account("WAL").limit(,42)'])
+
+    @patch('accounts.views.Wallet')
+    @patch('accounts.views.settings')
+    def test_redir_invalid(self, settings, wallet):
+        resp = self.client.get('/accounts/yandex_money_redir?code=123')
+        self.assertRedirects(resp, '/accounts/profile/1/', fetch_redirect_response=False)
+        self.assertTrue(self.client.session['profile_message'][1])
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42'})
+        resp = self.client.get('/accounts/yandex_money_redir?')
+        self.assertRedirects(resp, '/accounts/profile/1/', fetch_redirect_response=False)
+        self.assertTrue(self.client.session['profile_message'][1])
+
+    @patch('accounts.views.Wallet')
+    @patch('accounts.views.settings')
+    def test_redir_good(self, settings, wallet):
+        wallet.get_access_token = Mock(return_value={'access_token': 'TOKEN'})
+        wallet.return_value.request_payment = Mock(return_value={'request_id': 'REQID'})
+        wallet.return_value.process_payment = Mock(return_value={'status': 'success'})
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42'})
+        settings.YANDEX_MONEY_APP_ID = 'APP'
+        settings.YANDEX_MONEY_WALLET = 'WAL'
+        settings.YANDEX_MONEY_REDIRECT_URL = 'URL'
+        resp = self.client.get('/accounts/yandex_money_redir?code=123')
+        self.assertIsNone(self.client.session.get('yandex_money_amount'))
+        wallet.assert_called_once_with('TOKEN')
+        wallet.return_value.request_payment.assert_called_once_with(options={
+            "pattern_id": "p2p",
+            "to": 'WAL',
+            "amount": '42',
+        })
+        wallet.get_access_token.assert_called_once_with('APP', '123', 'URL')
+        wallet.return_value.process_payment.assert_called_once_with({"request_id": 'REQID'})
+        self.assertEqual(Profile.objects.get(user=self.admin).money, 42)
+        self.assertFalse(self.client.session['profile_message'][1])
+
+    @patch('accounts.views.Wallet')
+    @patch('accounts.views.settings')
+    def test_redir_bad(self, settings, wallet):
+        wallet.get_access_token = Mock(return_value={'access_token': 'TOKEN'})
+        wallet.return_value.request_payment = Mock(return_value={'request_id': 'REQID'})
+        wallet.return_value.process_payment = Mock(return_value={'status': 'error'})
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42'})
+        settings.YANDEX_MONEY_APP_ID = 'APP'
+        settings.YANDEX_MONEY_WALLET = 'WAL'
+        settings.YANDEX_MONEY_REDIRECT_URL = 'URL'
+        resp = self.client.get('/accounts/yandex_money_redir?code=123')
+        self.assertEqual(Profile.objects.get(user=self.admin).money, 0)
+        self.assertTrue(self.client.session['profile_message'][1])
