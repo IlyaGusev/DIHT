@@ -109,6 +109,12 @@ class SignUpForm(ModelForm):
             raise ValidationError(_('Этот e-mail уже используется.'))
         return self.cleaned_data['email']
 
+    def clean_group_number(self):
+        group = self.cleaned_data['group_number']
+        if group and (len(group) > 4 or not group.isdigit()):
+            raise ValidationError(_('Неверный номер группы.'))
+        return group
+
 
 class ProfileForm(ModelForm):
     """
@@ -145,6 +151,12 @@ class ProfileForm(ModelForm):
             raise ValidationError(
                 _('Неверный формат отчества: первыя буква должна быть заглавной, допустимы только русские символы.'))
         return self.cleaned_data['middle_name']
+
+    def clean_group_number(self):
+        group = self.cleaned_data['group_number']
+        if group and (len(group) > 4 or not group.isdigit()):
+            raise ValidationError(_('Неверный номер группы.'))
+        return group
 
 
 class ResetPasswordForm(Form):
