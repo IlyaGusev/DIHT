@@ -12,6 +12,7 @@
 """
 import os
 import json
+import urllib.parse
 from DIHT.settings import BASE_DIR
 from django.core.files import File
 from django.views.generic.edit import FormView, UpdateView, DeleteView
@@ -543,25 +544,57 @@ class YandexMoneyFormView(LoginRequiredMixin, FormView):
     """
     form_class = YandexMoneyForm
     template_name = 'accounts/yandex_money.html'
-    success_url = reverse_lazy('accounts:yandex_money_oauth')
 
     def form_valid(self, form):
-        self.request.session['yandex_money_amount'] = int(form['amount'].value())
-        return super(YandexMoneyFormView, self).form_valid(form)
+        amount = int(form['amount'].value())
+        self.request.session['yandex_money_amount'] = amount
+        if '_yandex' in self.request.POST:
+            scope = ['account-info payment.to-account("{}").limit(,{})'.format(settings.YANDEX_MONEY_WALLET, amount)]
+            auth_url = Wallet.build_obtain_token_url(settings.YANDEX_MONEY_APP_ID,
+                                                    settings.YANDEX_MONEY_REDIRECT_URL, scope)
+            auth_url += '&response_type=code'  # без этого Яндекс иногда возвращает invalid_request
+            return redirect(auth_url)
+        else:
+            payment = ExternalPayment(settings.YANDEX_MONEY_INSTANCE_ID)
+            request_options = {
+                "pattern_id": "p2p",
+                "to": settings.YANDEX_MONEY_WALLET,
+                "amount": str(amount),
+            }
+            response = payment.request(request_options)
+            if 'request_id' not in response:
+                return redirect_to_profile(self.request, 'Что-то пошло не так. Попробуйте еще раз.')
+            self.request.session['yandex_process_options'] = {
+                'request_id': response['request_id'],
+                'ext_auth_success_uri': settings.CARD_REDIRECT_URL,
+                'ext_auth_fail_uri': settings.CARD_REDIRECT_URL,
+            }
+            return redirect(settings.CARD_REDIRECT_URL)
 
-class YandexMoneyOauthView(LoginRequiredMixin, View):
+class YandexMoneyCardRedirView(LoginRequiredMixin, View):
     """
-    OAuth-аутентификация для Яндекс.Денег
+    Оплата с карты
     """
     def get(self, request):
+        process_options = request.session.get('yandex_process_options')
         amount = request.session.get('yandex_money_amount')
-        if not amount:
-            return redirect_to_profile(request, 'Не указана сумма. Попробуйте еще раз.')
-        scope = ['account-info payment.to-account("{}").limit(,{})'.format(settings.YANDEX_MONEY_WALLET, amount)]
-        auth_url = Wallet.build_obtain_token_url(settings.YANDEX_MONEY_APP_ID,
-                                                 settings.YANDEX_MONEY_REDIRECT_URL, scope)
-        auth_url += '&response_type=code'  # без этого Яндекс иногда возвращает invalid_request
-        return redirect(auth_url)
+        if not process_options or not amount:
+            return redirect_to_profile(request, 'Что-то пошло не так. Попробуйте еще раз.')
+        payment = ExternalPayment(settings.YANDEX_MONEY_INSTANCE_ID)
+        response = payment.process(process_options)
+        if response.get('status') == 'ext_auth_required':
+            url = response['acs_uri'] + '?' + urllib.parse.urlencode(response['acs_params'])
+            return redirect(url)
+        elif response.get('status') == 'success':
+            del request.session['yandex_process_options']
+            del request.session['yandex_money_amount']
+            MoneyOperation.objects.create(user=request.user,
+                                    amount=amount,
+                                    timestamp=timezone.now(),
+                                    description="Пополнение с карты",
+                                    moderator=None)
+            return redirect_to_profile(request, 'Ваш счет пополнен на {} рублей.'.format(amount), False)
+        return redirect_to_profile(request, 'Что-то пошло не так. Попробуйте еще раз.')
 
 class YandexMoneyRedirView(LoginRequiredMixin, View):
     """

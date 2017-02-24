@@ -175,16 +175,12 @@ class YandexMoneyTestCase(TestCase):
     @patch('accounts.views.settings')
     def test_oauth(self, settings, wallet):
         wallet.build_obtain_token_url = Mock(return_value='/?a')
-        resp = self.client.get('/accounts/yandex_money_oauth')
-        self.assertRedirects(resp, '/accounts/profile/1/', fetch_redirect_response=False)
-        self.assertTrue(self.client.session['profile_message'][1])
-        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42'})
-        self.assertEqual(self.client.session['yandex_money_amount'], 42)
         settings.YANDEX_MONEY_APP_ID = 'APP'
         settings.YANDEX_MONEY_WALLET = 'WAL'
         settings.YANDEX_MONEY_REDIRECT_URL = 'URL'
-        resp = self.client.get('/accounts/yandex_money_oauth')
-        self.assertRedirects(resp, '/?a&response_type=code')
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42', '_yandex': ''})
+        self.assertEqual(self.client.session['yandex_money_amount'], 42)
+        self.assertRedirects(resp, '/?a&response_type=code', fetch_redirect_response=False)
         wallet.build_obtain_token_url.assert_called_once_with('APP', 'URL', ['account-info payment.to-account("WAL").limit(,42)'])
 
     @patch('accounts.views.Wallet')
@@ -234,3 +230,81 @@ class YandexMoneyTestCase(TestCase):
         resp = self.client.get('/accounts/yandex_money_redir?code=123')
         self.assertEqual(Profile.objects.get(user=self.admin).money, 0)
         self.assertTrue(self.client.session['profile_message'][1])
+
+class YandexMoneyCardTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.admin = User.objects.create_superuser(username='admin', password='admin', email='admin@l.ru')
+        Profile.objects.create(user=self.admin)
+        self.client.login(username='admin', password='admin')
+
+    @patch('accounts.views.ExternalPayment')
+    @patch('accounts.views.settings')
+    def test_form(self, settings, payment):
+        payment.return_value.request = Mock(return_value = {'request_id': 'reqid'})
+        settings.YANDEX_MONEY_INSTANCE_ID = 'INS'
+        settings.YANDEX_MONEY_WALLET = 'WAL'
+        settings.CARD_REDIRECT_URL = '/CRD'
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42', '_card': ''})
+        self.assertEqual(self.client.session['yandex_money_amount'], 42)
+        payment.assert_called_once_with('INS')
+        payment.return_value.request.assert_called_once_with({"pattern_id": "p2p", "to": 'WAL', "amount": '42'})
+        self.assertEqual(self.client.session['yandex_process_options'], {
+                'request_id': 'reqid',
+                'ext_auth_success_uri': '/CRD',
+                'ext_auth_fail_uri': '/CRD',
+        })
+        self.assertRedirects(resp, '/CRD', fetch_redirect_response=False)
+
+    @patch('accounts.views.ExternalPayment')
+    @patch('accounts.views.settings')
+    def test_form_bad_request(self, settings, payment):
+        payment.return_value.request = Mock(return_value = {'status': 'error'})
+        settings.YANDEX_MONEY_INSTANCE_ID = 'INS'
+        settings.YANDEX_MONEY_WALLET = 'WAL'
+        settings.CARD_REDIRECT_URL = '/CRD'
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42', '_card': ''})
+        self.assertRedirects(resp, '/accounts/profile/1/', fetch_redirect_response=False)
+
+    @patch('accounts.views.ExternalPayment')
+    @patch('accounts.views.settings')
+    def test_redir_good(self, settings, payment):
+        payment.return_value.process = Mock(return_value = {'status': 'success'})
+        payment.return_value.request = Mock(return_value = {'request_id': 'reqid'})
+        settings.YANDEX_MONEY_INSTANCE_ID = 'INS'
+        settings.YANDEX_MONEY_WALLET = 'WAL'
+        settings.CARD_REDIRECT_URL = '/CRD'
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42', '_card': ''})
+        resp = self.client.get('/accounts/yandex_money_card')
+        payment.return_value.process.assert_called_once_with({
+                'request_id': 'reqid',
+                'ext_auth_success_uri': '/CRD',
+                'ext_auth_fail_uri': '/CRD',
+        })
+        self.assertEqual(Profile.objects.get(user=self.admin).money, 42)
+        self.assertFalse(self.client.session['profile_message'][1])
+
+    @patch('accounts.views.ExternalPayment')
+    @patch('accounts.views.settings')
+    def test_redir_bad(self, settings, payment):
+        payment.return_value.process = Mock(return_value = {'status': 'noway'})
+        payment.return_value.request = Mock(return_value = {'request_id': 'reqid'})
+        settings.YANDEX_MONEY_INSTANCE_ID = 'INS'
+        settings.YANDEX_MONEY_WALLET = 'WAL'
+        settings.CARD_REDIRECT_URL = '/CRD'
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42', '_card': ''})
+        resp = self.client.get('/accounts/yandex_money_card')
+        self.assertEqual(Profile.objects.get(user=self.admin).money, 0)
+
+    @patch('accounts.views.ExternalPayment')
+    @patch('accounts.views.settings')
+    def test_redir_wait(self, settings, payment):
+        payment.return_value.process = Mock(return_value = {'status': 'ext_auth_required', 'acs_uri': 'http://uri', 'acs_params': {'a': 1}})
+        payment.return_value.request = Mock(return_value = {'request_id': 'reqid'})
+        settings.YANDEX_MONEY_INSTANCE_ID = 'INS'
+        settings.YANDEX_MONEY_WALLET = 'WAL'
+        settings.CARD_REDIRECT_URL = '/CRD'
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42', '_card': ''})
+        resp = self.client.get('/accounts/yandex_money_card')
+        self.assertRedirects(resp, 'http://uri?a=1', fetch_redirect_response=False)
+        self.assertEqual(Profile.objects.get(user=self.admin).money, 0)
