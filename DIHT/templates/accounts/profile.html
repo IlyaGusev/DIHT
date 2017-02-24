@@ -280,14 +280,16 @@
                 <h5>Очки роста:</h5>
                 <table class = "table usual-letters">
                 {% for operation in operations %}
-                    <tr>
-                        <td>
-                            {{operation.description}}
-                        </td>
-                        <td align="right">{{operation.amount|stringformat:'.0f' }}
-                            <span style="font-size:10px;">ОР </span>
-                        </td>
-                    </tr>
+                    {% if not operation.for_hours_of_work %}
+                        <tr>
+                            <td>
+                                {{operation.description}}
+                            </td>
+                            <td align="right">{{operation.amount|stringformat:'.0f' }}
+                                <span style="font-size:10px;">ОР </span>
+                            </td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
                 {% if op_for_hours != 0 %}
                     <tr>
