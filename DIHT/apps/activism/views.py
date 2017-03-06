@@ -30,6 +30,7 @@ from activism.forms import TaskForm, EventForm, TaskCreateForm, PointForm, TaskC
 from activism.utils import global_checks, get_level, get_level_by_num
 from accounts.models import PaymentsOperation
 from django.db.models import Sum
+import math
 import csv
 
 """
@@ -646,9 +647,10 @@ class ActivistsView(LoginRequiredMixin, GroupRequiredMixin, DefaultContextMixin,
                                     'level': level['sign']})
                 else:
                     records.append({'user': user,
-                                    'sum_all': user.profile.experience,
+                                    'sum_all': math.floor(user.profile.experience),
                                     'level': level['sign']})
 
+        context['records'] = list(sorted(records, key=lambda record: (-record['sum_all'], record['user'].last_name)))
         context['records'] = list(sorted(records, key=lambda record: (-record['sum_all'], record['user'].last_name)))
         return context
 
