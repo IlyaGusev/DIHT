@@ -143,6 +143,14 @@ class RegisterTestCase(TestCase):
             response = self.client.post('/accounts/signup/', user)
             self.assertFormError(response, 'form', 'mobile', ['Некорректный номер телефона.'])
 
+    def test_register_group(self):
+        groups = ['a', '12345']
+        for group in groups:
+            user = self.user_ok
+            user['group_number'] = group
+            response = self.client.post('/accounts/signup/', user)
+            self.assertFormError(response, 'form', 'group_number', ['Неверный номер группы.'])
+
 
 class LoginTestCase(TestCase):
     def setUp(self):
