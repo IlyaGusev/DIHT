@@ -13,7 +13,7 @@ from accounts.views import SignUpView, ResetPasswordView, ProfileView, ProfileUp
     CheckUniqueView, AvatarUpdateView, SignUpOkView, FindView, AddMoneyView, RemoveMoneyView, \
     ActivateView, MoneyHistoryView, UserMoneyHistoryView, AddPaymentsView, RemovePaymentsView, ChangePasswordView, \
     ApproveMoneyView, KeysView, KeyCreateView, KeyUpdateView, KeyDeleteView, ChargeView, ChangePassIdView, \
-    YandexMoneyFormView, YandexMoneyOauthView, YandexMoneyRedirView
+    YandexMoneyFormView, YandexMoneyCardRedirView, YandexMoneyRedirView
 
 urlpatterns = [
     url(r'^signup/$', SignUpView.as_view(), name='signup'),
@@ -51,6 +51,6 @@ urlpatterns = [
     url('', include('social.apps.django_app.urls', namespace='social')),
 
     url(r'^yandex_money_form$', YandexMoneyFormView.as_view(), name='yandex_money_form'),
-    url(r'^yandex_money_oauth$', YandexMoneyOauthView.as_view(), name='yandex_money_oauth'),
+    url(r'^yandex_money_card$', YandexMoneyCardRedirView.as_view(), name='yandex_money_card'),
     url(r'^yandex_money_redir$', YandexMoneyRedirView.as_view(), name='yandex_money_redir'),
 ]
