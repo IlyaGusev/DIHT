@@ -13,6 +13,7 @@
 import os
 import json
 import urllib.parse
+import time
 from DIHT.settings import BASE_DIR
 from django.core.files import File
 from django.views.generic.edit import FormView, UpdateView, DeleteView
@@ -594,6 +595,9 @@ class YandexMoneyCardRedirView(LoginRequiredMixin, View):
                                     description="Пополнение с карты",
                                     moderator=None)
             return redirect_to_profile(request, 'Ваш счет пополнен на {} рублей.'.format(amount), False)
+        elif response.get('status') == 'in_progress':
+            time.sleep(3)
+            return self.get(request)
         return redirect_to_profile(request, 'Что-то пошло не так. Попробуйте еще раз.')
 
 class YandexMoneyRedirView(LoginRequiredMixin, View):
