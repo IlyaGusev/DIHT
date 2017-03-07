@@ -34,7 +34,7 @@ class IndexView(TemplateView):
         activist = False
         OPcount = 0
         if not self.request.user.is_anonymous():
-            for x in PointOperation.objects.filter(user=self.request.user):
+            for x in PointOperation.objects.filter(user=self.request.user.id):
                 OPcount += x.amount
         if self.request.POST:
             if self.request.POST.get('activist') and OPcount >= 16:
@@ -195,7 +195,7 @@ class IndexView(TemplateView):
                 record_obj.delete()
             return IndexView.get_context_data(self, **kwargs)
         if 'check_op' in self.request.POST and self.request.POST.get('check_op'):
-            for x in PointOperation.objects.filter(user=self.request.user):
+            for x in PointOperation.objects.filter(user=self.request.user.id):
                 op += x.amount
             if op < 16:
                 return HttpResponse("false")
