@@ -46,9 +46,9 @@ class IndexView(TemplateView):
         if Group.objects.filter(name='Ответственные за стиралку').exists():
             context['charge_washing'] = Group.objects.get(name='Ответственные за стиралку').user_set.all()
         if not activist:
-            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=False)
+            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=False).order_by('name')
         else:
-            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=True)
+            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=True).order_by('name')
         #machines = WashingMachine.objects.filter(is_active=True)
         current = timezone.now()
 
