@@ -37,7 +37,7 @@ class IndexView(TemplateView):
             for x in PointOperation.objects.filter(user=self.request.user.id):
                 OPcount += x.amount
         if self.request.POST:
-            if self.request.POST.get('activist') and OPcount >= 16:
+            if self.request.POST.get('activist') and (OPcount >= 16 or self.request.user.groups.filter(name__in=["Руководящая группа"]).exists()):
                 activist = True
             elif self.request.POST.get('nonactivist'):
                 activist = False
@@ -197,7 +197,7 @@ class IndexView(TemplateView):
         if 'check_op' in self.request.POST and self.request.POST.get('check_op'):
             for x in PointOperation.objects.filter(user=self.request.user.id):
                 op += x.amount
-            if op < 16:
+            if op < 16 and not request.user.groups.filter(name__in=["Руководящая группа"]).exists():
                 return HttpResponse("false")
         if not ('check_op' in self.request.POST and self.request.POST.get('check_op') == 'continue'):
             kwargs['op'] = op
