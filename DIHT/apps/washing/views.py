@@ -226,6 +226,8 @@ class CreateRecordView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     @method_decorator(transaction.atomic)
     def post(self, request, *args, **kwargs):
         record = parse_record(request)
+        if WashingMachineRecord.objects.filter(machine=record['machine']).filter(datetime_from=record['datetime_from']).exists():
+            return JsonResponse({"no_money": "Эта стиралка уже занята"}, status=400)
         price = record['machine'].parameters.all().filter(date__lte=record['datetime_from'].date()).order_by('-date')[0].price
         if request.user.profile.money >= price:
             operation = MoneyOperation.objects.create(user=request.user,
