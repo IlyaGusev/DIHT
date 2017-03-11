@@ -89,8 +89,9 @@ $(document).ready(function(){
             document.getElementById("activist_tabs").style.display="inline-block";
         });
     $('input[name="cancel_activ"]').click(function () {
-        var user_id = this.id.substring(13, 14);
+        //var user_id = this.id.substr(13, 14);
         var id = this.id.split(" ");
+        var user_id = id[0].substr(13, 10);
         $.ajax({
             type: "POST",
             url: "/washing/",
