@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import Group, User
 from django.utils.decorators import method_decorator
 from django.db import transaction
+from django.db.models import Sum
 from django.utils import timezone
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
 from django.conf import settings
@@ -30,153 +31,108 @@ week = ['Понедельник',
 class IndexView(TemplateView):
     template_name = 'washing/washing.html'
 
+    def create_intervals(self, machine, machine_params, day, times):
+        start = machine_params.start_hour * 60 + machine_params.start_minute
+        delta = machine_params.delta_hour * 60 + machine_params.delta_minute
+        result = OrderedDict()
+        for j in range(times):
+            start_hour = start // 60
+            start_minute = start - start_hour * 60
+            end_hour = (start + delta) // 60 % 24
+            end_minute = (start + delta - end_hour * 60) % 60
+            if start_hour >= 24:
+                day += dt.timedelta(days=start_hour // 24)
+                start_hour %= 24
+            d = dt.datetime.combine(day, dt.time(start_hour, start_minute, 0))
+
+            status = 'OK'
+            user = self.request.user
+            if machine.regular_non_working_days.filter(day_of_week=day.weekday()).exists():
+                status = 'DISABLE'
+            if machine.non_working_days.filter(date=day).exists():
+                status = 'DISABLE'
+            if machine.records.filter(datetime_from=d).exists():
+                if machine.records.get(datetime_from=d).user == self.request.user:
+                    status = "YOURS"
+                else:
+                    status = "BUSY"
+                user = machine.records.get(datetime_from=d).user
+
+            interval = (dt.time(start_hour, start_minute, 0),
+                        dt.time(end_hour, end_minute, 0))
+            result.setdefault(interval, OrderedDict())[machine] = [status, machine_params.price, user, True]
+            start += delta
+        return result
+
     def get_context_data(self, **kwargs):
-        activist = False
-        OPcount = 0
-        if not self.request.user.is_anonymous():
-            for x in PointOperation.objects.filter(user=self.request.user.id):
-                OPcount += x.amount
+        is_activist = False
+        if self.request.user.is_anonymous():
+            OPcount = 0
+        else:
+            OPcount = self.request.user.pointoperations.aggregate(Sum('amount'))['amount__sum']
         if self.request.POST:
             if self.request.POST.get('activist') and (OPcount >= 16 or self.request.user.groups.filter(name__in=["Руководящая группа"]).exists()):
-                activist = True
-            elif self.request.POST.get('nonactivist'):
-                activist = False
+                is_activist = True
 
         context = super(IndexView, self).get_context_data(**kwargs)
         if Group.objects.filter(name='Ответственные за стиралку').exists():
             context['charge_washing'] = Group.objects.get(name='Ответственные за стиралку').user_set.all()
-        if not activist:
-            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=False).order_by('name')
-        else:
-            machines = WashingMachine.objects.filter(is_active=True, parameters__activist=True).order_by('name')
-        #machines = WashingMachine.objects.filter(is_active=True)
-        current = timezone.now()
+        machines = WashingMachine.objects.filter(is_active=True, parameters__activist=is_activist).order_by('name')
 
         schedule = OrderedDict()
-
-        day = current.date()
+        day = timezone.now().date()
         context['current'] = day
 
-        if activist:
-            working = True
-            can_show = True
+        if is_activist:
             machine = machines[0]
-            machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
-            while day.weekday() != int(machine_params[0].activist_days):
-                if day.weekday() == (int(machine_params[0].activist_days) + 1) % 7 \
-                        and (machine_params[0].start_hour + machine_params[0].activist_hours) % 24 >= dt.datetime.now().hour\
-                        and machine_params[0].start_hour + machine_params[0].activist_hours >= 24:
+            machine_params = machine.parameters.filter(date__lte=day).order_by('-date').first()
+            while day.weekday() != int(machine_params.activist_days):
+                if day.weekday() == (int(machine_params.activist_days) + 1) % 7 \
+                        and (machine_params.start_hour + machine_params.activist_hours) % 24 >= dt.datetime.now().hour\
+                        and machine_params.start_hour + machine_params.activist_hours >= 24:
                     day -= dt.timedelta(days=1)
                     break
                 day += dt.timedelta(days=1)
-            end_work_day = day + dt.timedelta(hours=machine_params[0].activist_hours + machine_params[0].start_hour,
-                                              minutes=machine_params[0].activist_minutes+machine_params[0].start_minute)
-            end_work_hour = (machine_params[0].start_hour + machine_params[0].activist_hours) % 24
-            end_work_minute = (machine_params[0].start_minute + machine_params[0].activist_minutes) % 60
-            if end_work_minute < machine_params[0].start_minute:
+            end_work_day = day + dt.timedelta(hours=machine_params.activist_hours + machine_params.start_hour,
+                                              minutes=machine_params.activist_minutes+machine_params.start_minute)
+            end_work_hour = (machine_params.start_hour + machine_params.activist_hours) % 24
+            end_work_minute = (machine_params.start_minute + machine_params.activist_minutes) % 60
+            if end_work_minute < machine_params.start_minute:
                 end_work_hour += 1
             firstday = day
-            while working:
+            while True:
                 schedule[day] = OrderedDict()
-                if machine_params.exists():
-                    params = machine_params[0]
-
-                    times = (24 * 60 - params.start_minute - params.start_hour * 60) // \
-                            (params.delta_minute + params.delta_hour * 60)
-                    if day == end_work_day:
-                        times = (end_work_hour * 60 + end_work_minute) // \
-                            (params.delta_minute + params.delta_hour * 60)
-                    elif day != firstday:
-                        times = 24 * 60 // (params.delta_minute + params.delta_hour * 60)
-
-                    start = params.start_hour * 60 + params.start_minute
-                    delta = params.delta_hour * 60 + params.delta_minute
-                    if day != firstday:
-                        start = 0
-
-                    for j in range(times):
-                        start_hour = start // 60
-                        start_minute = start - start_hour * 60
-                        end_hour = (start + delta) // 60
-                        end_minute = start + delta - end_hour * 60
-
-                        if end_hour == 24:
-                            end_hour = 23
-                            end_minute = 59
-                        d = dt.datetime.combine(day, dt.time(start_hour, start_minute, 0))
-
-                        status = 'OK'
-                        user = self.request.user
-                        if machine.regular_non_working_days.filter(day_of_week=day.weekday()).exists():
-                            status = 'DISABLE'
-                        if machine.non_working_days.filter(date=day).exists():
-                            status = 'DISABLE'
-                        if machine.records.filter(datetime_from=d).exists():
-                            if machine.records.get(datetime_from=d).user == self.request.user:
-                                status = "YOURS"
-                            else:
-                                status = "BUSY"
-                            user = machine.records.get(datetime_from=d).user
-
-                        interval = (dt.time(start_hour, start_minute, 0),
-                                    dt.time(end_hour, end_minute, 0))
-                        if schedule[day].get(interval) is None:
-                            schedule[day][interval] = OrderedDict()
-                        schedule[day][interval][machine] = [status, params.price, user, False]
-                        start += delta
-                if can_show:
-                    for interval in schedule[day].values():
-                        interval[machine][3] = True
                 if day == end_work_day:
-                    working = False
+                    times = (end_work_hour * 60 + end_work_minute) // \
+                        (machine_params.delta_minute + machine_params.delta_hour * 60)
+                elif day == firstday:
+                    times = (24 * 60 - machine_params.start_minute - machine_params.start_hour * 60) // \
+                            (machine_params.delta_minute + machine_params.delta_hour * 60)
+                else:
+                    times = 24 * 60 // (machine_params.delta_minute + machine_params.delta_hour * 60)
+                if day != firstday:
+                    machine_params.start_hour = machine_params.start_minute = 0
+
+                schedule[day] = self.create_intervals(machine, machine_params, day, times)
+                if not schedule[day]:
+                    del schedule[day]
+                if day == end_work_day:
+                    break
                 else:
                     day += dt.timedelta(days=1)
         else:
             for i in range(7):
                 schedule[day] = OrderedDict()
-                can_show = True
                 for machine in machines:
-                    machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
-                    if machine_params.exists():
-                        params = machine_params[0]
+                    machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date').first()
 
-                        times = (24 * 60 - params.start_minute - params.start_hour * 60) // \
-                                (params.delta_minute + params.delta_hour * 60)
+                    times = (24 * 60 - machine_params.start_minute - machine_params.start_hour * 60) // \
+                            (machine_params.delta_minute + machine_params.delta_hour * 60)
 
-                        start = params.start_hour * 60 + params.start_minute
-                        delta = params.delta_hour * 60 + params.delta_minute
-
-                        for j in range(times):
-                            start_hour = start // 60
-                            start_minute = start - start_hour * 60
-                            end_hour = (start + delta) // 60
-                            end_minute = start + delta - end_hour * 60
-                            d = dt.datetime.combine(day, dt.time(start_hour, start_minute, 0))
-
-                            status = 'OK'
-                            user = self.request.user
-                            if machine.regular_non_working_days.filter(day_of_week=day.weekday()).exists():
-                                status = 'DISABLE'
-                            if machine.non_working_days.filter(date=day).exists():
-                                status = 'DISABLE'
-                            if machine.records.filter(datetime_from=d).exists():
-                                if machine.records.get(datetime_from=d).user == self.request.user:
-                                    status = "YOURS"
-                                else:
-                                    status = "BUSY"
-                                user = machine.records.get(datetime_from=d).user
-
-                            interval = (dt.time(start_hour, start_minute, 0),
-                                        dt.time(end_hour, end_minute, 0))
-                            if schedule[day].get(interval) is None:
-                                schedule[day][interval] = OrderedDict()
-                            schedule[day][interval][machine] = [status, params.price, user, False]
-                            start += delta
-                if can_show:
-                    for machine in machines:
-                        for interval in schedule[day].values():
-                            interval[machine][3] = True
-
+                    machine_schedule = self.create_intervals(machine, machine_params, day, times)
+                    schedule.setdefault(day, OrderedDict)
+                    for interval in machine_schedule:
+                        schedule[day].setdefault(interval, OrderedDict()).update(machine_schedule[interval])
                 day += dt.timedelta(days=1)
         context['week'] = week
         context['schedule'] = schedule
