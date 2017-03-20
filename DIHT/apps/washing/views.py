@@ -63,8 +63,12 @@ class IndexView(TemplateView):
             machine = machines[0]
             machine_params = machine.parameters.all().filter(date__lte=day).order_by('-date')
             while day.weekday() != int(machine_params[0].activist_days):
+                if day.weekday() == (int(machine_params[0].activist_days) + 1) % 7 \
+                        and (machine_params[0].start_hour + machine_params[0].activist_hours) % 24 >= dt.datetime.now().hour\
+                        and machine_params[0].start_hour + machine_params[0].activist_hours >= 24:
+                    day -= dt.timedelta(days=1)
+                    break
                 day += dt.timedelta(days=1)
-            #context['current'] = day
             end_work_day = day + dt.timedelta(hours=machine_params[0].activist_hours + machine_params[0].start_hour,
                                               minutes=machine_params[0].activist_minutes+machine_params[0].start_minute)
             end_work_hour = (machine_params[0].start_hour + machine_params[0].activist_hours) % 24
@@ -83,7 +87,7 @@ class IndexView(TemplateView):
                         times = (end_work_hour * 60 + end_work_minute) // \
                             (params.delta_minute + params.delta_hour * 60)
                     elif day != firstday:
-                        times = 24 * 60 // ((params.delta_minute + params.delta_hour * 60))
+                        times = 24 * 60 // (params.delta_minute + params.delta_hour * 60)
 
                     start = params.start_hour * 60 + params.start_minute
                     delta = params.delta_hour * 60 + params.delta_minute
