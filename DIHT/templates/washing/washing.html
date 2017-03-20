@@ -131,7 +131,7 @@
                         {% endif %}
                     {% if machine.parameters.all.0.activist %}
                             <div>{{ interval.0|time:'H:i' }} - {{ interval.1|time:'H:i' }}</div>{% endif %}
-                    {% if user.is_authenticated and user|has_group:"Ответственные за активистов" %}
+                    {% if user.is_authenticated and user|has_group:"Ответственные за активистов" and machine.parameters.all.0.activist %}
                     <input name="cancel_activ" id="cancel_activ_{{ record.2.id }} {{ machine.id }} {{ day|date:'d.m.Y' }} {{ interval.0|time:'H:i' }} {{ interval.1|time:'H:i' }} {{ record.1 }}"
                            class="btn btn-warning" style="width: 80px;" type="button" value="Отмена"/></td>
                         {% endif %}
