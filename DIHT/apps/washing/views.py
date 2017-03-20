@@ -197,7 +197,8 @@ class IndexView(TemplateView):
         if 'check_op' in self.request.POST and self.request.POST.get('check_op'):
             for x in PointOperation.objects.filter(user=self.request.user.id):
                 op += x.amount
-            if op < 16 and not request.user.groups.filter(name__in=["Руководящая группа"]).exists():
+            if (op < 16 or request.user.groups.filter(name__in=["Руководящая группа"])) \
+                    and not request.user.groups.filter(name__in=["Ответственные за активистов"]).exists():
                 return HttpResponse("false")
         if not ('check_op' in self.request.POST and self.request.POST.get('check_op') == 'continue'):
             kwargs['op'] = op
