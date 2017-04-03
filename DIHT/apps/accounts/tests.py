@@ -208,7 +208,7 @@ class YandexMoneyTestCase(TestCase):
         wallet.get_access_token = Mock(return_value={'access_token': 'TOKEN'})
         wallet.return_value.request_payment = Mock(return_value={'request_id': 'REQID'})
         wallet.return_value.process_payment = Mock(return_value={'status': 'success'})
-        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42'})
+        resp = self.client.post('/accounts/yandex_money_form', {'amount': '42', '_yandex': 'true'})
         settings.YANDEX_MONEY_APP_ID = 'APP'
         settings.YANDEX_MONEY_WALLET = 'WAL'
         settings.YANDEX_MONEY_REDIRECT_URL = 'URL'
@@ -254,13 +254,13 @@ class YandexMoneyCardTestCase(TestCase):
         settings.YANDEX_MONEY_WALLET = 'WAL'
         settings.CARD_REDIRECT_URL = '/CRD'
         resp = self.client.post('/accounts/yandex_money_form', {'amount': '42', '_card': ''})
-        self.assertEqual(self.client.session['yandex_money_amount'], 42)
         payment.assert_called_once_with('INS')
         payment.return_value.request.assert_called_once_with({"pattern_id": "p2p", "to": 'WAL', "amount": '42'})
         self.assertEqual(self.client.session['yandex_process_options'], {
                 'request_id': 'reqid',
                 'ext_auth_success_uri': '/CRD',
                 'ext_auth_fail_uri': '/CRD',
+                'amount': 42
         })
         self.assertRedirects(resp, '/CRD', fetch_redirect_response=False)
 

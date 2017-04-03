@@ -548,12 +548,12 @@ class YandexMoneyFormView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         amount = int(form['amount'].value())
-        self.request.session['yandex_money_amount'] = amount
         if '_yandex' in self.request.POST:
             scope = ['account-info payment.to-account("{}").limit(,{})'.format(settings.YANDEX_MONEY_WALLET, amount)]
             auth_url = Wallet.build_obtain_token_url(settings.YANDEX_MONEY_APP_ID,
                                                     settings.YANDEX_MONEY_REDIRECT_URL, scope)
             auth_url += '&response_type=code'  # без этого Яндекс иногда возвращает invalid_request
+            self.request.session['yandex_money_amount'] = amount
             return redirect(auth_url)
         else:
             payment = ExternalPayment(settings.YANDEX_MONEY_INSTANCE_ID)
@@ -569,6 +569,7 @@ class YandexMoneyFormView(LoginRequiredMixin, FormView):
                 'request_id': response['request_id'],
                 'ext_auth_success_uri': settings.CARD_REDIRECT_URL,
                 'ext_auth_fail_uri': settings.CARD_REDIRECT_URL,
+                'amount': amount,
             }
             return redirect(settings.CARD_REDIRECT_URL)
 
@@ -578,9 +579,10 @@ class YandexMoneyCardRedirView(LoginRequiredMixin, View):
     """
     def get(self, request):
         process_options = request.session.get('yandex_process_options')
-        amount = request.session.get('yandex_money_amount')
-        if not process_options or not amount:
+        if not process_options:
             return redirect_to_profile(request, 'Что-то пошло не так. Попробуйте еще раз.')
+        amount = process_options['amount']
+        del process_options['amount']
         payment = ExternalPayment(settings.YANDEX_MONEY_INSTANCE_ID)
         response = payment.process(process_options)
         if response.get('status') == 'ext_auth_required':
@@ -588,7 +590,6 @@ class YandexMoneyCardRedirView(LoginRequiredMixin, View):
             return redirect(url)
         elif response.get('status') == 'success':
             del request.session['yandex_process_options']
-            del request.session['yandex_money_amount']
             MoneyOperation.objects.create(user=request.user,
                                     amount=amount,
                                     timestamp=timezone.now(),
