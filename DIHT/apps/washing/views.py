@@ -69,7 +69,7 @@ class IndexView(TemplateView):
         if self.request.user.is_anonymous():
             OPcount = 0
         else:
-            OPcount = self.request.user.pointoperations.aggregate(Sum('amount'))['amount__sum']
+            OPcount = self.request.user.pointoperations.aggregate(Sum('amount'))['amount__sum'] or 0
         if self.request.POST:
             if self.request.POST.get('activist') and (OPcount >= 16 or self.request.user.groups.filter(name__in=["Руководящая группа"]).exists()):
                 is_activist = True
