@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('accounts', '0007_merge'),
-        ('accounts', '0007_profile_experience'),
+        ('accounts', '0006_auto_20170121_2146'),
     ]
 
     operations = [
